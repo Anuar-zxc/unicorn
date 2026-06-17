@@ -8,16 +8,20 @@ import {
   AlertCircle,
   AlertTriangle,
   ArrowRight,
+  Building2,
   Check,
   CheckCircle,
   CheckCircle2,
+  ClipboardCheck,
   FilePlus,
   FileSearch,
   FileText,
   GitCompare,
+  Handshake,
   Link as LinkIcon,
   Lock,
   MessageSquare,
+  ReceiptText,
   Scale,
   Shield,
   Sparkles,
@@ -585,23 +589,22 @@ function HowItWorks({ t }: { t: typeof copy.en }) {
 function ModeMock({ active }: { active: "analyze" | "build" | "strategize" }) {
   if (active === "build") {
     return (
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-6">
-        <p className="text-sm font-semibold">Mutual NDA draft</p>
-        <div className="mt-5 space-y-3 font-serif text-sm leading-6 text-[var(--text-secondary)]">
-          <p>1. Parties. This Agreement is entered into by [Company] and [Contractor].</p>
-          <p>2. Confidential Information. Each party may disclose technical, customer, and business information.</p>
-          <p>3. Obligations. Each party shall protect Confidential Information using reasonable care.</p>
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-5 shadow-[var(--shadow-sm)]">
+        <div className="flex items-center justify-between border-b border-[var(--border)] pb-4">
+          <div>
+            <p className="text-sm font-semibold">Mutual NDA draft</p>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">Generated from plain language</p>
+          </div>
+          <span className="rounded-full bg-[var(--accent-light)] px-3 py-1 text-xs font-semibold text-[var(--accent)]">Draft</span>
         </div>
-      </div>
-    );
-  }
-  if (active === "strategize") {
-    return (
-      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-6">
-        <p className="text-sm font-semibold">Case strategy brief</p>
-        <div className="mt-5 grid gap-3">
-          {["Legal framework: California Civil Code §1950.5", "Strongest argument: missed statutory deadline", "Next step: send demand letter before filing"].map((item) => (
-            <div key={item} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4 text-sm text-[var(--text-secondary)]">
+        <div className="mt-5 space-y-3 font-serif text-sm leading-6 text-[var(--text-secondary)]">
+          <p><span className="font-semibold text-[var(--text-primary)]">1. Parties.</span> This Agreement is entered into by [Company] and [Contractor].</p>
+          <p><span className="font-semibold text-[var(--text-primary)]">2. Confidential Information.</span> Each party may disclose technical, customer, and business information.</p>
+          <p><span className="font-semibold text-[var(--text-primary)]">3. Obligations.</span> Each party shall protect Confidential Information using reasonable care.</p>
+        </div>
+        <div className="mt-5 grid gap-2 sm:grid-cols-3">
+          {["Governing law", "Signature block", "AI notes"].map((item) => (
+            <div key={item} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-xs font-medium text-[var(--text-secondary)]">
               {item}
             </div>
           ))}
@@ -609,7 +612,57 @@ function ModeMock({ active }: { active: "analyze" | "build" | "strategize" }) {
       </div>
     );
   }
-  return <StepMock index={2} />;
+  if (active === "strategize") {
+    return (
+      <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-5 shadow-[var(--shadow-sm)]">
+        <div className="flex items-start justify-between gap-4 border-b border-[var(--border)] pb-4">
+          <div>
+            <p className="text-sm font-semibold">Case strategy brief</p>
+            <p className="mt-1 text-xs text-[var(--text-muted)]">Lawyer-ready summary</p>
+          </div>
+          <div className="rounded-xl bg-[var(--green-light)] px-3 py-2 text-center">
+            <p className="text-[11px] font-semibold text-[var(--green)]">Position</p>
+            <p className="text-sm font-bold text-[var(--green)]">Strong</p>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-3">
+          {[
+            ["Legal framework", "California Civil Code §1950.5"],
+            ["Strongest argument", "Missed statutory deadline"],
+            ["Next step", "Send demand letter before filing"]
+          ].map(([label, value]) => (
+            <div key={label} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-4">
+              <p className="text-[11px] font-bold uppercase tracking-wide text-[var(--text-muted)]">{label}</p>
+              <p className="mt-1 text-sm font-medium text-[var(--text-secondary)]">{value}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-5 shadow-[var(--shadow-sm)]">
+      <div className="flex items-center justify-between border-b border-[var(--border)] pb-4">
+        <div>
+          <p className="text-sm font-semibold">Service Agreement.pdf</p>
+          <p className="mt-1 text-xs text-[var(--text-muted)]">Risk analysis complete</p>
+        </div>
+        <span className="rounded-full bg-[var(--red-light)] px-3 py-1 text-xs font-semibold text-[var(--red)]">2 High</span>
+      </div>
+      <div className="mt-5 grid grid-cols-3 gap-3 text-center">
+        <MiniStat value="2" label="High" color="var(--red)" />
+        <MiniStat value="3" label="Medium" color="var(--amber)" />
+        <MiniStat value="8" label="OK" color="var(--green)" />
+      </div>
+      <div className="mt-5 space-y-2">
+        {["Auto-renewal clause", "Broad indemnity", "Liability cap missing"].map((item) => (
+          <div key={item} className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-sm text-[var(--text-secondary)]">
+            {item}
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 function StepMock({ index }: { index: number }) {
@@ -650,16 +703,16 @@ function CaseScenarios({ locale }: { locale: "en" | "ru" }) {
   const scenarios =
     locale === "ru"
       ? [
-          ["🏠", "Арендодатель не возвращает депозит", "Lexo сослался на §1950.5, подготовил demand letter и предложил tenant rights lawyer.", "Депозит вернули за 11 дней"],
-          ["💼", "Клиент отказывается платить", "Построен breach-of-contract аргумент, список доказательств и final notice.", "Оплата пришла без суда"],
-          ["📋", "Non-compete после увольнения", "Проверена enforceability по штату, найден overreach, подготовлен counter-argument.", "Переход к конкуренту стал безопаснее"],
-          ["🤝", "Спор с сооснователем", "Проверен equity agreement, найден пробел в vesting schedule, подготовлена amendment strategy.", "Спор решён без суда"]
+          { icon: Building2, title: "Арендодатель не возвращает депозит", result: "Lexo сослался на §1950.5, подготовил demand letter и предложил tenant rights lawyer.", outcome: "Депозит вернули за 11 дней" },
+          { icon: ReceiptText, title: "Клиент отказывается платить", result: "Построен breach-of-contract аргумент, список доказательств и final notice.", outcome: "Оплата пришла без суда" },
+          { icon: ClipboardCheck, title: "Non-compete после увольнения", result: "Проверена enforceability по штату, найден overreach, подготовлен counter-argument.", outcome: "Переход к конкуренту стал безопаснее" },
+          { icon: Handshake, title: "Спор с сооснователем", result: "Проверен equity agreement, найден пробел в vesting schedule, подготовлена amendment strategy.", outcome: "Спор решён без суда" }
         ]
       : [
-          ["🏠", "Landlord keeping your deposit", "Lexo cited §1950.5, drafted a demand letter, and matched a tenant rights lawyer.", "Deposit returned in 11 days"],
-          ["💼", "Client refusing to pay", "Built breach-of-contract argument, identified invoice records needed, generated final notice.", "Payment received, no court"],
-          ["📋", "Non-compete after leaving a job", "Analyzed enforceability by state, found overreach, prepared counter-argument.", "Joined competitor legally"],
-          ["🤝", "Co-founder dispute", "Reviewed equity agreement, identified missing vesting schedule, drafted amendment strategy.", "Dispute resolved without court"]
+          { icon: Building2, title: "Landlord keeping your deposit", result: "Lexo cited §1950.5, drafted a demand letter, and matched a tenant rights lawyer.", outcome: "Deposit returned in 11 days" },
+          { icon: ReceiptText, title: "Client refusing to pay", result: "Built breach-of-contract argument, identified invoice records needed, generated final notice.", outcome: "Payment received, no court" },
+          { icon: ClipboardCheck, title: "Non-compete after leaving a job", result: "Analyzed enforceability by state, found overreach, prepared counter-argument.", outcome: "Joined competitor legally" },
+          { icon: Handshake, title: "Co-founder dispute", result: "Reviewed equity agreement, identified missing vesting schedule, drafted amendment strategy.", outcome: "Dispute resolved without court" }
         ];
 
   return (
@@ -672,12 +725,14 @@ function CaseScenarios({ locale }: { locale: "en" | "ru" }) {
           </h2>
         </div>
         <div className="mt-10 grid gap-4 md:grid-cols-2">
-          {scenarios.map(([emoji, title, result, outcome]) => (
+          {scenarios.map(({ icon: Icon, title, result, outcome }) => (
             <article key={title} className="card rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-6 shadow-[var(--shadow-sm)]">
-              <div className="text-3xl">{emoji}</div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--accent-light)] text-[var(--accent)]">
+                <Icon className="h-5 w-5" />
+              </div>
               <h3 className="mt-5 font-display text-xl font-semibold">{title}</h3>
               <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">{result}</p>
-              <p className="mt-5 rounded-xl bg-[var(--green-light)] p-3 text-sm font-semibold text-[var(--green)]">{outcome}</p>
+              <p className="mt-5 rounded-xl border border-[var(--green)]/15 bg-[var(--green-light)] p-3 text-sm font-semibold text-[var(--green)]">{outcome}</p>
             </article>
           ))}
         </div>
@@ -806,17 +861,17 @@ function Trust({ t }: { t: typeof copy.en }) {
 
 function CtaBanner({ t }: { t: typeof copy.en }) {
   return (
-    <section className="bg-[var(--text-primary)] py-24">
+    <section className="border-y border-[#252528] bg-[#07070A] py-24">
       <div className="mx-auto max-w-2xl px-6 text-center">
-        <h2 className="mb-4 text-[36px] font-bold leading-tight text-[var(--bg-page)] md:text-[48px]">
+        <h2 className="mb-4 text-[36px] font-bold leading-tight text-white md:text-[48px]">
           {t.ctaTitle}
         </h2>
-        <p className="mb-8 text-[16px] text-[var(--text-muted)]">{t.ctaSubtitle}</p>
+        <p className="mb-8 text-[16px] leading-7 text-white/58">{t.ctaSubtitle}</p>
         <NextLink href="/auth/signup" className="button-like inline-flex items-center gap-2 rounded-xl bg-[var(--accent)] px-6 py-3 font-medium text-white hover:bg-[var(--accent-hover)]">
           {t.ctaButton}
           <ArrowRight size={16} />
         </NextLink>
-        <p className="mt-4 text-[13px] text-[var(--text-muted)]">{t.noCard}</p>
+        <p className="mt-4 text-[13px] text-white/42">{t.noCard}</p>
       </div>
     </section>
   );
