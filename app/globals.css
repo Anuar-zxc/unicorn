@@ -1,0 +1,209 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: 'Plus Jakarta Sans', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  --bg-page: #ffffff;
+  --bg-surface: #f7f7f5;
+  --bg-elevated: #efefeb;
+  --bg-primary: var(--bg-page);
+  --bg-secondary: var(--bg-surface);
+  --bg-tertiary: var(--bg-elevated);
+  --text-primary: #0a0a0a;
+  --text-secondary: #52524e;
+  --text-muted: #94948f;
+  --accent: #1a56e8;
+  --accent-hover: #1240c4;
+  --accent-light: #eef3ff;
+  --green: #0d7a4e;
+  --green-light: #e6f7f0;
+  --legal-green: var(--green);
+  --legal-green-light: var(--green-light);
+  --amber: #b45309;
+  --amber-light: #fef3d4;
+  --red: #dc2626;
+  --red-light: #fef2f2;
+  --border: #e4e4e0;
+  --border-token: var(--border);
+  --border-strong: #cacac5;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08), 0 2px 4px rgba(0,0,0,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.10), 0 4px 8px rgba(0,0,0,0.06);
+  --dark-bg: #0c0c0e;
+  --dark-surface: #141418;
+  --dark-border: #252528;
+  --dark-text: #f0f0ec;
+  --background: 0 0% 100%;
+  --foreground: 0 0% 4%;
+}
+
+.dark {
+  --bg-page: #0c0c0f;
+  --bg-surface: #131318;
+  --bg-elevated: #1c1c23;
+  --bg-primary: var(--bg-page);
+  --bg-secondary: var(--bg-surface);
+  --bg-tertiary: var(--bg-elevated);
+  --text-primary: #eeeef0;
+  --text-secondary: #a1a1aa;
+  --text-muted: #62626a;
+  --accent: #4d7ef5;
+  --accent-hover: #6b96f8;
+  --accent-light: #0f1a3a;
+  --green: #22c07a;
+  --green-light: #0a2e1e;
+  --legal-green: var(--green);
+  --legal-green-light: var(--green-light);
+  --amber: #fbbf24;
+  --amber-light: #2e2008;
+  --red: #f87171;
+  --red-light: #2e0a0a;
+  --border: #22222a;
+  --border-token: var(--border);
+  --border-strong: #2e2e38;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.3);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.4);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+* {
+  box-sizing: border-box;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  text-rendering: optimizeLegibility;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+::selection {
+  background: var(--accent);
+  color: white;
+}
+
+.text-hero {
+  font-family: var(--font-display);
+  font-size: clamp(48px, 7vw, 88px);
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.text-h1 {
+  font-family: var(--font-display);
+  font-size: clamp(36px, 5vw, 64px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.text-h2 {
+  font-family: var(--font-display);
+  font-size: clamp(28px, 4vw, 48px);
+  font-weight: 600;
+  letter-spacing: -0.025em;
+  line-height: 1.12;
+}
+
+.text-h3 {
+  font-family: var(--font-display);
+  font-size: clamp(20px, 3vw, 28px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.text-body-lg {
+  font-size: 18px;
+  font-weight: 400;
+  line-height: 1.7;
+}
+
+.text-body {
+  font-size: 16px;
+  font-weight: 400;
+  line-height: 1.65;
+}
+
+.text-caption {
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.container-shell {
+  width: min(1180px, calc(100% - 32px));
+  margin-inline: auto;
+}
+
+.grid-bg {
+  background-image:
+    linear-gradient(rgba(10, 10, 10, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(10, 10, 10, 0.04) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+.dark-shell {
+  background: var(--dark-bg);
+  color: var(--dark-text);
+}
+
+.focus-ring {
+  @apply outline-none ring-offset-2 focus-visible:ring-2;
+  --tw-ring-color: var(--accent);
+  --tw-ring-offset-color: var(--bg-page);
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+button,
+a[role="button"],
+.button-like {
+  transition: all 0.15s cubic-bezier(0.2, 0, 0, 1);
+}
+
+button:active,
+a[role="button"]:active,
+.button-like:active {
+  transform: scale(0.97);
+}
+
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.pricing-card:hover {
+  border-color: var(--accent);
+}
+
+.feature-card:hover {
+  background: var(--bg-elevated);
+}
