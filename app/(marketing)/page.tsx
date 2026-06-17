@@ -355,11 +355,11 @@ function Hero({ t }: { t: typeof copy.en }) {
             ))}
           </div>
         </div>
-        <div className="relative mx-auto w-full max-w-[500px]">
-          <div className="absolute -left-4 top-2 z-10 rounded-full border border-[var(--border)] bg-[var(--bg-page)] px-3 py-1.5 text-xs font-semibold text-[var(--green)] shadow-[var(--shadow-md)]">
+        <div className="relative mx-auto mt-8 w-full max-w-[500px] sm:mt-0">
+          <div className="absolute -left-1 -top-9 z-10 rounded-full border border-[var(--border)] bg-[var(--bg-page)] px-3 py-1.5 text-[11px] font-semibold text-[var(--green)] shadow-[var(--shadow-md)] sm:-left-5 sm:-top-5 sm:text-xs">
             ✓ GDPR compliant
           </div>
-          <div className="absolute -bottom-4 right-4 z-10 rounded-full border border-[var(--border)] bg-[var(--bg-page)] px-3 py-1.5 text-xs font-semibold text-[var(--accent)] shadow-[var(--shadow-md)]">
+          <div className="absolute -bottom-5 right-3 z-10 rounded-full border border-[var(--border)] bg-[var(--bg-page)] px-3 py-1.5 text-[11px] font-semibold text-[var(--accent)] shadow-[var(--shadow-md)] sm:-right-2 sm:text-xs">
             ⚡ 28 seconds
           </div>
           <MockReportCard />
@@ -372,17 +372,17 @@ function Hero({ t }: { t: typeof copy.en }) {
 function MockReportCard() {
   return (
     <div className="card relative overflow-hidden rounded-[24px] border border-[var(--border)] bg-[var(--bg-page)] shadow-[var(--shadow-lg)]">
-      <div className="flex items-center justify-between border-b border-[var(--border)] p-4">
-        <div className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[var(--accent-light)]">
+      <div className="flex items-center justify-between gap-3 border-b border-[var(--border)] p-4">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--accent-light)]">
             <FileText size={14} className="text-[var(--accent)]" />
           </div>
-          <div>
-            <p className="text-[13px] font-semibold">Service Agreement.pdf</p>
-            <p className="text-[11px] text-[var(--text-muted)]">12 pages · Analyzed just now</p>
+          <div className="min-w-0">
+            <p className="truncate text-[13px] font-semibold">Service Agreement.pdf</p>
+            <p className="truncate text-[11px] text-[var(--text-muted)]">12 pages · Analyzed just now</p>
           </div>
         </div>
-        <span className="rounded-full bg-[var(--red-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--red)]">
+        <span className="shrink-0 rounded-full bg-[var(--red-light)] px-2 py-0.5 text-[11px] font-medium text-[var(--red)]">
           2 High Risks
         </span>
       </div>
