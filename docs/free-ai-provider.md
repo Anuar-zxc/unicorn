@@ -17,7 +17,7 @@ Add these locally and in Vercel:
 
 ```bash
 GEMINI_API_KEY=your_google_ai_studio_key
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-flash-lite-latest
 ```
 
 `DEEPSEEK_API_KEY` is optional now and is not required for the MVP.
