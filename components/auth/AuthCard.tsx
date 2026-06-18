@@ -9,13 +9,13 @@ import { useLanguage } from "@/components/providers/AppProviders";
 
 const copy = {
   en: {
-    signin: ["Welcome back", "Log in to analyze your contracts.", "Forgot password?", "No account?", "Create one"],
-    signup: ["Start free", "Analyze your first contract in minutes.", "Already have an account?", "Sign in"],
+    signin: ["Welcome back", "Log in to your professional legal workspace.", "Forgot password?", "No account?", "Create one"],
+    signup: ["Start your trial", "Set up your Lexo workspace in minutes.", "Already have an account?", "Sign in"],
     reset: ["Reset password", "We will send a secure reset link to your email.", "Remembered it?", "Log in"]
   },
   ru: {
-    signin: ["С возвращением", "Войдите, чтобы анализировать договоры.", "Забыли пароль?", "Нет аккаунта?", "Создать"],
-    signup: ["Начните бесплатно", "Проверьте первый договор за несколько минут.", "Уже есть аккаунт?", "Войти"],
+    signin: ["С возвращением", "Войдите в профессиональное юридическое пространство.", "Забыли пароль?", "Нет аккаунта?", "Создать"],
+    signup: ["Начните пробный период", "Настройте рабочее пространство Lexo за несколько минут.", "Уже есть аккаунт?", "Войти"],
     reset: ["Сброс пароля", "Мы отправим безопасную ссылку для сброса на email.", "Вспомнили пароль?", "Войти"]
   }
 };

@@ -9,7 +9,15 @@ create table if not exists public.profiles (
   email text,
   full_name text,
   company text,
-  plan text not null default 'free' check (plan in ('free', 'pro', 'business')),
+  role text default 'lawyer',
+  bar_number text,
+  practice_areas text[],
+  firm_name text,
+  jurisdiction text,
+  firm_size text,
+  biggest_time_sink text,
+  onboarding_completed boolean not null default false,
+  plan text not null default 'solo' check (plan in ('solo', 'firm', 'enterprise')),
   stripe_customer_id text,
   stripe_subscription_id text,
   created_at timestamptz not null default now()
@@ -18,7 +26,11 @@ create table if not exists public.profiles (
 create table if not exists public.analyses (
   id uuid primary key default gen_random_uuid(),
   user_id uuid not null references auth.users(id) on delete cascade,
-  type text not null default 'analyze' check (type in ('analyze', 'build', 'case')),
+  type text not null default 'review',
+  matter_name text,
+  tool_type text,
+  client_name text,
+  tags text[],
   title text,
   file_name text,
   file_path text,
@@ -60,11 +72,53 @@ create table if not exists public.bookings (
   created_at timestamptz not null default now()
 );
 
+create table if not exists public.team_members (
+  id uuid primary key default gen_random_uuid(),
+  firm_owner_id uuid references public.profiles(id) on delete cascade,
+  member_id uuid references public.profiles(id) on delete cascade,
+  role text default 'member' check (role in ('admin', 'member')),
+  invited_at timestamptz default now(),
+  joined_at timestamptz,
+  unique (firm_owner_id, member_id)
+);
+
+-- Existing-project migration (safe to run repeatedly)
+alter table public.profiles add column if not exists role text default 'lawyer';
+alter table public.profiles add column if not exists bar_number text;
+alter table public.profiles add column if not exists practice_areas text[];
+alter table public.profiles add column if not exists firm_name text;
+alter table public.profiles add column if not exists jurisdiction text;
+alter table public.profiles add column if not exists firm_size text;
+alter table public.profiles add column if not exists biggest_time_sink text;
+alter table public.profiles add column if not exists onboarding_completed boolean not null default false;
+alter table public.analyses add column if not exists matter_name text;
+alter table public.analyses add column if not exists tool_type text;
+alter table public.analyses add column if not exists client_name text;
+alter table public.analyses add column if not exists tags text[];
+
+do $$
+begin
+  if exists (
+    select 1 from pg_constraint
+    where conname = 'profiles_plan_check'
+      and conrelid = 'public.profiles'::regclass
+  ) then
+    alter table public.profiles drop constraint profiles_plan_check;
+  end if;
+end $$;
+
+update public.profiles
+set plan = case plan when 'free' then 'solo' when 'pro' then 'firm' when 'business' then 'enterprise' else plan end;
+
+alter table public.profiles alter column plan set default 'solo';
+alter table public.profiles add constraint profiles_plan_check check (plan in ('solo', 'firm', 'enterprise'));
+
 -- Row Level Security
 alter table public.profiles enable row level security;
 alter table public.analyses enable row level security;
 alter table public.lawyers enable row level security;
 alter table public.bookings enable row level security;
+alter table public.team_members enable row level security;
 
 create policy "Users can read own profile"
   on public.profiles for select
@@ -97,6 +151,15 @@ create policy "Users can read own bookings"
 create policy "Users can create own bookings"
   on public.bookings for insert
   with check (auth.uid() = user_id);
+
+create policy "Firm owners can manage team members"
+  on public.team_members for all
+  using (auth.uid() = firm_owner_id)
+  with check (auth.uid() = firm_owner_id);
+
+create policy "Members can read own membership"
+  on public.team_members for select
+  using (auth.uid() = member_id);
 
 -- Storage
 insert into storage.buckets (id, name, public)

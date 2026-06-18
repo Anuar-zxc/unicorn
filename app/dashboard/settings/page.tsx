@@ -5,11 +5,9 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 
 export default async function SettingsPage() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
+  const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/signin");
+  const email = user.email ?? "";
 
   return (
     <main className="p-4 md:p-6">
@@ -27,7 +25,7 @@ export default async function SettingsPage() {
           </div>
           <div>
             <p className="text-xs uppercase tracking-wide text-white/35 mb-1">Email address</p>
-            <p className="text-white/80 text-sm">{user.email}</p>
+            <p className="text-white/80 text-sm">{email}</p>
           </div>
           <p className="mt-4 text-xs text-white/35">
             To change your email, contact support.
@@ -43,7 +41,7 @@ export default async function SettingsPage() {
           <p className="text-sm text-white/60 mb-4">
             We will send a password reset link to your email address.
           </p>
-          <ResetPasswordButton email={user.email ?? ""} />
+          <ResetPasswordButton email={email} />
         </section>
 
         {/* Danger zone */}

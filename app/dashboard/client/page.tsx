@@ -1,0 +1,3 @@
+import { MessageSquareText } from "lucide-react";
+import { ToolWorkspace } from "@/components/dashboard/ToolWorkspace";
+export default function Page() { return <ToolWorkspace title="Client Summary" eyebrow="Client communication" description="Convert legal analysis into accurate client-ready language, key decisions, questions, and practical next steps." endpoint="/api/client-brief" icon={MessageSquareText} upload="single" inputLabel="Legal analysis or source material" inputPlaceholder="Paste the memo, agreement section, or case analysis to translate for the client…" contextLabel="Reading level and client context" contextPlaceholder="Example: Simplified · first-time founder" outputLabel="Client-ready brief" />; }

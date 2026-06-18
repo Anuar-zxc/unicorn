@@ -24,7 +24,7 @@ export function AnalysisCards({ result }: { result: AnalysisResult }) {
         <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
           <div>
             <p className="text-sm text-white/42">Executive Summary</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold">Plain-English contract overview</h2>
+            <h2 className="mt-2 font-display text-2xl font-semibold">Attorney-grade contract overview</h2>
           </div>
           <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide ${riskTone[overallRisk]}`}>
             {overallRisk} Risk

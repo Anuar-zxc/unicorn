@@ -1,5 +1,5 @@
 import { STRATEGIST_SYSTEM } from "@/lib/ai-system";
-import { getGroqClient, GROQ_MODEL } from "@/lib/groq";
+import { streamDeepSeek } from "@/lib/deepseek";
 
 const demoStrategy = `# Case Strategy Brief
 
@@ -69,7 +69,7 @@ Sincerely,
 - What evidence would make the claim stronger before negotiation?
 - Is small claims court appropriate for the amount at issue?
 
-⚠️ AI Disclaimer: This analysis is for informational purposes only. Lexo is not a law firm and this is not legal advice. Consult a licensed attorney before taking legal action.`;
+Professional AI analysis — attorney review recommended before client delivery.`;
 
 function streamText(text: string) {
   const encoder = new TextEncoder();
@@ -86,14 +86,6 @@ function streamText(text: string) {
 
 export async function POST(req: Request) {
   const { situation, outcome, stage, jurisdiction, documentsSummary, followups } = await req.json();
-  const client = getGroqClient();
-
-  if (!client) {
-    return new Response(streamText(demoStrategy), {
-      headers: { "Content-Type": "text/plain; charset=utf-8" }
-    });
-  }
-
   const systemPrompt = `${STRATEGIST_SYSTEM}
 
 Your analysis must include:
@@ -113,32 +105,17 @@ Rules:
 
 Jurisdiction: ${jurisdiction || "Not provided"}`;
 
-  const stream = await client.chat.completions.create({
-    model: GROQ_MODEL,
-    max_tokens: 7000,
-    stream: true,
-    messages: [
-      { role: "system", content: systemPrompt },
-      {
-        role: "user",
-        content: `Situation: ${situation}
+  const readable = await streamDeepSeek({
+    system: systemPrompt,
+    user: `Situation: ${situation}
 Desired outcome: ${outcome}
 Stage: ${stage}
 Documents summary: ${documentsSummary || "No documents uploaded"}
-Follow-up answers: ${followups || "None"}`
-      }
-    ]
+Follow-up answers: ${followups || "None"}`,
+    maxTokens: 7000
   });
-
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        const text = chunk.choices[0]?.delta?.content ?? "";
-        if (text) controller.enqueue(encoder.encode(text));
-      }
-      controller.close();
-    }
+  if (!readable) return new Response(streamText(demoStrategy), {
+    headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 
   return new Response(readable, {

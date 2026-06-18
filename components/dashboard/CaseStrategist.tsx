@@ -218,7 +218,7 @@ export function CaseStrategist() {
         </div>
 
         <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
-          ⚠️ AI outputs are informational only. Lexo is not a law firm and does not provide legal advice.
+          Professional AI analysis — attorney review recommended before client delivery.
         </div>
       </section>
     </div>

@@ -9,7 +9,7 @@ import { useLanguage } from "@/components/providers/AppProviders";
 const authText = {
   en: {
     fullName: "Full name",
-    company: "Company (optional)",
+    company: "Firm name (optional)",
     email: "Email",
     password: "Password",
     wait: "Please wait...",
@@ -22,7 +22,7 @@ const authText = {
   },
   ru: {
     fullName: "Полное имя",
-    company: "Компания (необязательно)",
+    company: "Название фирмы (необязательно)",
     email: "Email",
     password: "Пароль",
     wait: "Подождите...",
@@ -105,7 +105,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
       });
     }
 
-    router.push("/dashboard");
+    router.push("/dashboard/onboarding");
     router.refresh();
   };
 

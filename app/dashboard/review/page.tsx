@@ -1,0 +1,3 @@
+import { FileSearch } from "lucide-react";
+import { ToolWorkspace } from "@/components/dashboard/ToolWorkspace";
+export default function Page() { return <ToolWorkspace title="Contract Review" eyebrow="Contract intelligence" description="Review the entire agreement for risk allocation, unusual terms, missing protections, and revision opportunities." endpoint="/api/review" icon={FileSearch} upload="single" inputLabel="Attorney instructions or pasted contract" inputPlaceholder="Add deal context, your client's position, or paste contract text here…" contextLabel="Represented party and jurisdiction" contextPlaceholder="Example: Buyer · Delaware law" outputLabel="Contract review report" />; }

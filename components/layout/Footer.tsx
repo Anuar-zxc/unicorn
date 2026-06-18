@@ -1,130 +1,49 @@
 "use client";
 
 import Link from "next/link";
-import { Linkedin, Twitter } from "lucide-react";
-import { useLanguage } from "@/components/providers/AppProviders";
 import { Logo } from "@/components/shared/Logo";
+import { useLanguage } from "@/components/providers/AppProviders";
 
-const footerText = {
+const copy = {
   en: {
-    tagline: "Plain-English contract analysis for ordinary people and small businesses.",
-    made: "Made with care for small businesses",
-    trust: "SOC2 compliant · AES-256 encrypted · No data sold",
-    privacy: "Privacy Policy",
-    terms: "Terms",
+    tagline: "AI-powered legal workspace for modern law practices.",
     columns: [
-      { title: "Product", links: ["Analyze Contract", "Previous Analyses", "Billing", "Pricing"] },
-      { title: "Trust", links: ["Private Storage", "AI Disclaimer", "Simple Language", "Secure Upload"] },
-      { title: "Legal", links: ["Privacy Policy", "Terms", "Security", "Disclaimer"] },
-      { title: "Company", links: ["About", "Roadmap", "Contact", "Support"] }
-    ]
+      { title: "Workspace", links: [["Contract Review", "/dashboard/review"], ["Case Research", "/dashboard/research"], ["Draft Generator", "/dashboard/draft"], ["Case Prep", "/dashboard/caseprep"]] },
+      { title: "Product", links: [["Redline Compare", "/dashboard/compare"], ["Client Summary", "/dashboard/client"], ["Pricing", "/#pricing"], ["Security", "/#trust"]] },
+      { title: "Legal", links: [["Privacy", "/privacy"], ["Terms", "/terms"], ["AI use policy", "/terms"], ["Contact", "mailto:hello@lexo.ai"]] }
+    ],
+    copyright: "© 2026 Lexo. Professional legal AI workspace.",
+    disclaimer: "AI-assisted analysis — attorney review recommended before client delivery."
   },
   ru: {
-    tagline: "Понятный анализ договоров для обычных людей и малого бизнеса.",
-    made: "Сделано с заботой о малом бизнесе",
-    trust: "SOC2 compliant · AES-256 шифрование · Данные не продаются",
-    privacy: "Политика конфиденциальности",
-    terms: "Условия",
+    tagline: "AI-пространство для современной юридической практики.",
     columns: [
-      { title: "Продукт", links: ["Анализ договора", "История", "Оплата", "Тарифы"] },
-      { title: "Доверие", links: ["Приватное хранение", "AI дисклеймер", "Простой язык", "Безопасная загрузка"] },
-      { title: "Правовое", links: ["Конфиденциальность", "Условия", "Безопасность", "Дисклеймер"] },
-      { title: "Компания", links: ["О нас", "План развития", "Контакты", "Поддержка"] }
-    ]
+      { title: "Инструменты", links: [["Проверка договоров", "/dashboard/review"], ["Исследование дел", "/dashboard/research"], ["Создание документов", "/dashboard/draft"], ["Подготовка дела", "/dashboard/caseprep"]] },
+      { title: "Продукт", links: [["Сравнение версий", "/dashboard/compare"], ["Резюме для клиента", "/dashboard/client"], ["Тарифы", "/#pricing"], ["Безопасность", "/#trust"]] },
+      { title: "Правовая информация", links: [["Конфиденциальность", "/privacy"], ["Условия", "/terms"], ["Политика AI", "/terms"], ["Контакты", "mailto:hello@lexo.ai"]] }
+    ],
+    copyright: "© 2026 Lexo. Профессиональное юридическое AI-пространство.",
+    disclaimer: "AI-анализ требует проверки юристом перед передачей клиенту."
   }
-};
-
-const social = [
-  { name: "LinkedIn", href: "https://linkedin.com/company/lexo", icon: Linkedin },
-  { name: "Twitter/X", href: "https://twitter.com/lexo", icon: Twitter }
-];
-
-const footerHref: Record<string, string> = {
-  "Analyze Contract": "/dashboard/analyze",
-  "Previous Analyses": "/dashboard/history",
-  Billing: "/dashboard/billing",
-  Pricing: "/#pricing",
-  "Private Storage": "/#trust",
-  "AI Disclaimer": "/terms",
-  "Simple Language": "/#features",
-  "Secure Upload": "/#trust",
-  "Privacy Policy": "/privacy",
-  Terms: "/terms",
-  Security: "/#trust",
-  Disclaimer: "/terms",
-  About: "/#problem",
-  Roadmap: "/#features",
-  Contact: "mailto:hello@lexo.ai",
-  Support: "mailto:support@lexo.ai",
-  "Анализ договора": "/dashboard/analyze",
-  История: "/dashboard/history",
-  Оплата: "/dashboard/billing",
-  Тарифы: "/#pricing",
-  "Приватное хранение": "/#trust",
-  "AI дисклеймер": "/terms",
-  "Простой язык": "/#features",
-  "Безопасная загрузка": "/#trust",
-  Конфиденциальность: "/privacy",
-  Условия: "/terms",
-  Безопасность: "/#trust",
-  Дисклеймер: "/terms",
-  "О нас": "/#problem",
-  "План развития": "/#features",
-  Контакты: "mailto:hello@lexo.ai",
-  Поддержка: "mailto:support@lexo.ai"
 };
 
 export function Footer() {
   const { locale } = useLanguage();
-  const text = footerText[locale];
-
+  const text = copy[locale];
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--bg-surface)]">
-      <div className="container-shell grid gap-10 py-14 md:grid-cols-[1.4fr_2fr]">
+      <div className="container-shell grid gap-10 py-14 md:grid-cols-[1.2fr_1.8fr]">
         <div>
-          <Link href="/" className="flex items-center">
-            <Logo className="text-[34px]" />
-          </Link>
-          <p className="mt-4 max-w-sm text-sm leading-6 text-[var(--text-secondary)]">
-            {text.tagline}
-          </p>
-          <div className="mt-6 flex gap-3">
-            {social.map((item) => (
-              <Link
-                key={item.name}
-                aria-label={item.name}
-                href={item.href}
-                className="rounded-full border border-[var(--border)] p-2 text-[var(--text-secondary)] hover:border-[var(--accent)] hover:text-[var(--accent)]"
-              >
-                <item.icon className="h-4 w-4" />
-              </Link>
-            ))}
-          </div>
+          <Logo className="text-[30px]" />
+          <p className="mt-4 max-w-sm text-sm leading-6 text-[var(--text-secondary)]">{text.tagline}</p>
         </div>
-        <div className="grid grid-cols-2 gap-8 md:grid-cols-4">
-          {text.columns.map((column) => (
-            <div key={column.title}>
-              <h3 className="font-display text-sm font-semibold">{column.title}</h3>
-              <ul className="mt-4 space-y-3 text-sm text-[var(--text-secondary)]">
-                {column.links.map((item) => (
-                  <li key={item}>
-                    <Link href={footerHref[item] ?? "/"} className="hover:text-[var(--text-primary)]">{item}</Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3">
+          {text.columns.map((column) => <div key={column.title}><h3 className="text-sm font-semibold">{column.title}</h3><ul className="mt-4 space-y-3 text-sm text-[var(--text-secondary)]">{column.links.map(([label, href]) => <li key={label}><Link href={href} className="hover:text-[var(--text-primary)]">{label}</Link></li>)}</ul></div>)}
         </div>
       </div>
-      <div className="container-shell flex flex-col gap-3 border-t border-[var(--border)] py-6 text-sm text-[var(--text-muted)] md:flex-row md:items-center md:justify-between">
-        <div>
-          <p>© 2025 Lexo Inc. · {text.made}</p>
-          <p className="mt-1">{text.trust}</p>
-        </div>
-        <div className="flex gap-5">
-          <Link href="/privacy">{text.privacy}</Link>
-          <Link href="/terms">{text.terms}</Link>
-        </div>
+      <div className="container-shell flex flex-col gap-2 border-t border-[var(--border)] py-6 text-xs text-[var(--text-muted)] sm:flex-row sm:justify-between">
+        <p>{text.copyright}</p>
+        <p>{text.disclaimer}</p>
       </div>
     </footer>
   );

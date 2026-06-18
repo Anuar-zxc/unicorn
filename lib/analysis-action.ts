@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { extractContractText } from "@/lib/file-text";
-import { getGroqClient, GROQ_MODEL } from "@/lib/groq";
+import { completeDeepSeek } from "@/lib/deepseek";
 import { canAnalyze } from "@/lib/plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -149,12 +149,10 @@ export async function analyzeContractAction(
 }
 
 async function runAnalysis(text: string): Promise<AnalysisResult> {
-  const client = getGroqClient();
-
-  if (!client) {
+  if (!process.env.DEEPSEEK_API_KEY) {
     return {
       summary:
-        "This is a demo analysis because GROQ_API_KEY is not configured. The contract should be reviewed for obligations, renewal terms, payment duties, and termination rules.",
+        "DeepSeek API is not configured. The contract should be reviewed for obligations, renewal terms, payment duties, and termination rules.",
       overallRisk: "Medium",
       jurisdiction: "California law appears likely, but this must be confirmed from the governing law clause.",
       importantClauses: [
@@ -189,19 +187,12 @@ async function runAnalysis(text: string): Promise<AnalysisResult> {
         "Can the renewal and termination language be narrowed?"
       ],
       disclaimer:
-        "This analysis is informational only and is not legal advice. Consult a licensed lawyer before signing."
+        "Professional AI analysis — attorney review recommended before client delivery."
     };
   }
 
-  const response = await client.chat.completions.create({
-    model: GROQ_MODEL,
-    max_tokens: 3000,
-    temperature: 0.2,
-    response_format: { type: "json_object" },
-    messages: [
-      {
-        role: "system",
-        content: `You are Lexo's professional contract analysis AI.
+  const content = await completeDeepSeek({
+    system: `You are Lexo's professional contract analysis AI.
 
 Analyze this document and return JSON with these keys:
 summary: string, 2-3 sentences.
@@ -213,16 +204,12 @@ lawyerQuestions: string[].
 disclaimer: string.
 
 Use simple language. Never pretend to be a licensed lawyer. Always include a disclaimer that this is informational only.
-Return only valid JSON. Do not wrap the JSON in markdown fences.`
-      },
-      {
-        role: "user",
-        content: `Analyze this contract text:\n\n${text.slice(0, 8000)}`
-      }
-    ]
+Return only valid JSON. Do not wrap the JSON in markdown fences.`,
+    user: `Analyze this contract text:\n\n${text.slice(0, 8000)}`,
+    maxTokens: 3000,
+    json: true
   });
 
-  const content = response.choices[0]?.message.content;
   const parsed = resultSchema.safeParse(JSON.parse(content ?? "{}"));
   if (!parsed.success) {
     throw new Error("AI returned an invalid analysis format.");

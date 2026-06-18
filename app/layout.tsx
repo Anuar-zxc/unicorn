@@ -16,9 +16,9 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Lexo — Understand any contract in 30 seconds",
+  title: "Lexo — The AI workspace built for lawyers",
   description:
-    "Upload your contract and get an AI-powered analysis of risks, confusing clauses, and hidden obligations. Built for people and small businesses."
+    "Professional legal AI for contract review, case research, document drafting, redlines, client briefs, and case preparation."
 };
 
 export default function RootLayout({

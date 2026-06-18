@@ -1,5 +1,5 @@
 import { BUILDER_SYSTEM } from "@/lib/ai-system";
-import { getGroqClient, GROQ_MODEL } from "@/lib/groq";
+import { streamDeepSeek } from "@/lib/deepseek";
 
 const demoContract = `# Mutual Non-Disclosure Agreement
 
@@ -31,7 +31,7 @@ This Agreement is governed by the laws of [JURISDICTION].
 - A lawyer should review enforceability, trade secret language, and jurisdiction-specific restrictions.
 - Add exact party names, dates, addresses, and permitted disclosure rules before signing.
 
-⚠️ AI Disclaimer: This analysis is for informational purposes only. Lexo is not a law firm and this is not legal advice. Consult a licensed attorney before taking legal action.`;
+Professional AI draft — attorney review recommended before client delivery.`;
 
 function streamText(text: string) {
   const encoder = new TextEncoder();
@@ -48,14 +48,6 @@ function streamText(text: string) {
 
 export async function POST(req: Request) {
   const { description, jurisdiction, clarifications } = await req.json();
-  const client = getGroqClient();
-
-  if (!client) {
-    return new Response(streamText(demoContract), {
-      headers: { "Content-Type": "text/plain; charset=utf-8" }
-    });
-  }
-
   const systemPrompt = `${BUILDER_SYSTEM}
 
 Draft professional, jurisdiction-aware legal contracts based on user descriptions.
@@ -71,29 +63,14 @@ Rules:
 Jurisdiction: ${jurisdiction || "United States (general)"}
 Output format: clean markdown. Start directly with the contract — no preamble.`;
 
-  const stream = await client.chat.completions.create({
-    model: GROQ_MODEL,
-    max_tokens: 6000,
-    stream: true,
-    messages: [
-      { role: "system", content: systemPrompt },
-      {
-        role: "user",
-        content: `Draft this contract: ${description}
-${clarifications ? `Additional details: ${clarifications}` : ""}`
-      }
-    ]
+  const readable = await streamDeepSeek({
+    system: systemPrompt,
+    user: `Draft this contract: ${description}
+${clarifications ? `Additional details: ${clarifications}` : ""}`,
+    maxTokens: 6000
   });
-
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        const text = chunk.choices[0]?.delta?.content ?? "";
-        if (text) controller.enqueue(encoder.encode(text));
-      }
-      controller.close();
-    }
+  if (!readable) return new Response(streamText(demoContract), {
+    headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 
   return new Response(readable, {

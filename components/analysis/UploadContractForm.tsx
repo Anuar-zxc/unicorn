@@ -34,7 +34,7 @@ export function UploadContractForm({ disabled }: { disabled?: boolean }) {
       >
         <FileUp className="h-10 w-10 text-[#1A56E8]" />
         <h2 className="mt-5 font-display text-2xl font-semibold">
-          Upload a contract
+          Upload client contract
         </h2>
         <p className="mt-2 max-w-lg text-sm leading-6 text-white/50">
           PDF or DOCX only. Max 10MB. We extract the text, analyze risks, and
@@ -67,7 +67,7 @@ export function UploadContractForm({ disabled }: { disabled?: boolean }) {
             Analyzing contract...
           </>
         ) : (
-          "Analyze my contract"
+          "Review client contract"
         )}
       </Button>
     </form>

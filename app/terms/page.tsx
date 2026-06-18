@@ -14,11 +14,11 @@ export default function TermsPage() {
     },
     {
       title: "2. Service Description",
-      body: "Lexo provides AI-powered contract analysis for informational purposes only. The analysis identifies potential risks and summarises key clauses to help you understand a document — it does not constitute legal advice."
+      body: "Lexo provides an AI-powered professional workspace for contract review, legal research, drafting, case preparation, redline comparison, and client communication."
     },
     {
-      title: "3. Not Legal Advice",
-      body: "Lexo is not a law firm and does not provide legal advice. Nothing on this platform creates an attorney-client relationship. Always consult a licensed attorney before signing any legal document."
+      title: "3. Professional Review",
+      body: "Lexo produces AI-assisted work product for legal professionals. Attorneys remain responsible for reviewing, validating, and approving all output before relying on it or delivering it to a client."
     },
     {
       title: "4. Eligibility",
@@ -34,7 +34,7 @@ export default function TermsPage() {
     },
     {
       title: "7. Subscriptions and Billing",
-      body: "Free accounts are limited to one analysis per calendar month. Pro subscriptions are billed monthly at $9 and renew automatically. You may cancel at any time; cancellations take effect at the end of the current billing period."
+      body: "Solo, Firm, and Enterprise subscriptions are billed according to the selected monthly or annual plan and renew automatically. You may cancel at any time; cancellations take effect at the end of the current billing period."
     },
     {
       title: "8. Data and Privacy",

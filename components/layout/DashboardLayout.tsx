@@ -46,7 +46,7 @@ export function DashboardLayout({
             </button>
             <div>
               <p className="text-xs uppercase tracking-[0.16em] text-white/35">
-                Contract clarity
+                Professional legal workspace
               </p>
               <Logo className="mt-1 block text-[28px] text-white" />
             </div>

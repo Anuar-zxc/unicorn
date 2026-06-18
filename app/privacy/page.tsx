@@ -10,11 +10,11 @@ export default function PrivacyPage() {
         <div className="mt-8 max-w-3xl space-y-5 text-[#4A4A48]">
           <p>
             Lexo stores uploaded documents securely and uses them only to
-            provide contract analysis, report history, and account functionality.
+            provide professional legal AI tools, matter history, and account functionality.
           </p>
           <p>
-            We do not sell personal data. AI analysis is informational only and
-            does not create an attorney-client relationship.
+            We do not sell personal data or use client documents to train AI models.
+            AI-assisted work product remains subject to attorney review.
           </p>
           <p>
             Production deployments should configure Supabase row-level security,

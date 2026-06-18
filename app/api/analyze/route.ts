@@ -1,6 +1,6 @@
 import { ANALYZER_SYSTEM } from "@/lib/ai-system";
 import { extractContractText } from "@/lib/file-text";
-import { getGroqClient, GROQ_MODEL } from "@/lib/groq";
+import { streamDeepSeek } from "@/lib/deepseek";
 
 const demoReport = `## Executive Summary
 This contract creates ongoing obligations and should be reviewed for renewal, liability, payment, termination, and indemnity language. Overall risk: MEDIUM.
@@ -22,7 +22,7 @@ Replace with: "Renewal requires written confirmation by both parties at least 30
 2. Is the indemnity language market-standard for this deal size?
 3. Should liability be capped to fees paid in the previous 3 months?
 
-⚠️ AI Disclaimer: This analysis is for informational purposes only. Lexo is not a law firm and this is not legal advice. Consult a licensed attorney before taking legal action.`;
+Professional AI analysis — attorney review recommended before client delivery.`;
 
 function streamText(text: string) {
   const encoder = new TextEncoder();
@@ -52,41 +52,25 @@ export async function POST(req: Request) {
     text = body.text ?? body.contractText ?? "";
   }
 
-  const client = getGroqClient();
-  if (!client || !text.trim()) {
+  if (!text.trim()) {
     return new Response(streamText(demoReport), {
       headers: { "Content-Type": "text/markdown; charset=utf-8" }
     });
   }
 
-  const stream = await client.chat.completions.create({
-    model: GROQ_MODEL,
-    max_tokens: 5000,
-    stream: true,
-    messages: [
-      {
-        role: "system",
-        content: `${ANALYZER_SYSTEM}
+  const readable = await streamDeepSeek({
+    system: `${ANALYZER_SYSTEM}
 
 Return a structured markdown report with:
 ## Executive Summary
 ## Risk Breakdown
 ## Negotiation Playbook
-## Questions for Your Lawyer`
-      },
-      { role: "user", content: text.slice(0, 8000) }
-    ]
+## Questions for Your Lawyer`,
+    user: text.slice(0, 8000),
+    maxTokens: 5000
   });
-
-  const encoder = new TextEncoder();
-  const readable = new ReadableStream({
-    async start(controller) {
-      for await (const chunk of stream) {
-        const text = chunk.choices[0]?.delta?.content ?? "";
-        if (text) controller.enqueue(encoder.encode(text));
-      }
-      controller.close();
-    }
+  if (!readable) return new Response(streamText(demoReport), {
+    headers: { "Content-Type": "text/markdown; charset=utf-8" }
   });
 
   return new Response(readable, {
