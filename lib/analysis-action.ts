@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { CLAUDE_ANALYSIS_MODEL, getAnthropicClient } from "@/lib/anthropic";
 import { extractContractText } from "@/lib/file-text";
+import { getGroqClient, GROQ_MODEL } from "@/lib/groq";
 import { canAnalyze } from "@/lib/plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -149,12 +149,12 @@ export async function analyzeContractAction(
 }
 
 async function runAnalysis(text: string): Promise<AnalysisResult> {
-  const client = getAnthropicClient();
+  const client = getGroqClient();
 
   if (!client) {
     return {
       summary:
-        "This is a demo analysis because ANTHROPIC_API_KEY is not configured. The contract should be reviewed for obligations, renewal terms, payment duties, and termination rules.",
+        "This is a demo analysis because GROQ_API_KEY is not configured. The contract should be reviewed for obligations, renewal terms, payment duties, and termination rules.",
       overallRisk: "Medium",
       jurisdiction: "California law appears likely, but this must be confirmed from the governing law clause.",
       importantClauses: [
@@ -193,11 +193,15 @@ async function runAnalysis(text: string): Promise<AnalysisResult> {
     };
   }
 
-  const response = await client.messages.create({
-    model: CLAUDE_ANALYSIS_MODEL,
+  const response = await client.chat.completions.create({
+    model: GROQ_MODEL,
     max_tokens: 3000,
     temperature: 0.2,
-    system: `You are a professional contract analyst.
+    response_format: { type: "json_object" },
+    messages: [
+      {
+        role: "system",
+        content: `You are Lexo's professional contract analysis AI.
 
 Analyze this document and return JSON with these keys:
 summary: string, 2-3 sentences.
@@ -209,19 +213,16 @@ lawyerQuestions: string[].
 disclaimer: string.
 
 Use simple language. Never pretend to be a licensed lawyer. Always include a disclaimer that this is informational only.
-Return only valid JSON. Do not wrap the JSON in markdown fences.`,
-    messages: [
+Return only valid JSON. Do not wrap the JSON in markdown fences.`
+      },
       {
         role: "user",
-        content: `Analyze this contract text:\n\n${text}`
+        content: `Analyze this contract text:\n\n${text.slice(0, 8000)}`
       }
     ]
   });
 
-  const content = response.content
-    .filter((block) => block.type === "text")
-    .map((block) => block.text)
-    .join("\n");
+  const content = response.choices[0]?.message.content;
   const parsed = resultSchema.safeParse(JSON.parse(content ?? "{}"));
   if (!parsed.success) {
     throw new Error("AI returned an invalid analysis format.");

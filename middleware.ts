@@ -34,14 +34,20 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  // Refresh session — do NOT remove this.
-  await supabase.auth.getUser();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+    const redirectUrl = request.nextUrl.clone();
+    redirectUrl.pathname = "/auth/signin";
+    redirectUrl.searchParams.set("next", request.nextUrl.pathname);
+    return NextResponse.redirect(redirectUrl);
+  }
 
   return supabaseResponse;
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
-  ]
+  matcher: ["/dashboard/:path*"]
 };

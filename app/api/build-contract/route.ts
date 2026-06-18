@@ -1,5 +1,5 @@
-import { CLAUDE_ANALYSIS_MODEL, getAnthropicClient } from "@/lib/anthropic";
 import { BUILDER_SYSTEM } from "@/lib/ai-system";
+import { getGroqClient, GROQ_MODEL } from "@/lib/groq";
 
 const demoContract = `# Mutual Non-Disclosure Agreement
 
@@ -48,7 +48,7 @@ function streamText(text: string) {
 
 export async function POST(req: Request) {
   const { description, jurisdiction, clarifications } = await req.json();
-  const client = getAnthropicClient();
+  const client = getGroqClient();
 
   if (!client) {
     return new Response(streamText(demoContract), {
@@ -71,11 +71,12 @@ Rules:
 Jurisdiction: ${jurisdiction || "United States (general)"}
 Output format: clean markdown. Start directly with the contract — no preamble.`;
 
-  const stream = client.messages.stream({
-    model: CLAUDE_ANALYSIS_MODEL,
+  const stream = await client.chat.completions.create({
+    model: GROQ_MODEL,
     max_tokens: 6000,
-    system: systemPrompt,
+    stream: true,
     messages: [
+      { role: "system", content: systemPrompt },
       {
         role: "user",
         content: `Draft this contract: ${description}
@@ -88,9 +89,8 @@ ${clarifications ? `Additional details: ${clarifications}` : ""}`
   const readable = new ReadableStream({
     async start(controller) {
       for await (const chunk of stream) {
-        if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-          controller.enqueue(encoder.encode(chunk.delta.text));
-        }
+        const text = chunk.choices[0]?.delta?.content ?? "";
+        if (text) controller.enqueue(encoder.encode(text));
       }
       controller.close();
     }

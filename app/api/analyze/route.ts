@@ -1,6 +1,6 @@
-import { CLAUDE_ANALYSIS_MODEL, getAnthropicClient } from "@/lib/anthropic";
 import { ANALYZER_SYSTEM } from "@/lib/ai-system";
 import { extractContractText } from "@/lib/file-text";
+import { getGroqClient, GROQ_MODEL } from "@/lib/groq";
 
 const demoReport = `## Executive Summary
 This contract creates ongoing obligations and should be reviewed for renewal, liability, payment, termination, and indemnity language. Overall risk: MEDIUM.
@@ -52,33 +52,38 @@ export async function POST(req: Request) {
     text = body.text ?? body.contractText ?? "";
   }
 
-  const client = getAnthropicClient();
+  const client = getGroqClient();
   if (!client || !text.trim()) {
     return new Response(streamText(demoReport), {
       headers: { "Content-Type": "text/markdown; charset=utf-8" }
     });
   }
 
-  const stream = client.messages.stream({
-    model: CLAUDE_ANALYSIS_MODEL,
+  const stream = await client.chat.completions.create({
+    model: GROQ_MODEL,
     max_tokens: 5000,
-    system: `${ANALYZER_SYSTEM}
+    stream: true,
+    messages: [
+      {
+        role: "system",
+        content: `${ANALYZER_SYSTEM}
 
 Return a structured markdown report with:
 ## Executive Summary
 ## Risk Breakdown
 ## Negotiation Playbook
-## Questions for Your Lawyer`,
-    messages: [{ role: "user", content: text.slice(0, 80_000) }]
+## Questions for Your Lawyer`
+      },
+      { role: "user", content: text.slice(0, 8000) }
+    ]
   });
 
   const encoder = new TextEncoder();
   const readable = new ReadableStream({
     async start(controller) {
       for await (const chunk of stream) {
-        if (chunk.type === "content_block_delta" && chunk.delta.type === "text_delta") {
-          controller.enqueue(encoder.encode(chunk.delta.text));
-        }
+        const text = chunk.choices[0]?.delta?.content ?? "";
+        if (text) controller.enqueue(encoder.encode(text));
       }
       controller.close();
     }
