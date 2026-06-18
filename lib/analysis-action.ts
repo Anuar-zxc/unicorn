@@ -2,8 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { extractContractText } from "@/lib/file-text";
-import { completeDeepSeek } from "@/lib/deepseek";
+import { extractDocumentForAnalysis, type ExtractedDocument } from "@/lib/file-text";
+import { completeGemini } from "@/lib/gemini";
 import { canAnalyze } from "@/lib/plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -36,8 +36,15 @@ export type AnalyzeState = {
 
 const acceptedTypes = [
   "application/pdf",
-  "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+  "image/heic",
+  "image/heif"
 ];
+
+const acceptedExtensions = /\.(pdf|docx|jpe?g|png|webp|heic|heif)$/i;
 
 export async function analyzeContractAction(
   _prevState: AnalyzeState,
@@ -45,16 +52,15 @@ export async function analyzeContractAction(
 ): Promise<AnalyzeState> {
   const file = formData.get("contract");
   if (!(file instanceof File) || file.size === 0) {
-    return { ok: false, error: "Upload a PDF or DOCX contract first." };
+    return { ok: false, error: "Upload a PDF, DOCX, or legal image first." };
   }
 
   const isAccepted =
     acceptedTypes.includes(file.type) ||
-    file.name.toLowerCase().endsWith(".pdf") ||
-    file.name.toLowerCase().endsWith(".docx");
+    acceptedExtensions.test(file.name);
 
   if (!isAccepted) {
-    return { ok: false, error: "Only PDF and DOCX files are supported." };
+    return { ok: false, error: "Only PDF, DOCX, JPG, PNG, WEBP, HEIC, and HEIF files are supported." };
   }
 
   if (file.size > 10 * 1024 * 1024) {
@@ -93,20 +99,20 @@ export async function analyzeContractAction(
     };
   }
 
-  let extractedText = "";
+  let document: ExtractedDocument;
   try {
-    extractedText = await extractContractText(file);
+    document = await extractDocumentForAnalysis(file);
   } catch (error) {
     return {
       ok: false,
       error:
         error instanceof Error
           ? error.message
-          : "Could not read this document. Try another PDF or DOCX."
+          : "Could not read this document. Try another PDF, DOCX, or image."
     };
   }
 
-  if (extractedText.trim().length < 100) {
+  if (document.kind === "text" && document.text.trim().length < 100) {
     return {
       ok: false,
       error: "We could not extract enough text from this contract."
@@ -125,7 +131,11 @@ export async function analyzeContractAction(
     return { ok: false, error: uploadError.message };
   }
 
-  const analysis = await runAnalysis(extractedText.slice(0, 80_000));
+  const analysis = await runAnalysis(document);
+  const extractedText =
+    document.kind === "text"
+      ? document.text
+      : `[Image/scan uploaded for vision analysis: ${document.fileName} (${document.mimeType})]`;
 
   const { data, error: insertError } = await supabase
     .from("analyses")
@@ -148,11 +158,11 @@ export async function analyzeContractAction(
   return { ok: true, analysisId: data.id };
 }
 
-async function runAnalysis(text: string): Promise<AnalysisResult> {
-  if (!process.env.DEEPSEEK_API_KEY) {
+async function runAnalysis(document: ExtractedDocument): Promise<AnalysisResult> {
+  if (!process.env.GEMINI_API_KEY) {
     return {
       summary:
-        "DeepSeek API is not configured. The contract should be reviewed for obligations, renewal terms, payment duties, and termination rules.",
+        "Gemini API is not configured yet, so Lexo is showing an investor-demo analysis. Once GEMINI_API_KEY is added, Lexo will read PDF, DOCX, scans, and legal photos live.",
       overallRisk: "Medium",
       jurisdiction: "California law appears likely, but this must be confirmed from the governing law clause.",
       importantClauses: [
@@ -191,7 +201,7 @@ async function runAnalysis(text: string): Promise<AnalysisResult> {
     };
   }
 
-  const content = await completeDeepSeek({
+  const content = await completeGemini({
     system: `You are Lexo's professional contract analysis AI.
 
 Analyze this document and return JSON with these keys:
@@ -205,16 +215,30 @@ disclaimer: string.
 
 Use simple language. Never pretend to be a licensed lawyer. Always include a disclaimer that this is informational only.
 Return only valid JSON. Do not wrap the JSON in markdown fences.`,
-    user: `Analyze this contract text:\n\n${text.slice(0, 8000)}`,
+    prompt:
+      document.kind === "image"
+        ? "Read this legal image/scan/photo. First perform OCR, then analyze the legal document."
+        : `Analyze this contract text:\n\n${document.text.slice(0, 8000)}`,
+    inlineDocument:
+      document.kind === "image"
+        ? { mimeType: document.mimeType, dataUrl: document.dataUrl }
+        : undefined,
     maxTokens: 3000,
     json: true
   });
 
-  const parsed = resultSchema.safeParse(JSON.parse(content ?? "{}"));
+  const parsed = resultSchema.safeParse(JSON.parse(stripJsonFences(content ?? "{}")));
   if (!parsed.success) {
     throw new Error("AI returned an invalid analysis format.");
   }
   return parsed.data;
+}
+
+function stripJsonFences(value: string) {
+  return value
+    .trim()
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/\s*```$/i, "");
 }
 
 export async function deleteAnalysisAction(formData: FormData) {

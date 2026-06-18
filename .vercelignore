@@ -1,0 +1,7 @@
+artifacts/
+db.sqlite3
+manage.py
+requirements.txt
+core/
+lexo/
+data/goszakup/

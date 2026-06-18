@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
+import {
+  createSupabaseBrowserClient,
+  isSupabaseConfigured
+} from "@/lib/supabase/browser";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/components/providers/AppProviders";
 
@@ -17,8 +20,12 @@ const authText = {
     signup: "Create account",
     reset: "Send reset link",
     resetSent: "Password reset email sent. Check your inbox.",
+    signupSent: "Account created. You can sign in now.",
     google: "Continue with Google",
-    divider: "or"
+    divider: "or",
+    configError: "Authentication is not configured yet. Add the Supabase environment variables.",
+    invalidCredentials: "Incorrect email or password.",
+    emailNotConfirmed: "Confirm your email before signing in."
   },
   ru: {
     fullName: "Полное имя",
@@ -30,12 +37,39 @@ const authText = {
     signup: "Создать аккаунт",
     reset: "Отправить ссылку",
     resetSent: "Письмо для сброса пароля отправлено. Проверьте почту.",
+    signupSent: "Аккаунт создан. Теперь можно войти.",
     google: "Продолжить с Google",
-    divider: "или"
+    divider: "или",
+    configError: "Авторизация ещё не настроена. Добавьте переменные окружения Supabase.",
+    invalidCredentials: "Неверный email или пароль.",
+    emailNotConfirmed: "Подтвердите email перед входом."
   }
 };
 
-export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
+function GoogleIcon() {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5">
+      <path fill="#4285F4" d="M21.6 12.23c0-.71-.06-1.4-.18-2.06H12v3.9h5.38a4.6 4.6 0 0 1-2 3.02v2.53h3.24c1.9-1.75 2.98-4.33 2.98-7.39Z" />
+      <path fill="#34A853" d="M12 22c2.7 0 4.97-.9 6.62-2.38l-3.24-2.53c-.9.6-2.05.96-3.38.96-2.6 0-4.81-1.76-5.6-4.13H3.06v2.61A10 10 0 0 0 12 22Z" />
+      <path fill="#FBBC05" d="M6.4 13.92A6.02 6.02 0 0 1 6.08 12c0-.67.12-1.32.32-1.92V7.47H3.06A10 10 0 0 0 2 12c0 1.61.38 3.14 1.06 4.53l3.34-2.61Z" />
+      <path fill="#EA4335" d="M12 5.95c1.47 0 2.79.5 3.83 1.5L18.7 4.6A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.94 5.47l3.34 2.61c.79-2.37 3-4.13 5.6-4.13Z" />
+    </svg>
+  );
+}
+
+function friendlyError(message: string, text: (typeof authText)["en"]) {
+  if (/invalid login credentials/i.test(message)) return text.invalidCredentials;
+  if (/email not confirmed/i.test(message)) return text.emailNotConfirmed;
+  return message;
+}
+
+export function AuthForm({
+  mode,
+  next = "/dashboard"
+}: {
+  mode: "signin" | "signup" | "reset";
+  next?: string;
+}) {
   const { locale } = useLanguage();
   const text = authText[locale];
   const router = useRouter();
@@ -54,11 +88,17 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
     setError(null);
     setMessage(null);
 
+    if (!isSupabaseConfigured()) {
+      setLoading(false);
+      setError(text.configError);
+      return;
+    }
+
     const origin = window.location.origin;
 
     if (mode === "reset") {
       const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${origin}/auth/signin`
+        redirectTo: `${origin}/auth/callback?next=/auth/update-password`
       });
       setLoading(false);
       if (resetError) {
@@ -73,10 +113,10 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
       const { error: signinError } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
       if (signinError) {
-        setError(signinError.message);
+        setError(friendlyError(signinError.message, text));
         return;
       }
-      router.push("/dashboard");
+      router.replace(next);
       router.refresh();
       return;
     }
@@ -85,7 +125,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
       email,
       password,
       options: {
-        emailRedirectTo: `${origin}/auth/callback`,
+        emailRedirectTo: `${origin}/auth/callback?next=/dashboard/onboarding`,
         data: { full_name: fullName, company }
       }
     });
@@ -96,26 +136,43 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
       return;
     }
 
-    if (data.user) {
-      await supabase.from("profiles").upsert({
-        id: data.user.id,
-        email,
-        full_name: fullName,
-        company
-      });
+    if (data.session) {
+      router.replace("/dashboard/onboarding");
+      router.refresh();
+      return;
     }
 
-    router.push("/dashboard/onboarding");
-    router.refresh();
+    const { error: signinAfterSignupError } = await supabase.auth.signInWithPassword({
+      email,
+      password
+    });
+    if (!signinAfterSignupError) {
+      router.replace("/dashboard/onboarding");
+      router.refresh();
+      return;
+    }
+
+    setMessage(text.signupSent);
   };
 
   const signInWithGoogle = async () => {
     setLoading(true);
     setError(null);
+    if (!isSupabaseConfigured()) {
+      setLoading(false);
+      setError(text.configError);
+      return;
+    }
     const origin = window.location.origin;
     const { error: googleError } = await supabase.auth.signInWithOAuth({
       provider: "google",
-      options: { redirectTo: `${origin}/auth/callback?next=/dashboard` }
+      options: {
+        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        queryParams: {
+          access_type: "offline",
+          prompt: "select_account"
+        }
+      }
     });
     if (googleError) {
       setLoading(false);
@@ -133,6 +190,7 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
             disabled={loading}
             className="focus-ring flex h-11 w-full items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
           >
+            <GoogleIcon />
             {text.google}
           </button>
           <div className="flex items-center gap-3 text-xs text-[var(--text-muted)]">
@@ -148,6 +206,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
             <span className="text-sm font-medium">{text.fullName}</span>
             <input
               type="text"
+              name="full-name"
+              autoComplete="name"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
               className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
@@ -158,6 +218,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
             <span className="text-sm font-medium">{text.company}</span>
             <input
               type="text"
+              name="company"
+              autoComplete="organization"
               value={company}
               onChange={(event) => setCompany(event.target.value)}
               className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
@@ -169,6 +231,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
         <span className="text-sm font-medium">{text.email}</span>
         <input
           type="email"
+          name="email"
+          autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
           className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
@@ -180,6 +244,8 @@ export function AuthForm({ mode }: { mode: "signin" | "signup" | "reset" }) {
           <span className="text-sm font-medium">{text.password}</span>
           <input
             type="password"
+            name="password"
+            autoComplete={mode === "signup" ? "new-password" : "current-password"}
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"

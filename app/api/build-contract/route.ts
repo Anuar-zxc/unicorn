@@ -1,5 +1,5 @@
 import { BUILDER_SYSTEM } from "@/lib/ai-system";
-import { streamDeepSeek } from "@/lib/deepseek";
+import { completeGemini } from "@/lib/gemini";
 
 const demoContract = `# Mutual Non-Disclosure Agreement
 
@@ -63,17 +63,17 @@ Rules:
 Jurisdiction: ${jurisdiction || "United States (general)"}
 Output format: clean markdown. Start directly with the contract — no preamble.`;
 
-  const readable = await streamDeepSeek({
+  const output = await completeGemini({
     system: systemPrompt,
-    user: `Draft this contract: ${description}
+    prompt: `Draft this contract: ${description}
 ${clarifications ? `Additional details: ${clarifications}` : ""}`,
     maxTokens: 6000
   });
-  if (!readable) return new Response(streamText(demoContract), {
+  if (!output) return new Response(streamText(demoContract), {
     headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 
-  return new Response(readable, {
+  return new Response(streamText(output), {
     headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 }

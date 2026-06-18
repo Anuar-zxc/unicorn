@@ -1,11 +1,21 @@
-import { extractContractText } from "@/lib/file-text";
-import { streamDeepSeek } from "@/lib/deepseek";
+import { extractDocumentForAnalysis } from "@/lib/file-text";
+import { completeGemini } from "@/lib/gemini";
 
 const fallback = `## Professional AI analysis
 
-The workspace is waiting for the DeepSeek API key.
+Lexo is running in investor demo mode.
 
-Add \`DEEPSEEK_API_KEY\` to the deployment environment to stream a complete attorney-ready result. The submitted material will then be processed with the selected tool prompt.
+Add a free Google AI Studio \`GEMINI_API_KEY\` to enable live AI generation for documents, scans, and photos. For now, this preview shows the expected attorney-ready structure.
+
+## Key observations
+- Identify the client's goal and represented party.
+- Extract important facts, deadlines, obligations, and risks.
+- Convert the material into a practical legal work product.
+
+## Recommended next steps
+1. Upload or paste the source material.
+2. Confirm jurisdiction and client position.
+3. Review the AI output before client delivery.
 
 ## Attorney review
 
@@ -20,22 +30,31 @@ export function createToolHandler(systemPrompt: string) {
       if (contentType.includes("multipart/form-data")) {
         const data = await req.formData();
         context = String(data.get("context") ?? "");
-        const files = data.getAll("files").filter((item): item is File => item instanceof File && item.size > 0);
-        const texts = await Promise.all(files.map(async (file, index) => `\n\n--- DOCUMENT ${index + 1}: ${file.name} ---\n${await extractContractText(file)}`));
-        input = `${String(data.get("input") ?? "")}${texts.join("")}`;
+        const files = data
+          .getAll("files")
+          .filter((item): item is File => item instanceof File && item.size > 0);
+        const documents = await Promise.all(
+          files.map(async (file, index) => {
+            const document = await extractDocumentForAnalysis(file);
+            if (document.kind === "image") {
+              return `\n\n--- DOCUMENT ${index + 1}: ${file.name} ---\n[Image/scan uploaded. Vision analysis is available in Contract Review after GEMINI_API_KEY is configured.]`;
+            }
+            return `\n\n--- DOCUMENT ${index + 1}: ${file.name} ---\n${document.text}`;
+          })
+        );
+        input = `${String(data.get("input") ?? "")}${documents.join("")}`;
       } else {
         const body = await req.json();
         input = [body.input, body.secondaryInput].filter(Boolean).join("\n\n--- SECOND VERSION / ADDITIONAL MATERIAL ---\n");
         context = body.context ?? "";
       }
       if (!input.trim()) return new Response("Input is required.", { status: 400 });
-      const stream = await streamDeepSeek({
+      const output = await completeGemini({
         system: `${systemPrompt}\n\nWorkspace context: ${context || "No additional context supplied."}`,
-        user: input.slice(0, 30000),
+        prompt: input.slice(0, 30000),
         maxTokens: 5000
       });
-      if (!stream) return new Response(streamFallback(fallback), { headers: { "Content-Type": "text/markdown; charset=utf-8" } });
-      return new Response(stream, { headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "no-store" } });
+      return new Response(streamFallback(output || fallback), { headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "no-store" } });
     } catch (error) {
       return new Response(error instanceof Error ? error.message : "Unable to process this request.", { status: 500 });
     }

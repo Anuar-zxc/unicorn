@@ -1,5 +1,5 @@
 import { STRATEGIST_SYSTEM } from "@/lib/ai-system";
-import { streamDeepSeek } from "@/lib/deepseek";
+import { completeGemini } from "@/lib/gemini";
 
 const demoStrategy = `# Case Strategy Brief
 
@@ -105,20 +105,20 @@ Rules:
 
 Jurisdiction: ${jurisdiction || "Not provided"}`;
 
-  const readable = await streamDeepSeek({
+  const output = await completeGemini({
     system: systemPrompt,
-    user: `Situation: ${situation}
+    prompt: `Situation: ${situation}
 Desired outcome: ${outcome}
 Stage: ${stage}
 Documents summary: ${documentsSummary || "No documents uploaded"}
 Follow-up answers: ${followups || "None"}`,
     maxTokens: 7000
   });
-  if (!readable) return new Response(streamText(demoStrategy), {
+  if (!output) return new Response(streamText(demoStrategy), {
     headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 
-  return new Response(readable, {
+  return new Response(streamText(output), {
     headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 }

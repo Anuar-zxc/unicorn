@@ -1,0 +1,9 @@
+[
+  {"id":"constitution","title":"Конституция Республики Казахстан","type":"constitution","language":"ru","url":"https://adilet.zan.kz/rus/docs/K950001000_","authority":"ИПС «Әділет»"},
+  {"id":"civil-code-general","title":"Гражданский кодекс Республики Казахстан (Общая часть)","type":"code","language":"ru","url":"https://adilet.zan.kz/rus/docs/K940001000_","authority":"ИПС «Әділет»"},
+  {"id":"civil-code-special","title":"Гражданский кодекс Республики Казахстан (Особенная часть)","type":"code","language":"ru","url":"https://adilet.zan.kz/rus/docs/K990000409_","authority":"ИПС «Әділет»"},
+  {"id":"labor-code","title":"Трудовой кодекс Республики Казахстан","type":"code","language":"ru","url":"https://adilet.zan.kz/rus/docs/K1500000414","authority":"ИПС «Әділет»"},
+  {"id":"entrepreneurial-code","title":"Предпринимательский кодекс Республики Казахстан","type":"code","language":"ru","url":"https://adilet.zan.kz/rus/docs/K1500000375","authority":"ИПС «Әділет»"},
+  {"id":"civil-procedure-code","title":"Гражданский процессуальный кодекс Республики Казахстан","type":"code","language":"ru","url":"https://adilet.zan.kz/rus/docs/K1500000377","authority":"ИПС «Әділет»"},
+  {"id":"personal-data-law","title":"Закон Республики Казахстан «О персональных данных и их защите»","type":"law","language":"ru","url":"https://adilet.zan.kz/rus/docs/Z1300000094","authority":"ИПС «Әділет»"}
+]

@@ -1,14 +1,22 @@
 import Link from "next/link";
-import { ArrowRight, BookOpen, FileDiff, FileSearch, FileText, FolderKanban, MessageSquareText } from "lucide-react";
+import {
+  ArrowRight,
+  BriefcaseBusiness,
+  FileCheck2,
+  GitCompareArrows,
+  MessageCircleQuestion,
+  PenLine,
+  SearchCheck
+} from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 const tools = [
-  { icon: FileSearch, title: "Contract Review", desc: "Analyze any contract in 60 seconds", href: "/dashboard/review", tone: "blue" },
-  { icon: BookOpen, title: "Case Research", desc: "Statutes, precedents, legal memos", href: "/dashboard/research", tone: "indigo" },
-  { icon: FileText, title: "Draft Generator", desc: "Contracts, motions, demand letters", href: "/dashboard/draft", tone: "green" },
-  { icon: FolderKanban, title: "Case Prep", desc: "Intake memos and strategy prep", href: "/dashboard/caseprep", tone: "purple" },
-  { icon: FileDiff, title: "Redline Compare", desc: "Compare two contract versions", href: "/dashboard/compare", tone: "amber" },
-  { icon: MessageSquareText, title: "Client Summary", desc: "Plain-language client briefs", href: "/dashboard/client", tone: "rose" }
+  { icon: FileCheck2, title: "Contract Review", desc: "Analyze PDF, DOCX, scans, and photos", href: "/dashboard/review", tone: "blue" },
+  { icon: SearchCheck, title: "Case Research", desc: "Statutes, precedents, legal memos", href: "/dashboard/research", tone: "indigo" },
+  { icon: PenLine, title: "Draft Generator", desc: "Contracts, motions, demand letters", href: "/dashboard/draft", tone: "green" },
+  { icon: BriefcaseBusiness, title: "Case Prep", desc: "Intake memos and strategy prep", href: "/dashboard/caseprep", tone: "purple" },
+  { icon: GitCompareArrows, title: "Redline Compare", desc: "Compare two contract versions", href: "/dashboard/compare", tone: "amber" },
+  { icon: MessageCircleQuestion, title: "Client Summary", desc: "Plain-language client briefs", href: "/dashboard/client", tone: "rose" }
 ];
 
 const toneClasses: Record<string, string> = {
@@ -45,7 +53,7 @@ export default async function DashboardPage() {
       <section className="mt-6">
         <div className="flex items-end justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.16em] text-white/35">Workspace</p><h2 className="mt-2 font-display text-2xl font-semibold">Start with a tool</h2></div></div>
         <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {tools.map((tool) => <Link key={tool.title} href={tool.href} className="group rounded-2xl border border-[#252b36] bg-[#131720] p-5 hover:border-[#4d7ef5]/50"><div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${toneClasses[tool.tone]}`}><tool.icon className="h-5 w-5" /></div><h3 className="mt-5 font-display text-xl font-semibold">{tool.title}</h3><p className="mt-2 text-sm text-white/48">{tool.desc}</p><span className="mt-5 flex items-center gap-2 text-sm font-semibold text-[#8fb0ff]">Open tool <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link>)}
+          {tools.map((tool) => <Link key={tool.title} href={tool.href} className="group rounded-2xl border border-[#252b36] bg-[#131720] p-5 transition hover:-translate-y-0.5 hover:border-[#4d7ef5]/50 hover:bg-[#151b27]"><div className="flex items-start justify-between gap-3"><div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${toneClasses[tool.tone]}`}><tool.icon className="h-5 w-5" strokeWidth={2.65} /></div><span className="rounded-full border border-emerald-400/15 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-300">Works now</span></div><h3 className="mt-5 font-display text-xl font-semibold">{tool.title}</h3><p className="mt-2 text-sm text-white/48">{tool.desc}</p><span className="mt-5 flex items-center gap-2 text-sm font-semibold text-[#8fb0ff]">Run tool <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" /></span></Link>)}
         </div>
       </section>
       <section className="mt-6 rounded-2xl border border-[#252b36] bg-[#131720] p-5">

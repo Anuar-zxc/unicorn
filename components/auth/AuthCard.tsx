@@ -20,7 +20,15 @@ const copy = {
   }
 };
 
-export function AuthCard({ mode }: { mode: "signin" | "signup" | "reset" }) {
+export function AuthCard({
+  mode,
+  next,
+  error
+}: {
+  mode: "signin" | "signup" | "reset";
+  next?: string;
+  error?: string;
+}) {
   const { locale } = useLanguage();
   const text = copy[locale][mode];
 
@@ -36,7 +44,14 @@ export function AuthCard({ mode }: { mode: "signin" | "signup" | "reset" }) {
           <h1 className="mt-4 font-display text-3xl font-semibold">{text[0]}</h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">{text[1]}</p>
         </div>
-        <AuthForm mode={mode} />
+        {error && (
+          <p className="mb-4 rounded-lg bg-[var(--red-light)] p-3 text-sm text-[var(--red)]">
+            {locale === "ru"
+              ? "Не удалось завершить вход. Попробуйте ещё раз."
+              : "We could not complete sign-in. Please try again."}
+          </p>
+        )}
+        <AuthForm mode={mode} next={next} />
         {mode === "signin" && (
           <>
             <p className="mt-5 text-center text-sm text-[var(--text-secondary)]">

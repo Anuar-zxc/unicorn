@@ -35,8 +35,8 @@ export function DashboardLayout({
         userPlan={userPlan}
       />
       <div className="min-w-0 flex-1">
-        <header className="sticky top-0 z-30 border-b border-[#252528] bg-[#0C0C0E]/85 backdrop-blur-xl">
-          <div className="flex h-16 items-center gap-4 px-4 md:px-6">
+        <header className="sticky top-0 z-30 border-b border-[#252528] bg-[#0C0C0E]/92 backdrop-blur-xl">
+          <div className="flex min-h-20 items-center gap-4 px-4 py-3 md:px-6">
             <button
               className="rounded-full p-2 text-white/70 hover:bg-white/5 lg:hidden"
               aria-label="Open navigation"
@@ -44,11 +44,11 @@ export function DashboardLayout({
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div>
+            <div className="min-w-0">
               <p className="text-xs uppercase tracking-[0.16em] text-white/35">
                 Professional legal workspace
               </p>
-              <Logo className="mt-1 block text-[28px] text-white" />
+              <Logo className="mt-2 text-[30px] text-white" />
             </div>
             <div className="ml-auto">
               <Avatar initials={initials} className="h-10 w-10 text-sm" />

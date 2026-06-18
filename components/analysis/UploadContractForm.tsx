@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FileUp, Loader2 } from "lucide-react";
+import { FileImage, FileText, FileUp, Loader2 } from "lucide-react";
 import {
   analyzeContractAction,
   type AnalyzeState
@@ -32,14 +32,22 @@ export function UploadContractForm({ disabled }: { disabled?: boolean }) {
         className="grid cursor-pointer place-items-center rounded-xl border border-dashed border-[#3a3a40] bg-[#0C0C0E] p-10 text-center transition hover:border-[#1A56E8]"
         onClick={() => inputRef.current?.click()}
       >
-        <FileUp className="h-10 w-10 text-[#1A56E8]" />
+        <FileUp className="h-10 w-10 text-[#1A56E8]" strokeWidth={2.6} />
         <h2 className="mt-5 font-display text-2xl font-semibold">
-          Upload client contract
+          Upload contract, scan, or legal photo
         </h2>
         <p className="mt-2 max-w-lg text-sm leading-6 text-white/50">
-          PDF or DOCX only. Max 10MB. We extract the text, analyze risks, and
-          save the report to your history.
+          PDF, DOCX, JPG, PNG, WEBP, HEIC. Max 10MB. Lexo extracts the text,
+          reads scans with vision, highlights risks, and saves the report.
         </p>
+        <div className="mt-5 flex flex-wrap justify-center gap-2 text-xs font-semibold text-white/55">
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+            <FileText className="h-3.5 w-3.5" /> PDF/DOCX
+          </span>
+          <span className="inline-flex items-center gap-1 rounded-full border border-white/10 bg-white/[0.04] px-3 py-1">
+            <FileImage className="h-3.5 w-3.5" /> Photos & scans
+          </span>
+        </div>
         <p className="mt-4 text-sm font-medium text-white/75">
           {fileName || "Choose file"}
         </p>
@@ -47,7 +55,7 @@ export function UploadContractForm({ disabled }: { disabled?: boolean }) {
           ref={inputRef}
           type="file"
           name="contract"
-          accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+          accept=".pdf,.docx,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp,image/heic,image/heif"
           className="hidden"
           disabled={disabled || pending}
           onChange={(event) => setFileName(event.target.files?.[0]?.name ?? "")}

@@ -1,6 +1,6 @@
 import { ANALYZER_SYSTEM } from "@/lib/ai-system";
-import { extractContractText } from "@/lib/file-text";
-import { streamDeepSeek } from "@/lib/deepseek";
+import { extractDocumentForAnalysis, type ExtractedDocument } from "@/lib/file-text";
+import { completeGemini } from "@/lib/gemini";
 
 const demoReport = `## Executive Summary
 This contract creates ongoing obligations and should be reviewed for renewal, liability, payment, termination, and indemnity language. Overall risk: MEDIUM.
@@ -40,25 +40,31 @@ function streamText(text: string) {
 export async function POST(req: Request) {
   const contentType = req.headers.get("content-type") ?? "";
   let text = "";
+  let document: ExtractedDocument | undefined;
 
   if (contentType.includes("multipart/form-data")) {
     const formData = await req.formData();
-    const file = formData.get("contract");
+    const file = formData.get("contract") ?? formData.get("files");
     if (file instanceof File) {
-      text = await extractContractText(file);
+      document = await extractDocumentForAnalysis(file);
+      text = document.kind === "text" ? document.text : "";
     }
   } else {
     const body = await req.json();
     text = body.text ?? body.contractText ?? "";
   }
 
-  if (!text.trim()) {
+  if (!text.trim() && document?.kind !== "image") {
     return new Response(streamText(demoReport), {
       headers: { "Content-Type": "text/markdown; charset=utf-8" }
     });
   }
 
-  const readable = await streamDeepSeek({
+  const prompt = document?.kind === "image"
+    ? "Read this legal image/scan/photo. First perform OCR, then analyze it as a legal document."
+    : `Analyze this contract text:\n\n${text.slice(0, 8000)}`;
+
+  const output = await completeGemini({
     system: `${ANALYZER_SYSTEM}
 
 Return a structured markdown report with:
@@ -66,14 +72,18 @@ Return a structured markdown report with:
 ## Risk Breakdown
 ## Negotiation Playbook
 ## Questions for Your Lawyer`,
-    user: text.slice(0, 8000),
+    prompt,
+    inlineDocument: document?.kind === "image" ? {
+      mimeType: document.mimeType,
+      dataUrl: document.dataUrl
+    } : undefined,
     maxTokens: 5000
   });
-  if (!readable) return new Response(streamText(demoReport), {
+  if (!output) return new Response(streamText(demoReport), {
     headers: { "Content-Type": "text/markdown; charset=utf-8" }
   });
 
-  return new Response(readable, {
+  return new Response(streamText(output), {
     headers: { "Content-Type": "text/markdown; charset=utf-8" }
   });
 }
