@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Menu } from "lucide-react";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { Avatar } from "@/components/shared/Avatar";
+import { Logo } from "@/components/shared/Logo";
 
 function getInitials(email: string): string {
   const parts = email.split("@")[0].split(/[.\-_]/);
@@ -47,7 +48,7 @@ export function DashboardLayout({
               <p className="text-xs uppercase tracking-[0.16em] text-white/35">
                 Contract clarity
               </p>
-              <p className="font-display text-xl font-semibold">Lexo</p>
+              <Logo className="mt-1 block text-[28px] text-white" />
             </div>
             <div className="ml-auto">
               <Avatar initials={initials} className="h-10 w-10 text-sm" />

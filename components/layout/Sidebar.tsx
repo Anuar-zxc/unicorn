@@ -14,6 +14,7 @@ import {
   Users
 } from "lucide-react";
 import { Avatar } from "@/components/shared/Avatar";
+import { Logo } from "@/components/shared/Logo";
 import { PlanBadge } from "@/components/shared/PlanBadge";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { cn } from "@/lib/utils";
@@ -59,11 +60,14 @@ export function Sidebar({
       )}
     >
       <div className="flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-[#1A56E8] text-white shrink-0">
-            <Scale className="h-5 w-5" />
-          </span>
-          {!collapsed && <span className="font-display text-lg font-semibold">Lexo</span>}
+        <Link href="/dashboard" className="flex min-w-0 items-center">
+          {collapsed ? (
+            <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#1A56E8]/15">
+              <Logo markOnly className="text-[22px] text-white" />
+            </span>
+          ) : (
+            <Logo className="text-[34px] text-white" />
+          )}
         </Link>
         {!collapsed && (
           <button

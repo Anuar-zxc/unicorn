@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Menu, Scale, X } from "lucide-react";
+import { Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
+import { Logo } from "@/components/shared/Logo";
 import { useLanguage } from "@/components/providers/AppProviders";
 import { cn } from "@/lib/utils";
 
@@ -71,11 +72,8 @@ export function Navbar() {
       )}
     >
       <nav className="container-shell flex h-16 items-center justify-between">
-        <Link href="/" className="flex items-center gap-2 font-display text-lg font-semibold">
-          <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
-            <Scale className="h-5 w-5" />
-          </span>
-          Lexo
+        <Link href="/" className="flex items-center">
+          <Logo className="text-[34px]" />
         </Link>
 
         <div className="hidden items-center gap-1 rounded-full border border-[var(--border)] bg-[var(--bg-surface)]/70 p-1 lg:flex">
@@ -120,7 +118,7 @@ export function Navbar() {
         )}
       >
         <div className="mb-8 flex items-center justify-between">
-          <span className="font-display text-lg font-semibold">Lexo</span>
+          <Logo className="text-[34px]" />
           <button
             aria-label="Close menu"
             className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-full"

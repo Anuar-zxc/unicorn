@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Linkedin, Scale, Twitter } from "lucide-react";
+import { Linkedin, Twitter } from "lucide-react";
 import { useLanguage } from "@/components/providers/AppProviders";
+import { Logo } from "@/components/shared/Logo";
 
 const footerText = {
   en: {
@@ -81,11 +82,8 @@ export function Footer() {
     <footer className="border-t border-[var(--border)] bg-[var(--bg-surface)]">
       <div className="container-shell grid gap-10 py-14 md:grid-cols-[1.4fr_2fr]">
         <div>
-          <Link href="/" className="flex items-center gap-2 font-display text-lg font-semibold">
-            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
-              <Scale className="h-5 w-5" />
-            </span>
-            Lexo
+          <Link href="/" className="flex items-center">
+            <Logo className="text-[34px]" />
           </Link>
           <p className="mt-4 max-w-sm text-sm leading-6 text-[var(--text-secondary)]">
             {text.tagline}

@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Scale } from "lucide-react";
 import { AuthForm } from "@/components/auth/AuthForm";
 import { LanguageSwitcher } from "@/components/shared/LanguageSwitcher";
+import { Logo } from "@/components/shared/Logo";
 import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { useLanguage } from "@/components/providers/AppProviders";
 
@@ -32,9 +32,7 @@ export function AuthCard({ mode }: { mode: "signin" | "signup" | "reset" }) {
             <LanguageSwitcher />
             <ThemeToggle />
           </div>
-          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-[var(--accent-light)] text-[var(--accent)]">
-            <Scale className="h-6 w-6" />
-          </div>
+          <Logo className="mx-auto block w-fit text-[52px]" />
           <h1 className="mt-4 font-display text-3xl font-semibold">{text[0]}</h1>
           <p className="mt-2 text-sm text-[var(--text-secondary)]">{text[1]}</p>
         </div>
