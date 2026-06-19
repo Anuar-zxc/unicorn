@@ -18,7 +18,8 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=ваш_anon_key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-Для production задайте `NEXT_PUBLIC_APP_URL` равным публичному HTTPS-домену.
+Для production задайте `NEXT_PUBLIC_APP_URL` равным публичному HTTPS-домену:
+`https://lexo-ai-kz.vercel.app`.
 
 ## 2. URL Configuration в Supabase
 

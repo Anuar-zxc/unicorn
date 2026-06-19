@@ -6,14 +6,12 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 
 export default async function SettingsPage() {
   const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
+  const [{ data: { user } }, { data: profile }] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from("profiles").select("polar_customer_id").maybeSingle()
+  ]);
   if (!user) redirect("/auth/signin");
   const email = user.email ?? "";
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("polar_customer_id")
-    .eq("id", user.id)
-    .maybeSingle();
 
   return (
     <main className="p-4 md:p-6">

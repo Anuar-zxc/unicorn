@@ -59,18 +59,14 @@ export default async function BillingPage({
 }) {
   const params = await searchParams;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-  if (!user) redirect("/auth/signin?next=/dashboard/billing");
-
   const { data: profile } = await supabase
     .from("profiles")
     .select(
       "plan,subscription_status,current_period_end,cancel_at_period_end,polar_customer_id"
     )
-    .eq("id", user.id)
     .maybeSingle();
+
+  if (!profile) redirect("/auth/signin?next=/dashboard/billing");
 
   const current = normalizePlan(profile?.plan);
   const isSubscribed =

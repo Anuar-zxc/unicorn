@@ -11,7 +11,7 @@ codebase only for lawyer marketplace bookings.
    - Firm: $149/month and optionally $1,428/year ($119/month billed annually).
 3. Create an organization access token.
 4. Register this webhook:
-   - Production URL: `https://unicorn-mauve-ten.vercel.app/api/webhooks/polar`
+   - Production URL: `https://lexo-ai-kz.vercel.app/api/webhooks/polar`
    - Local forwarding target: `http://localhost:3000/api/webhooks/polar`
 5. Subscribe it to:
    - `subscription.active`

@@ -30,13 +30,12 @@ const toneClasses: Record<string, string> = {
 
 export default async function DashboardPage() {
   const supabase = await createSupabaseServerClient();
-  const { data: { user } } = await supabase.auth.getUser();
   const [{ data: profile }, { count }, { data: recent }] = await Promise.all([
-    supabase.from("profiles").select("full_name").eq("id", user?.id).maybeSingle(),
-    supabase.from("analyses").select("id", { count: "exact", head: true }).eq("user_id", user?.id),
-    supabase.from("analyses").select("id,file_name,title,type,status,created_at").eq("user_id", user?.id).order("created_at", { ascending: false }).limit(10)
+    supabase.from("profiles").select("full_name").maybeSingle(),
+    supabase.from("analyses").select("id", { count: "exact", head: true }),
+    supabase.from("analyses").select("id,file_name,title,type,status,created_at").order("created_at", { ascending: false }).limit(10)
   ]);
-  const firstName = profile?.full_name?.split(" ")[0] || user?.email?.split("@")[0] || "Counsel";
+  const firstName = profile?.full_name?.split(" ")[0] || "Counsel";
   const reviewed = count ?? 0;
   return (
     <main className="p-4 md:p-6">

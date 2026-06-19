@@ -4,26 +4,19 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function ContractReviewPage() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
 
   const monthStart = new Date();
   monthStart.setDate(1);
   monthStart.setHours(0, 0, 0, 0);
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("plan")
-    .eq("id", user?.id)
-    .maybeSingle();
-
-  const { count } = await supabase
-    .from("analyses")
-    .select("id", { count: "exact", head: true })
-    .eq("user_id", user?.id)
-    .or("tool_type.in.(review,analysis),tool_type.is.null")
-    .gte("created_at", monthStart.toISOString());
+  const [{ data: profile }, { count }] = await Promise.all([
+    supabase.from("profiles").select("plan").maybeSingle(),
+    supabase
+      .from("analyses")
+      .select("id", { count: "exact", head: true })
+      .or("tool_type.in.(review,analysis),tool_type.is.null")
+      .gte("created_at", monthStart.toISOString())
+  ]);
 
   const plan = profile?.plan ?? "free";
   const usage = count ?? 0;

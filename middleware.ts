@@ -34,11 +34,10 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
+  const { data } = await supabase.auth.getClaims();
+  const claims = data?.claims;
 
-  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (!claims?.sub && request.nextUrl.pathname.startsWith("/dashboard")) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth/signin";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);

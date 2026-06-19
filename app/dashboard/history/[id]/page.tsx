@@ -10,15 +10,11 @@ export default async function AnalysisDetailPage({
 }) {
   const { id } = await params;
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
 
   const { data: analysis } = await supabase
     .from("analyses")
     .select("file_name,created_at,result")
     .eq("id", id)
-    .eq("user_id", user?.id)
     .maybeSingle();
 
   if (!analysis) notFound();

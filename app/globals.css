@@ -207,3 +207,18 @@ a[role="button"]:active,
 .feature-card:hover {
   background: var(--bg-elevated);
 }
+
+html:not(.dark) .dashboard-shell [class*="bg-[#131720]"],
+html:not(.dark) .dashboard-shell [class*="bg-[#141418]"],
+html:not(.dark) .dashboard-shell [class*="bg-[#0C0C0E]"],
+html:not(.dark) .dashboard-shell [class*="bg-[#0b0e14]"] {
+  background-color: var(--bg-page) !important;
+}
+
+html:not(.dark) .dashboard-shell [class*="border-[#252"] {
+  border-color: var(--border) !important;
+}
+
+html:not(.dark) .dashboard-shell [class*="text-white/"] {
+  color: var(--text-secondary) !important;
+}

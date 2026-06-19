@@ -5,14 +5,10 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function HistoryPage() {
   const supabase = await createSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
 
   const { data: analyses } = await supabase
     .from("analyses")
     .select("id,file_name,created_at,result")
-    .eq("user_id", user?.id)
     .order("created_at", { ascending: false });
 
   return (
