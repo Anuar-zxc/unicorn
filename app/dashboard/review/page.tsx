@@ -1,5 +1,5 @@
 import { UploadContractForm } from "@/components/analysis/UploadContractForm";
-import { FREE_MONTHLY_LIMIT, canAnalyze } from "@/lib/plans";
+import { canAnalyze, monthlyAnalysisLimit } from "@/lib/plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function ContractReviewPage() {
@@ -22,11 +22,13 @@ export default async function ContractReviewPage() {
     .from("analyses")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user?.id)
+    .or("tool_type.in.(review,analysis),tool_type.is.null")
     .gte("created_at", monthStart.toISOString());
 
   const plan = profile?.plan ?? "free";
   const usage = count ?? 0;
   const allowed = canAnalyze(plan, usage);
+  const limit = monthlyAnalysisLimit(plan);
 
   return (
     <main className="p-4 md:p-6">
@@ -43,9 +45,9 @@ export default async function ContractReviewPage() {
           report to matter history.
         </p>
         <p className="mt-4 text-sm text-white/42">
-          {plan === "pro"
-            ? "Pro plan: unlimited analyses"
-            : `${usage} of ${FREE_MONTHLY_LIMIT} free analyses used this month`}
+          {limit === Infinity
+            ? `${plan === "enterprise" ? "Enterprise" : "Firm"} plan: unlimited analyses`
+            : `${usage} of ${limit} analyses used this month`}
         </p>
       </div>
 
@@ -53,8 +55,8 @@ export default async function ContractReviewPage() {
 
       {!allowed && (
         <p className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100">
-          You have used your free monthly analysis. Upgrade to Pro for unlimited
-          analyses.
+          You have reached your monthly analysis limit. Upgrade your plan to
+          continue.
         </p>
       )}
     </main>

@@ -18,7 +18,7 @@ export default function PrivacyPage() {
           </p>
           <p>
             Production deployments should configure Supabase row-level security,
-            private storage, Stripe billing, and retention controls before launch.
+            private storage, Polar subscription billing, Stripe marketplace payments, and retention controls before launch.
           </p>
         </div>
       </main>

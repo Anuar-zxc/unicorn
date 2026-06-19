@@ -1,5 +1,6 @@
 import { STRATEGIST_SYSTEM } from "@/lib/ai-system";
 import { completeGemini } from "@/lib/gemini";
+import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
 
 const demoStrategy = `# Case Strategy Brief
 
@@ -85,6 +86,11 @@ function streamText(text: string) {
 }
 
 export async function POST(req: Request) {
+  const access = await authorizeFeature("caseStrategies");
+  if (!access.ok) {
+    return new Response(access.message, { status: access.status });
+  }
+
   const { situation, outcome, stage, jurisdiction, documentsSummary, followups } = await req.json();
   const systemPrompt = `${STRATEGIST_SYSTEM}
 
@@ -114,11 +120,16 @@ Documents summary: ${documentsSummary || "No documents uploaded"}
 Follow-up answers: ${followups || "None"}`,
     maxTokens: 7000
   });
-  if (!output) return new Response(streamText(demoStrategy), {
-    headers: { "Content-Type": "text/plain; charset=utf-8" }
+  const result = output || demoStrategy;
+  await recordToolUsage({
+    supabase: access.supabase,
+    userId: access.user.id,
+    toolType: "case",
+    input: `${situation}\n${outcome}\n${stage}\n${jurisdiction}\n${documentsSummary ?? ""}`,
+    output: result
   });
 
-  return new Response(streamText(output), {
+  return new Response(streamText(result), {
     headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 }

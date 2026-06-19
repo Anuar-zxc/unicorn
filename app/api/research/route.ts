@@ -2,7 +2,9 @@ import { createToolHandler } from "@/lib/stream-tool";
 import { TOOL_PROMPTS } from "@/lib/tool-prompts";
 import { streamLocalLegalAnswer } from "@/lib/kz-rag";
 
-const cloudHandler = createToolHandler(TOOL_PROMPTS.research);
+const cloudHandler = createToolHandler(TOOL_PROMPTS.research, {
+  toolType: "research"
+});
 
 export async function POST(req: Request) {
   const body = await req.clone().json();

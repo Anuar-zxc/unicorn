@@ -1,5 +1,6 @@
 import { BUILDER_SYSTEM } from "@/lib/ai-system";
 import { completeGemini } from "@/lib/gemini";
+import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
 
 const demoContract = `# Mutual Non-Disclosure Agreement
 
@@ -47,6 +48,11 @@ function streamText(text: string) {
 }
 
 export async function POST(req: Request) {
+  const access = await authorizeFeature("builds");
+  if (!access.ok) {
+    return new Response(access.message, { status: access.status });
+  }
+
   const { description, jurisdiction, clarifications } = await req.json();
   const systemPrompt = `${BUILDER_SYSTEM}
 
@@ -69,11 +75,16 @@ Output format: clean markdown. Start directly with the contract — no preamble.
 ${clarifications ? `Additional details: ${clarifications}` : ""}`,
     maxTokens: 6000
   });
-  if (!output) return new Response(streamText(demoContract), {
-    headers: { "Content-Type": "text/plain; charset=utf-8" }
+  const result = output || demoContract;
+  await recordToolUsage({
+    supabase: access.supabase,
+    userId: access.user.id,
+    toolType: "draft",
+    input: `${description}\n${jurisdiction}\n${clarifications ?? ""}`,
+    output: result
   });
 
-  return new Response(streamText(output), {
+  return new Response(streamText(result), {
     headers: { "Content-Type": "text/plain; charset=utf-8" }
   });
 }

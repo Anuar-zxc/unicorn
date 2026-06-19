@@ -17,9 +17,14 @@ create table if not exists public.profiles (
   firm_size text,
   biggest_time_sink text,
   onboarding_completed boolean not null default false,
-  plan text not null default 'solo' check (plan in ('solo', 'firm', 'enterprise')),
+  plan text not null default 'free' check (plan in ('free', 'solo', 'firm', 'enterprise')),
   stripe_customer_id text,
   stripe_subscription_id text,
+  polar_customer_id text,
+  polar_subscription_id text,
+  subscription_status text not null default 'none',
+  current_period_end timestamptz,
+  cancel_at_period_end boolean not null default false,
   created_at timestamptz not null default now()
 );
 
@@ -91,6 +96,11 @@ alter table public.profiles add column if not exists jurisdiction text;
 alter table public.profiles add column if not exists firm_size text;
 alter table public.profiles add column if not exists biggest_time_sink text;
 alter table public.profiles add column if not exists onboarding_completed boolean not null default false;
+alter table public.profiles add column if not exists polar_customer_id text;
+alter table public.profiles add column if not exists polar_subscription_id text;
+alter table public.profiles add column if not exists subscription_status text not null default 'none';
+alter table public.profiles add column if not exists current_period_end timestamptz;
+alter table public.profiles add column if not exists cancel_at_period_end boolean not null default false;
 alter table public.analyses add column if not exists matter_name text;
 alter table public.analyses add column if not exists tool_type text;
 alter table public.analyses add column if not exists client_name text;
@@ -108,10 +118,17 @@ begin
 end $$;
 
 update public.profiles
-set plan = case plan when 'free' then 'solo' when 'pro' then 'firm' when 'business' then 'enterprise' else plan end;
+set plan = case plan when 'pro' then 'solo' when 'business' then 'firm' else plan end;
 
-alter table public.profiles alter column plan set default 'solo';
-alter table public.profiles add constraint profiles_plan_check check (plan in ('solo', 'firm', 'enterprise'));
+alter table public.profiles alter column plan set default 'free';
+alter table public.profiles add constraint profiles_plan_check check (plan in ('free', 'solo', 'firm', 'enterprise'));
+
+create index if not exists idx_profiles_polar_customer
+  on public.profiles(polar_customer_id);
+
+create unique index if not exists idx_profiles_polar_subscription
+  on public.profiles(polar_subscription_id)
+  where polar_subscription_id is not null;
 
 -- Row Level Security
 alter table public.profiles enable row level security;

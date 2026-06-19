@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BriefcaseBusiness,
+  CreditCard,
   ChevronLeft,
   FileCheck2,
   FolderOpen,
@@ -30,6 +31,7 @@ const items = [
   { href: "/dashboard/compare", label: "Redline", icon: GitCompareArrows },
   { href: "/dashboard/client", label: "Client Briefs", icon: MessageCircleQuestion },
   { href: "/dashboard/docs", label: "All Documents", icon: FolderOpen },
+  { href: "/dashboard/billing", label: "Billing", icon: CreditCard },
   { href: "/dashboard/settings", label: "Settings", icon: Settings }
 ];
 
@@ -79,7 +81,7 @@ export function Sidebar({ collapsed, onToggle, userEmail, userPlan }: { collapse
         })}
       </nav>
       <div className="mt-auto rounded-xl border border-[#252b36] bg-[#131720] p-3">
-        <div className="flex items-center gap-3"><Avatar initials={initials(userEmail)} className="h-9 w-9 text-xs" />{!collapsed && <div className="min-w-0"><p className="truncate text-xs font-semibold">{userEmail}</p><PlanBadge plan={userPlan === "firm" ? "Firm" : "Solo"} /></div>}</div>
+        <div className="flex items-center gap-3"><Avatar initials={initials(userEmail)} className="h-9 w-9 text-xs" />{!collapsed && <div className="min-w-0"><p className="truncate text-xs font-semibold">{userEmail}</p><PlanBadge plan={userPlan === "enterprise" ? "Enterprise" : userPlan === "firm" ? "Firm" : userPlan === "solo" ? "Solo" : "Free"} /></div>}</div>
         {!collapsed && <div className="mt-3"><LogoutButton /></div>}
       </div>
     </aside>

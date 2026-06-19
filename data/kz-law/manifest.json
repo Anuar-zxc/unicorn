@@ -7,8 +7,8 @@
     "url": "https://adilet.zan.kz/rus/docs/K950001000_",
     "authority": "ИПС «Әділет»",
     "resolvedTitle": "Конституция Республики Казахстан",
-    "articleCount": 98,
-    "fetchedAt": "2026-06-18T12:43:04.172Z"
+    "articleCount": 101,
+    "fetchedAt": "2026-06-19T07:33:36.232Z"
   },
   {
     "id": "civil-code-general",
@@ -18,8 +18,52 @@
     "url": "https://adilet.zan.kz/rus/docs/K940001000_",
     "authority": "ИПС «Әділет»",
     "resolvedTitle": "Гражданский кодекс Республики Казахстан (Общая часть)",
-    "articleCount": 409,
-    "fetchedAt": "2026-06-18T12:43:05.270Z"
+    "articleCount": 414,
+    "fetchedAt": "2026-06-19T07:33:48.283Z"
+  },
+  {
+    "id": "civil-code-special",
+    "title": "Гражданский кодекс Республики Казахстан (Особенная часть)",
+    "type": "code",
+    "language": "ru",
+    "url": "https://adilet.zan.kz/rus/docs/K990000409_",
+    "authority": "ИПС «Әділет»",
+    "resolvedTitle": "Гражданский кодекс Республики Казахстан (особенная часть)",
+    "articleCount": 738,
+    "fetchedAt": "2026-06-19T07:34:00.311Z"
+  },
+  {
+    "id": "labor-code",
+    "title": "Трудовой кодекс Республики Казахстан",
+    "type": "code",
+    "language": "ru",
+    "url": "https://adilet.zan.kz/rus/docs/K1500000414",
+    "authority": "ИПС «Әділет»",
+    "resolvedTitle": "Трудовой кодекс Республики Казахстан",
+    "articleCount": 218,
+    "fetchedAt": "2026-06-19T07:34:10.649Z"
+  },
+  {
+    "id": "entrepreneurial-code",
+    "title": "Предпринимательский кодекс Республики Казахстан",
+    "type": "code",
+    "language": "ru",
+    "url": "https://adilet.zan.kz/rus/docs/K1500000375",
+    "authority": "ИПС «Әділет»",
+    "resolvedTitle": "Предпринимательский кодекс Республики Казахстан",
+    "articleCount": 343,
+    "fetchedAt": "2026-06-19T07:34:16.853Z"
+  },
+  {
+    "id": "civil-procedure-code",
+    "title": "Гражданский процессуальный кодекс Республики Казахстан",
+    "type": "code",
+    "language": "ru",
+    "url": "https://adilet.zan.kz/rus/docs/K1500000377",
+    "authority": "ИПС «Әділет»",
+    "resolvedTitle": "Гражданский процессуальный кодекс Республики Казахстан",
+    "articleCount": 486,
+    "fetchedAt": "2026-06-19T07:34:30.575Z"
   },
   {
     "id": "personal-data-law",
@@ -29,7 +73,7 @@
     "url": "https://adilet.zan.kz/rus/docs/Z1300000094",
     "authority": "ИПС «Әділет»",
     "resolvedTitle": "О персональных данных и их защите",
-    "articleCount": 0,
-    "fetchedAt": "2026-06-18T12:43:05.648Z"
+    "articleCount": 38,
+    "fetchedAt": "2026-06-19T07:34:42.073Z"
   }
 ]

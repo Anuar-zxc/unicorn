@@ -1,5 +1,7 @@
 import { extractDocumentForAnalysis } from "@/lib/file-text";
 import { completeGemini } from "@/lib/gemini";
+import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
+import type { UsageFeature } from "@/lib/usage";
 
 const fallback = `## Professional AI analysis
 
@@ -21,9 +23,17 @@ Add a free Google AI Studio \`GEMINI_API_KEY\` to enable live AI generation for 
 
 AI-assisted analysis — attorney review recommended before client delivery.`;
 
-export function createToolHandler(systemPrompt: string) {
+export function createToolHandler(
+  systemPrompt: string,
+  options: { feature?: UsageFeature; toolType?: string } = {}
+) {
   return async function POST(req: Request) {
     try {
+      const access = await authorizeFeature(options.feature ?? "builds");
+      if (!access.ok) {
+        return new Response(access.message, { status: access.status });
+      }
+
       const contentType = req.headers.get("content-type") ?? "";
       let input = "";
       let context = "";
@@ -54,7 +64,15 @@ export function createToolHandler(systemPrompt: string) {
         prompt: input.slice(0, 30000),
         maxTokens: 5000
       });
-      return new Response(streamFallback(output || fallback), { headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "no-store" } });
+      const result = output || fallback;
+      await recordToolUsage({
+        supabase: access.supabase,
+        userId: access.user.id,
+        toolType: options.toolType ?? "build",
+        input: `${input}\n\nContext: ${context}`,
+        output: result
+      });
+      return new Response(streamFallback(result), { headers: { "Content-Type": "text/markdown; charset=utf-8", "Cache-Control": "no-store" } });
     } catch (error) {
       return new Response(error instanceof Error ? error.message : "Unable to process this request.", { status: 500 });
     }

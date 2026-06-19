@@ -90,12 +90,13 @@ export async function analyzeContractAction(
     .from("analyses")
     .select("id", { count: "exact", head: true })
     .eq("user_id", user.id)
+    .or("tool_type.in.(review,analysis),tool_type.is.null")
     .gte("created_at", monthStart.toISOString());
 
   if (!canAnalyze(profile?.plan, count ?? 0)) {
     return {
       ok: false,
-      error: "You used your free monthly analysis. Upgrade to Pro for unlimited analyses."
+      error: "You reached your monthly analysis limit. Upgrade your plan to continue."
     };
   }
 

@@ -19,7 +19,7 @@ export default async function Layout({ children }: { children: React.ReactNode }
   return (
     <DashboardLayout
       userEmail={user.email ?? ""}
-      userPlan={profile?.plan ?? "solo"}
+      userPlan={profile?.plan ?? "free"}
     >
       {children}
     </DashboardLayout>

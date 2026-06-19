@@ -62,7 +62,7 @@ export function PricingTable() {
                 <span className="pb-2 text-sm text-[var(--text-secondary)]">{locale === "ru" ? "/месяц" : "/month"}</span>
               </div>
               {annual && <p className="mt-2 text-xs text-[var(--text-muted)]">{locale === "ru" ? "Оплата за год" : "Billed annually"}</p>}
-              <Link href="/auth/signup"><Button className="mt-6 w-full" variant={plan.highlight ? "primary" : "outline"}>{locale === "ru" ? "Начать 14-дневный период" : "Start 14-day trial"}</Button></Link>
+              <Link href={plan.name === "Enterprise" ? "mailto:sales@lexo.ai?subject=Lexo Enterprise" : `/api/checkout?plan=${plan.name === "Solo" ? "solo" : "firm"}&billing=${annual ? "annual" : "monthly"}`}><Button className="mt-6 w-full" variant={plan.highlight ? "primary" : "outline"}>{plan.name === "Enterprise" ? (locale === "ru" ? "Связаться с нами" : "Contact sales") : (locale === "ru" ? "Начать 14-дневный период" : "Start 14-day trial")}</Button></Link>
               <ul className="mt-7 space-y-3 text-sm text-[var(--text-secondary)]">
                 {plan.features.map((feature) => <li key={feature} className="flex gap-3"><Check className="h-4 w-4 shrink-0 text-[var(--green)]" /><span>{feature}</span></li>)}
               </ul>

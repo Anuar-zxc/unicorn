@@ -1,6 +1,9 @@
-export const FREE_MONTHLY_LIMIT = 50;
+import { canUseFeature, featureLimit } from "@/lib/usage";
 
 export function canAnalyze(plan: string | null | undefined, monthlyUsage: number) {
-  if (plan === "firm" || plan === "enterprise" || plan === "pro") return true;
-  return monthlyUsage < FREE_MONTHLY_LIMIT;
+  return canUseFeature(plan, "analyses", monthlyUsage);
+}
+
+export function monthlyAnalysisLimit(plan: string | null | undefined) {
+  return featureLimit(plan, "analyses");
 }

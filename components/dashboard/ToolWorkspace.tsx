@@ -1,16 +1,37 @@
 "use client";
 
 import { useRef, useState } from "react";
-import type { LucideIcon } from "lucide-react";
-import { Check, Copy, Download, FileUp, Loader2, Play, RotateCcw } from "lucide-react";
+import {
+  BookOpen,
+  Check,
+  Copy,
+  Download,
+  FileDiff,
+  FileText,
+  FileUp,
+  FolderKanban,
+  Loader2,
+  MessageSquareText,
+  Play,
+  RotateCcw
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { UpgradePrompt } from "@/components/shared/UpgradePrompt";
+
+const toolIcons = {
+  research: BookOpen,
+  draft: FileText,
+  caseprep: FolderKanban,
+  compare: FileDiff,
+  client: MessageSquareText
+} as const;
 
 type Props = {
   title: string;
   eyebrow: string;
   description: string;
   endpoint: string;
-  icon: LucideIcon;
+  icon: keyof typeof toolIcons;
   inputLabel: string;
   inputPlaceholder: string;
   outputLabel: string;
@@ -29,13 +50,14 @@ export function ToolWorkspace(props: Props) {
   const [output, setOutput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [limitReached, setLimitReached] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function run() {
     if (!input.trim() && files.length === 0) return setError("Add source material before running the tool.");
     if (props.upload === "double" && files.length < 2 && !secondaryInput.trim()) return setError("Add both contract versions to compare.");
-    setLoading(true); setError(""); setOutput("");
+    setLoading(true); setError(""); setLimitReached(false); setOutput("");
     try {
       let body: BodyInit;
       let headers: HeadersInit | undefined;
@@ -50,7 +72,14 @@ export function ToolWorkspace(props: Props) {
         body = JSON.stringify({ input, secondaryInput, context });
       }
       const response = await fetch(props.endpoint, { method: "POST", headers, body });
-      if (!response.ok || !response.body) throw new Error(await response.text() || "The tool could not complete this request.");
+      if (!response.ok || !response.body) {
+        const message = await response.text();
+        if (response.status === 403 && message.includes("PLAN_LIMIT")) {
+          setLimitReached(true);
+          throw new Error("Your current plan limit has been reached.");
+        }
+        throw new Error(message || "The tool could not complete this request.");
+      }
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let result = "";
@@ -65,7 +94,7 @@ export function ToolWorkspace(props: Props) {
     } finally { setLoading(false); }
   }
 
-  const Icon = props.icon;
+  const Icon = toolIcons[props.icon];
   return (
     <main className="p-4 md:p-6">
       <div className="grid gap-5 xl:grid-cols-[.9fr_1.1fr]">
@@ -84,6 +113,7 @@ export function ToolWorkspace(props: Props) {
           {props.contextLabel && <><label className="mt-5 block text-sm font-medium text-white/72">{props.contextLabel}</label><input value={context} onChange={(e) => setContext(e.target.value)} placeholder={props.contextPlaceholder} className="mt-2 h-11 w-full rounded-xl border border-[#252b36] bg-[#0b0e14] px-4 text-sm outline-none placeholder:text-white/22 focus:border-[#4d7ef5]" /></>}
           {props.samples && <div className="mt-4 flex flex-wrap gap-2">{props.samples.map((sample) => <button key={sample} type="button" onClick={() => setInput(sample)} className="rounded-full border border-[#303744] px-3 py-1.5 text-xs text-white/48 hover:border-[#4d7ef5] hover:text-white">{sample}</button>)}</div>}
           {error && <p className="mt-4 rounded-lg border border-red-400/20 bg-red-400/10 p-3 text-sm text-red-200">{error}</p>}
+          {limitReached && <UpgradePrompt feature={props.title.toLowerCase()} />}
           <Button className="mt-5 w-full" onClick={run} disabled={loading}>{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}{loading ? "Lexo is working…" : `Run ${props.title}`}</Button>
         </section>
 

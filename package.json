@@ -11,10 +11,14 @@
     "egov:open-data": "node scripts/egov-open-data.mjs",
     "goszakup:contracts": "node scripts/goszakup-contracts.mjs",
     "kz:ingest": "node scripts/ingest-kz-law.mjs",
-    "kz:pilot": "node scripts/ingest-kz-law.mjs --only=constitution,civil-code-general,personal-data-law"
+    "kz:pilot": "node scripts/ingest-kz-law.mjs --only=constitution,civil-code-general,personal-data-law",
+    "kz:dataset": "node scripts/build-training-dataset.mjs",
+    "kz:evaluate": "node scripts/evaluate-retrieval.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",
+    "@polar-sh/nextjs": "^0.9.6",
+    "@polar-sh/sdk": "^0.48.1",
     "@supabase/ssr": "^0.6.1",
     "@supabase/supabase-js": "^2.49.4",
     "cheerio": "^1.2.0",

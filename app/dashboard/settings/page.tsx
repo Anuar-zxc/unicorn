@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
-import { Mail, KeyRound, ShieldAlert } from "lucide-react";
+import Link from "next/link";
+import { CreditCard, Mail, KeyRound, ShieldAlert } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 
@@ -8,6 +9,11 @@ export default async function SettingsPage() {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/auth/signin");
   const email = user.email ?? "";
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("polar_customer_id")
+    .eq("id", user.id)
+    .maybeSingle();
 
   return (
     <main className="p-4 md:p-6">
@@ -17,6 +23,26 @@ export default async function SettingsPage() {
       </div>
 
       <div className="grid gap-5 max-w-2xl">
+        <section className="rounded-xl border border-[#252528] bg-[#141418] p-6">
+          <div className="mb-5 flex items-center gap-3">
+            <CreditCard className="h-5 w-5 text-[#1A56E8]" />
+            <h2 className="font-display text-xl font-semibold">Subscription</h2>
+          </div>
+          <p className="mb-4 text-sm text-white/60">
+            View your plan, invoices, payment method, and cancellation settings.
+          </p>
+          <div className="flex flex-wrap gap-3">
+            <Link href="/dashboard/billing" className="rounded-full bg-[#1A56E8] px-5 py-2.5 text-sm font-medium text-white">
+              View plans
+            </Link>
+            {profile?.polar_customer_id && (
+              <Link href="/api/portal" className="rounded-full border border-[#3a3a40] bg-[#0C0C0E] px-5 py-2.5 text-sm font-medium text-white/70 hover:bg-white/5 hover:text-white">
+                Manage billing
+              </Link>
+            )}
+          </div>
+        </section>
+
         {/* Account section */}
         <section className="rounded-xl border border-[#252528] bg-[#141418] p-6">
           <div className="flex items-center gap-3 mb-5">

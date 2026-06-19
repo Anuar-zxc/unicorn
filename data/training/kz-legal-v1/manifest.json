@@ -1,0 +1,29 @@
+{
+  "name": "kz-legal-v1",
+  "created_at": "2026-06-19T07:34:50.578Z",
+  "source": "Official legal texts from ИПС «Әділет»",
+  "input": "data/kz-law/chunks.json",
+  "output": "data/training/kz-legal-v1",
+  "chunks": 2334,
+  "sources": [
+    "constitution",
+    "civil-code-general",
+    "civil-code-special",
+    "labor-code",
+    "entrepreneurial-code",
+    "civil-procedure-code",
+    "personal-data-law"
+  ],
+  "splits": {
+    "train": 1844,
+    "dev": 230,
+    "test": 260
+  },
+  "uses_client_documents": false,
+  "intended_uses": [
+    "retrieval evaluation",
+    "reranker or embedding training after expert review",
+    "instruction fine-tuning after expert review"
+  ],
+  "warning": "Instruction examples are extractive seed data and must be reviewed by a Kazakhstan-qualified legal expert before fine-tuning."
+}

@@ -1,0 +1,350 @@
+{
+  "metrics": {
+    "evaluated_at": "2026-06-19T07:34:55.670Z",
+    "engine": "lexical-baseline-v1",
+    "examples": 260,
+    "recall_at_1": 0.8730769230769231,
+    "recall_at_3": 0.9384615384615385,
+    "recall_at_5": 0.9538461538461539,
+    "recall_at_10": 0.9769230769230769,
+    "mean_reciprocal_rank": 0.9119596727260562
+  },
+  "failures": [
+    {
+      "id": "retrieval:constitution:14",
+      "query": "Какая норма права Казахстана применяется к следующему вопросу: «Все равны перед законом и судом.»?",
+      "expected": "constitution:14",
+      "rank": 166,
+      "top5": [
+        {
+          "id": "civil-procedure-code:13",
+          "score": 36
+        },
+        {
+          "id": "civil-code-special:1031",
+          "score": 22
+        },
+        {
+          "id": "civil-code-special:1000",
+          "score": 21
+        },
+        {
+          "id": "civil-code-special:608",
+          "score": 19
+        },
+        {
+          "id": "civil-code-general:204",
+          "score": 18
+        }
+      ]
+    },
+    {
+      "id": "retrieval:constitution:23",
+      "query": "Какая норма права Казахстана применяется к следующему вопросу: «Граждане Республики Казахстан имеют право на свободу объединений.»?",
+      "expected": "constitution:23",
+      "rank": 236,
+      "top5": [
+        {
+          "id": "entrepreneurial-code:82",
+          "score": 24
+        },
+        {
+          "id": "civil-code-general:323",
+          "score": 22
+        },
+        {
+          "id": "civil-code-special:1084",
+          "score": 22
+        },
+        {
+          "id": "civil-code-special:1092",
+          "score": 21
+        },
+        {
+          "id": "civil-code-special:971",
+          "score": 20
+        }
+      ]
+    },
+    {
+      "id": "retrieval:constitution:26",
+      "query": "Какая норма права Казахстана применяется к следующему вопросу: «Граждане Республики Казахстан могут иметь в частной собственности любое законно приобретенное имущество.»?",
+      "expected": "constitution:26",
+      "rank": 44,
+      "top5": [
+        {
+          "id": "civil-code-general:255",
+          "score": 34
+        },
+        {
+          "id": "civil-code-general:252",
+          "score": 32
+        },
+        {
+          "id": "civil-code-general:236",
+          "score": 31
+        },
+        {
+          "id": "civil-code-general:249",
+          "score": 28
+        },
+        {
+          "id": "civil-code-general:250",
+          "score": 28
+        }
+      ]
+    },
+    {
+      "id": "retrieval:constitution:74",
+      "query": "Какая норма права Казахстана применяется к следующему вопросу: «Законы и международные договоры, признанные несоответствующими Конституции Республики Казахстан, не могут быть подписаны либо, соответственно, ратифицированы и введены в действие.»?",
+      "expected": "constitution:74",
+      "rank": 8,
+      "top5": [
+        {
+          "id": "entrepreneurial-code:155",
+          "score": 23
+        },
+        {
+          "id": "civil-procedure-code:59",
+          "score": 22
+        },
+        {
+          "id": "civil-code-special:980",
+          "score": 20
+        },
+        {
+          "id": "entrepreneurial-code:324",
+          "score": 20
+        },
+        {
+          "id": "civil-procedure-code:505",
+          "score": 20
+        }
+      ]
+    },
+    {
+      "id": "retrieval:constitution:79",
+      "query": "Какая норма права Казахстана применяется к следующему вопросу: «Суды состоят из постоянных судей, независимость которых защищается Конституцией и законом.»?",
+      "expected": "constitution:79",
+      "rank": 12,
+      "top5": [
+        {
+          "id": "civil-procedure-code:12",
+          "score": 21
+        },
+        {
+          "id": "labor-code:193",
+          "score": 15
+        },
+        {
+          "id": "entrepreneurial-code:82",
+          "score": 15
+        },
+        {
+          "id": "civil-code-general:36",
+          "score": 14
+        },
+        {
+          "id": "personal-data-law:25",
+          "score": 14
+        }
+      ]
+    },
+    {
+      "id": "retrieval:civil-code-special:615",
+      "query": "Что устанавливает законодательство Республики Казахстан по вопросу «Прекращение договора»?",
+      "expected": "civil-code-special:615",
+      "rank": 6,
+      "top5": [
+        {
+          "id": "civil-code-special:852",
+          "score": 19
+        },
+        {
+          "id": "civil-code-special:891",
+          "score": 19
+        },
+        {
+          "id": "civil-code-special:841",
+          "score": 18
+        },
+        {
+          "id": "civil-code-special:879",
+          "score": 17
+        },
+        {
+          "id": "civil-code-special:908",
+          "score": 17
+        }
+      ]
+    },
+    {
+      "id": "retrieval:civil-code-special:1100",
+      "query": "Что устанавливает законодательство Республики Казахстан по вопросу «Закон юридического лица»?",
+      "expected": "civil-code-special:1100",
+      "rank": 7,
+      "top5": [
+        {
+          "id": "civil-code-general:38",
+          "score": 28
+        },
+        {
+          "id": "civil-code-general:41",
+          "score": 28
+        },
+        {
+          "id": "civil-code-general:45",
+          "score": 28
+        },
+        {
+          "id": "civil-code-general:49",
+          "score": 28
+        },
+        {
+          "id": "civil-code-general:50",
+          "score": 28
+        }
+      ]
+    },
+    {
+      "id": "retrieval:civil-procedure-code:315",
+      "query": "Что устанавливает законодательство Республики Казахстан по вопросу «Решение суда по заявлению»?",
+      "expected": "civil-procedure-code:315",
+      "rank": 7,
+      "top5": [
+        {
+          "id": "civil-procedure-code:327",
+          "score": 31
+        },
+        {
+          "id": "civil-procedure-code:378",
+          "score": 30
+        },
+        {
+          "id": "civil-procedure-code:389",
+          "score": 30
+        },
+        {
+          "id": "civil-procedure-code:340",
+          "score": 29
+        },
+        {
+          "id": "civil-procedure-code:345",
+          "score": 29
+        }
+      ]
+    },
+    {
+      "id": "retrieval:civil-procedure-code:337",
+      "query": "Что устанавливает законодательство Республики Казахстан по вопросу «Рассмотрение заявления о принудительной госпитализации лица с психическим, поведенческим расстройством (заболеванием), не связанным с употреблением психоактивных веществ, в стационар организации, оказывающей медицинскую помощь в области психического здоровья»?",
+      "expected": "civil-procedure-code:337",
+      "rank": 6,
+      "top5": [
+        {
+          "id": "civil-procedure-code:342",
+          "score": 230
+        },
+        {
+          "id": "civil-procedure-code:336",
+          "score": 225
+        },
+        {
+          "id": "civil-procedure-code:341",
+          "score": 224
+        },
+        {
+          "id": "civil-procedure-code:344",
+          "score": 216
+        },
+        {
+          "id": "civil-procedure-code:335",
+          "score": 214
+        }
+      ]
+    },
+    {
+      "id": "retrieval:civil-procedure-code:374",
+      "query": "Что устанавливает законодательство Республики Казахстан по вопросу «Решение суда по заявлению»?",
+      "expected": "civil-procedure-code:374",
+      "rank": 13,
+      "top5": [
+        {
+          "id": "civil-procedure-code:327",
+          "score": 31
+        },
+        {
+          "id": "civil-procedure-code:378",
+          "score": 30
+        },
+        {
+          "id": "civil-procedure-code:389",
+          "score": 30
+        },
+        {
+          "id": "civil-procedure-code:340",
+          "score": 29
+        },
+        {
+          "id": "civil-procedure-code:345",
+          "score": 29
+        }
+      ]
+    },
+    {
+      "id": "retrieval:civil-procedure-code:381",
+      "query": "Что устанавливает законодательство Республики Казахстан по вопросу «Решение суда по заявлению»?",
+      "expected": "civil-procedure-code:381",
+      "rank": 10,
+      "top5": [
+        {
+          "id": "civil-procedure-code:327",
+          "score": 31
+        },
+        {
+          "id": "civil-procedure-code:378",
+          "score": 30
+        },
+        {
+          "id": "civil-procedure-code:389",
+          "score": 30
+        },
+        {
+          "id": "civil-procedure-code:340",
+          "score": 29
+        },
+        {
+          "id": "civil-procedure-code:345",
+          "score": 29
+        }
+      ]
+    },
+    {
+      "id": "retrieval:civil-procedure-code:387",
+      "query": "Что устанавливает законодательство Республики Казахстан по вопросу «Подача заявления»?",
+      "expected": "civil-procedure-code:387",
+      "rank": 18,
+      "top5": [
+        {
+          "id": "civil-procedure-code:323",
+          "score": 17
+        },
+        {
+          "id": "civil-procedure-code:341",
+          "score": 17
+        },
+        {
+          "id": "civil-procedure-code:301-1",
+          "score": 16
+        },
+        {
+          "id": "civil-procedure-code:307",
+          "score": 16
+        },
+        {
+          "id": "civil-procedure-code:310",
+          "score": 16
+        }
+      ]
+    }
+  ]
+}
