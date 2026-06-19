@@ -240,7 +240,7 @@ export default function MarketingPage() {
           </div>
         </section>
 
-        <section className="py-20 md:py-28">
+        <section id="audience" className="scroll-mt-24 py-20 md:py-28">
           <div className="container-shell">
             <div className="mx-auto max-w-2xl text-center">
               <p className="text-caption text-[var(--accent)]">{ru ? "Создано вокруг практики" : "Designed around practice"}</p>

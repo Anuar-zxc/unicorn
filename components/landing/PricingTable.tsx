@@ -39,7 +39,11 @@ const plansRu = [
 export function PricingTable() {
   const { locale } = useLanguage();
   const plans = locale === "ru" ? plansRu : plansEn;
-  const [annual, setAnnual] = useState(true);
+  const annualAvailable = Boolean(
+    process.env.NEXT_PUBLIC_POLAR_SOLO_ANNUAL_PRODUCT_ID &&
+      process.env.NEXT_PUBLIC_POLAR_FIRM_ANNUAL_PRODUCT_ID
+  );
+  const [annual, setAnnual] = useState(false);
   return (
     <section id="pricing" className="border-y border-[var(--border)] bg-[var(--bg-surface)] py-20 md:py-28">
       <div className="container-shell">
@@ -48,7 +52,20 @@ export function PricingTable() {
           <h2 className="text-h2 mt-3">{locale === "ru" ? "Больше возможностей без найма новых сотрудников." : "Capacity without another salary."}</h2>
           <div className="mt-7 inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-page)] p-1">
             <button className={cn("rounded-md px-5 py-2 text-sm font-semibold", !annual && "bg-[var(--accent)] text-white")} onClick={() => setAnnual(false)}>{locale === "ru" ? "Ежемесячно" : "Monthly"}</button>
-            <button className={cn("rounded-md px-5 py-2 text-sm font-semibold", annual && "bg-[var(--accent)] text-white")} onClick={() => setAnnual(true)}>{locale === "ru" ? "Ежегодно · скидка 20%" : "Annual · save 20%"}</button>
+            <button
+              className={cn(
+                "rounded-md px-5 py-2 text-sm font-semibold",
+                annual && "bg-[var(--accent)] text-white",
+                !annualAvailable && "cursor-not-allowed opacity-45"
+              )}
+              onClick={() => annualAvailable && setAnnual(true)}
+              disabled={!annualAvailable}
+              title={!annualAvailable ? (locale === "ru" ? "Годовая оплата скоро появится" : "Annual billing is coming soon") : undefined}
+            >
+              {annualAvailable
+                ? (locale === "ru" ? "Ежегодно · скидка 20%" : "Annual · save 20%")
+                : (locale === "ru" ? "Ежегодно · скоро" : "Annual · coming soon")}
+            </button>
           </div>
         </div>
         <div className="mt-10 grid gap-5 lg:grid-cols-3">
@@ -62,7 +79,7 @@ export function PricingTable() {
                 <span className="pb-2 text-sm text-[var(--text-secondary)]">{locale === "ru" ? "/месяц" : "/month"}</span>
               </div>
               {annual && <p className="mt-2 text-xs text-[var(--text-muted)]">{locale === "ru" ? "Оплата за год" : "Billed annually"}</p>}
-              <Link href={plan.name === "Enterprise" ? "mailto:sales@lexo.ai?subject=Lexo Enterprise" : `/api/checkout?plan=${plan.name === "Solo" ? "solo" : "firm"}&billing=${annual ? "annual" : "monthly"}`}><Button className="mt-6 w-full" variant={plan.highlight ? "primary" : "outline"}>{plan.name === "Enterprise" ? (locale === "ru" ? "Связаться с нами" : "Contact sales") : (locale === "ru" ? "Начать 14-дневный период" : "Start 14-day trial")}</Button></Link>
+              <Link href={plan.name === "Enterprise" ? "mailto:sales@lexo.ai?subject=Lexo Enterprise" : `/api/checkout?plan=${plan.name === "Solo" ? "solo" : "firm"}&billing=${annual && annualAvailable ? "annual" : "monthly"}`}><Button className="mt-6 w-full" variant={plan.highlight ? "primary" : "outline"}>{plan.name === "Enterprise" ? (locale === "ru" ? "Связаться с нами" : "Contact sales") : (locale === "ru" ? "Начать 14-дневный период" : "Start 14-day trial")}</Button></Link>
               <ul className="mt-7 space-y-3 text-sm text-[var(--text-secondary)]">
                 {plan.features.map((feature) => <li key={feature} className="flex gap-3"><Check className="h-4 w-4 shrink-0 text-[var(--green)]" /><span>{feature}</span></li>)}
               </ul>
