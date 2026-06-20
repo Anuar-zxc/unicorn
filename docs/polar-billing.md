@@ -7,8 +7,8 @@ codebase only for lawyer marketplace bookings.
 
 1. Create a seller organization at `https://sandbox.polar.sh`.
 2. Create recurring products matching the existing Lexo prices:
-   - Solo: $49/month and optionally $468/year ($39/month billed annually).
-   - Firm: $149/month and optionally $1,428/year ($119/month billed annually).
+   - Solo: $39/month and optionally $372/year ($31/month billed annually).
+   - Firm: $119/month and optionally $1,140/year ($95/month billed annually).
 3. Create an organization access token.
 4. Register this webhook:
    - Production URL: `https://lexo-ai-kz.vercel.app/api/webhooks/polar`

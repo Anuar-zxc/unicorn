@@ -10,13 +10,13 @@ import { useLanguage } from "@/components/providers/AppProviders";
 const plansEn = [
   {
     name: "Solo",
-    price: { monthly: 49, annual: 39 },
+    price: { monthly: 39, annual: 31 },
     description: "For individual lawyers and solo practitioners.",
     features: ["All 6 AI tools", "50 documents/month", "Contract review up to 100 pages", "Case research memos", "Document drafting", "PDF & DOCX export", "14-day document history", "Email support"]
   },
   {
     name: "Firm",
-    price: { monthly: 149, annual: 119 },
+    price: { monthly: 119, annual: 95 },
     description: "For small law firms and legal teams.",
     badge: "Most popular",
     highlight: true,
@@ -24,16 +24,16 @@ const plansEn = [
   },
   {
     name: "Enterprise",
-    price: { monthly: 399, annual: 319 },
+    price: { monthly: 299, annual: 239 },
     description: "For larger firms and in-house legal departments.",
     badge: "Full power",
     features: ["Everything in Firm", "Unlimited team members", "Custom practice-area prompts", "API access", "SSO / SAML authentication", "Custom retention policy", "Dedicated account manager", "SLA guarantee", "On-premise deployment option", "Custom contract templates"]
   }
 ];
 const plansRu = [
-  { name: "Solo", price: { monthly: 49, annual: 39 }, description: "Для индивидуальных юристов и частной практики.", features: ["Все 6 AI-инструментов", "50 документов в месяц", "Проверка до 100 страниц", "Исследовательские меморандумы", "Создание документов", "Экспорт PDF и DOCX", "История 14 дней", "Поддержка по email"] },
-  { name: "Firm", price: { monthly: 149, annual: 119 }, description: "Для небольших юридических фирм и команд.", badge: "Популярный", highlight: true, features: ["Всё из Solo", "До 5 участников", "Неограниченные документы", "Проверка до 500 страниц", "Общее рабочее пространство", "Организация дел", "Портал клиентских резюме", "Приоритетная обработка", "История 90 дней", "Приоритетная поддержка"] },
-  { name: "Enterprise", price: { monthly: 399, annual: 319 }, description: "Для крупных фирм и юридических департаментов.", badge: "Полная мощность", features: ["Всё из Firm", "Неограниченная команда", "Настраиваемые AI-промпты", "API-доступ", "SSO / SAML", "Политика хранения данных", "Персональный менеджер", "SLA", "Локальное развёртывание", "Шаблоны договоров"] }
+  { name: "Solo", price: { monthly: 39, annual: 31 }, description: "Для индивидуальных юристов и частной практики.", features: ["Все 6 AI-инструментов", "50 документов в месяц", "Проверка до 100 страниц", "Исследовательские меморандумы", "Создание документов", "Экспорт PDF и DOCX", "История 14 дней", "Поддержка по email"] },
+  { name: "Firm", price: { monthly: 119, annual: 95 }, description: "Для небольших юридических фирм и команд.", badge: "Популярный", highlight: true, features: ["Всё из Solo", "До 5 участников", "Неограниченные документы", "Проверка до 500 страниц", "Общее рабочее пространство", "Организация дел", "Портал клиентских резюме", "Приоритетная обработка", "История 90 дней", "Приоритетная поддержка"] },
+  { name: "Enterprise", price: { monthly: 299, annual: 239 }, description: "Для крупных фирм и юридических департаментов.", badge: "Полная мощность", features: ["Всё из Firm", "Неограниченная команда", "Настраиваемые AI-промпты", "API-доступ", "SSO / SAML", "Политика хранения данных", "Персональный менеджер", "SLA", "Локальное развёртывание", "Шаблоны договоров"] }
 ];
 
 export function PricingTable() {
