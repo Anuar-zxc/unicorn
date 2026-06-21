@@ -5,6 +5,9 @@ import { Check, Copy, Download, FilePlus, Loader2, RefreshCw, Send } from "lucid
 import { Button } from "@/components/ui/button";
 import { ResponseModeToggle } from "@/components/shared/ResponseModeToggle";
 import type { ResponseMode } from "@/lib/ai-prompts";
+import { LanguageModeToggle } from "@/components/shared/LanguageModeToggle";
+import type { AILanguage } from "@/lib/ai-language";
+import { useLanguage } from "@/components/providers/AppProviders";
 
 const examples = [
   "NDA with contractor",
@@ -18,6 +21,7 @@ const examples = [
 const sections = ["Parties & recitals", "Definitions", "Core obligations", "Governing law", "Signatures", "AI notes"];
 
 export function ContractBuilder() {
+  const { locale } = useLanguage();
   const [description, setDescription] = useState("");
   const [jurisdiction, setJurisdiction] = useState("United States (general)");
   const [clarifications, setClarifications] = useState("");
@@ -26,6 +30,7 @@ export function ContractBuilder() {
   const [editing, setEditing] = useState(false);
   const [error, setError] = useState("");
   const [mode, setMode] = useState<ResponseMode>("detailed");
+  const [language, setLanguage] = useState<AILanguage>(locale);
 
   const progress = useMemo(() => {
     if (!contract) return 0;
@@ -46,7 +51,7 @@ export function ContractBuilder() {
       const response = await fetch("/api/build-contract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ description, jurisdiction, clarifications, mode })
+        body: JSON.stringify({ description, jurisdiction, clarifications, mode, language })
       });
 
       if (!response.ok || !response.body) throw new Error("Could not generate the contract.");
@@ -78,8 +83,9 @@ export function ContractBuilder() {
         <p className="mt-3 text-sm leading-6 text-white/55">
           Describe what you need in plain language. Lexo will draft a structured contract with placeholders and lawyer review notes.
         </p>
-        <div className="mt-5">
+        <div className="mt-5 flex flex-wrap gap-2">
           <ResponseModeToggle mode={mode} onChange={setMode} />
+          <LanguageModeToggle language={language} onChange={setLanguage} />
         </div>
 
         <label className="mt-6 block text-sm font-medium text-white/70">What do you need?</label>

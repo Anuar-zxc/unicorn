@@ -1,3 +1,8 @@
+import {
+  getLanguageInstruction,
+  type AILanguage
+} from "@/lib/ai-language";
+
 export type ResponseMode = "concise" | "detailed";
 
 export function normalizeResponseMode(value: unknown): ResponseMode {
@@ -6,14 +11,15 @@ export function normalizeResponseMode(value: unknown): ResponseMode {
 
 export function buildSystemPrompt(
   basePrompt: string,
-  mode: ResponseMode
+  mode: ResponseMode,
+  language: AILanguage = "en"
 ) {
   const lengthInstruction =
     mode === "concise"
       ? `RESPONSE LENGTH: Keep the response short and decision-oriented. Give the direct answer first, stay under 150 words where the task allows it, and use at most 2-3 compact bullet points.`
       : `RESPONSE LENGTH: Provide a thorough response with context, reasoning, relevant nuance, edge cases, and practical next steps.`;
 
-  return `${basePrompt}\n\n${lengthInstruction}`;
+  return `${basePrompt}\n\n${lengthInstruction}\n\n${getLanguageInstruction(language)}`;
 }
 
 export const PERSONAL_LEGAL_PROMPT = `You are Lexo's personal legal information assistant.
@@ -33,4 +39,4 @@ Cover:
 5. A practical checklist of next steps and documents.
 
 Do not present rates or thresholds as permanent facts. Prefer official State Revenue Committee sources and say when a current rule could not be verified.
-End with: "⚠️ This is general guidance, not tax advice. Kazakhstan tax law is subject to change — verify current rules with a licensed accountant (бухгалтер) or the State Revenue Committee (kgd.gov.kz) before filing."`;
+End with a general-guidance disclaimer in the selected response language saying that Kazakhstan tax law changes and current rules must be verified with a licensed accountant or kgd.gov.kz.`;

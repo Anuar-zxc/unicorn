@@ -11,6 +11,10 @@ import {
   normalizeResponseMode,
   type ResponseMode
 } from "@/lib/ai-prompts";
+import {
+  normalizeAILanguage,
+  type AILanguage
+} from "@/lib/ai-language";
 
 const resultSchema = z.object({
   summary: z.string(),
@@ -57,6 +61,7 @@ export async function analyzeContractAction(
 ): Promise<AnalyzeState> {
   const file = formData.get("contract");
   const mode = normalizeResponseMode(formData.get("mode"));
+  const requestedLanguage = formData.get("language");
   if (!(file instanceof File) || file.size === 0) {
     return { ok: false, error: "Upload a PDF, DOCX, or legal image first." };
   }
@@ -88,7 +93,7 @@ export async function analyzeContractAction(
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("plan")
+    .select("plan,ai_language")
     .eq("id", user.id)
     .maybeSingle();
 
@@ -138,7 +143,10 @@ export async function analyzeContractAction(
     return { ok: false, error: uploadError.message };
   }
 
-  const analysis = await runAnalysis(document, mode);
+  const language = normalizeAILanguage(
+    requestedLanguage ?? profile?.ai_language
+  );
+  const analysis = await runAnalysis(document, mode, language);
   const extractedText =
     document.kind === "text"
       ? document.text
@@ -167,9 +175,26 @@ export async function analyzeContractAction(
 
 async function runAnalysis(
   document: ExtractedDocument,
-  mode: ResponseMode
+  mode: ResponseMode,
+  language: AILanguage
 ): Promise<AnalysisResult> {
   if (!process.env.GEMINI_API_KEY) {
+    if (language === "ru") {
+      return {
+        summary: "AI-модель временно недоступна. Lexo сохранил документ, но для полноценного анализа необходимо повторить запрос после восстановления подключения.",
+        overallRisk: "Medium",
+        jurisdiction: "Не определена",
+        importantClauses: ["Оплата и сроки", "Расторжение", "Ответственность и возмещение убытков"],
+        risks: [{
+          level: "Medium",
+          title: "Требуется живая проверка",
+          explanation: "Резервный режим не должен использоваться как окончательный юридический вывод.",
+          recommendation: "Повторите анализ и проверьте документ с юристом."
+        }],
+        lawyerQuestions: ["Какие условия создают наибольший финансовый риск?", "Соответствует ли договор применимому праву?"],
+        disclaimer: "Документ проанализирован с помощью AI. Перед подписанием рекомендуется проверка юристом."
+      };
+    }
     return {
       summary:
         "Gemini API is not configured yet, so Lexo is showing an investor-demo analysis. Once GEMINI_API_KEY is added, Lexo will read PDF, DOCX, scans, and legal photos live.",
@@ -224,7 +249,7 @@ lawyerQuestions: string[].
 disclaimer: string.
 
 Use simple language. Never pretend to be a licensed lawyer. Always include a disclaimer that this is informational only.
-Return only valid JSON. Do not wrap the JSON in markdown fences.`, mode),
+Return only valid JSON. Translate all human-readable JSON values into the selected output language, but keep risk enum values exactly High, Medium, or Low. Do not wrap the JSON in markdown fences.`, mode, language),
     prompt:
       document.kind === "image"
         ? "Read this legal image/scan/photo. First perform OCR, then analyze the legal document."

@@ -49,6 +49,7 @@ const lawyerItems: NavItem[] = [
 const individualItems: NavItem[] = [
   { href: "/dashboard", en: "Home", ru: "Главная", icon: LayoutGrid },
   { href: "/dashboard/check", en: "Check a Contract", ru: "Проверить договор", icon: FileCheck2 },
+  { href: "/dashboard/build", en: "Build an Agreement", ru: "Создать договор", icon: PenLine },
   { href: "/dashboard/ask", en: "Ask a Question", ru: "Задать вопрос", icon: MessageCircleQuestion },
   { href: "/dashboard/seller-tax", en: "Seller Taxes", ru: "Налоги продавца", icon: ReceiptText, badge: "New" },
   { href: "/dashboard/docs", en: "My Documents", ru: "Мои документы", icon: FolderOpen },

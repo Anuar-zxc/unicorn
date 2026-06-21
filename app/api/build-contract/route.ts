@@ -2,6 +2,7 @@ import { BUILDER_SYSTEM } from "@/lib/ai-system";
 import { completeGemini } from "@/lib/gemini";
 import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
 import { buildSystemPrompt, normalizeResponseMode } from "@/lib/ai-prompts";
+import { normalizeAILanguage } from "@/lib/ai-language";
 
 const demoContract = `# Mutual Non-Disclosure Agreement
 
@@ -54,7 +55,7 @@ export async function POST(req: Request) {
     return new Response(access.message, { status: access.status });
   }
 
-  const { description, jurisdiction, clarifications, mode } = await req.json();
+  const { description, jurisdiction, clarifications, mode, language } = await req.json();
   const systemPrompt = buildSystemPrompt(`${BUILDER_SYSTEM}
 
 Draft professional, jurisdiction-aware legal contracts based on user descriptions.
@@ -68,7 +69,7 @@ Rules:
 6. After the contract, add "## AI Notes" with assumptions, lawyer review points, and jurisdiction warnings
 
 Jurisdiction: ${jurisdiction || "United States (general)"}
-Output format: clean markdown. Start directly with the contract — no preamble.`, normalizeResponseMode(mode));
+Output format: clean markdown. Start directly with the contract — no preamble.`, normalizeResponseMode(mode), normalizeAILanguage(language ?? access.profile?.ai_language));
 
   const output = await completeGemini({
     system: systemPrompt,
@@ -76,7 +77,28 @@ Output format: clean markdown. Start directly with the contract — no preamble.
 ${clarifications ? `Additional details: ${clarifications}` : ""}`,
     maxTokens: 6000
   });
-  const result = output || demoContract;
+  const responseLanguage = normalizeAILanguage(language ?? access.profile?.ai_language);
+  const result = output || (responseLanguage === "ru" ? `# Проект договора
+
+## 1. Стороны
+[СТОРОНА 1] и [СТОРОНА 2].
+
+## 2. Предмет
+[ОПИШИТЕ ОБЯЗАТЕЛЬСТВА СТОРОН].
+
+## 3. Оплата и сроки
+[СУММА, ПОРЯДОК ОПЛАТЫ И СРОКИ].
+
+## 4. Ответственность и расторжение
+[УСЛОВИЯ ОТВЕТСТВЕННОСТИ И РАСТОРЖЕНИЯ].
+
+## 5. Применимое право
+[ЮРИСДИКЦИЯ].
+
+## 6. Подписи
+[ПОДПИСИ СТОРОН]
+
+Документ создан с помощью AI — перед подписанием рекомендуется проверка юристом.` : demoContract);
   await recordToolUsage({
     supabase: access.supabase,
     userId: access.user.id,

@@ -10,6 +10,7 @@ create table if not exists public.profiles (
   full_name text,
   company text,
   account_type text not null default 'individual' check (account_type in ('lawyer', 'individual')),
+  ai_language text not null default 'en' check (ai_language in ('en', 'ru')),
   role text default 'lawyer',
   bar_number text,
   practice_areas text[],
@@ -91,6 +92,7 @@ create table if not exists public.team_members (
 -- Existing-project migration (safe to run repeatedly)
 alter table public.profiles add column if not exists role text default 'lawyer';
 alter table public.profiles add column if not exists account_type text not null default 'individual';
+alter table public.profiles add column if not exists ai_language text not null default 'en';
 alter table public.profiles add column if not exists bar_number text;
 alter table public.profiles add column if not exists practice_areas text[];
 alter table public.profiles add column if not exists firm_name text;

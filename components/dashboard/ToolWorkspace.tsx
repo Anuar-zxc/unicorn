@@ -19,6 +19,9 @@ import { Button } from "@/components/ui/button";
 import { UpgradePrompt } from "@/components/shared/UpgradePrompt";
 import { ResponseModeToggle } from "@/components/shared/ResponseModeToggle";
 import type { ResponseMode } from "@/lib/ai-prompts";
+import { LanguageModeToggle } from "@/components/shared/LanguageModeToggle";
+import type { AILanguage } from "@/lib/ai-language";
+import { useLanguage } from "@/components/providers/AppProviders";
 
 const toolIcons = {
   research: BookOpen,
@@ -46,6 +49,7 @@ type Props = {
 };
 
 export function ToolWorkspace(props: Props) {
+  const { locale } = useLanguage();
   const [input, setInput] = useState("");
   const [secondaryInput, setSecondaryInput] = useState("");
   const [context, setContext] = useState("");
@@ -55,6 +59,7 @@ export function ToolWorkspace(props: Props) {
   const [limitReached, setLimitReached] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
   const [mode, setMode] = useState<ResponseMode>("concise");
+  const [language, setLanguage] = useState<AILanguage>(locale);
   const fileRef = useRef<HTMLInputElement>(null);
 
   async function run() {
@@ -69,11 +74,12 @@ export function ToolWorkspace(props: Props) {
         data.set("input", input);
         data.set("context", context);
         data.set("mode", mode);
+        data.set("language", language);
         files.forEach((file) => data.append("files", file));
         body = data;
       } else {
         headers = { "Content-Type": "application/json" };
-        body = JSON.stringify({ input, secondaryInput, context, mode });
+        body = JSON.stringify({ input, secondaryInput, context, mode, language });
       }
       const response = await fetch(props.endpoint, { method: "POST", headers, body });
       if (!response.ok || !response.body) {
@@ -107,8 +113,9 @@ export function ToolWorkspace(props: Props) {
           <p className="mt-6 text-xs font-semibold uppercase tracking-[.16em] text-[#8fb0ff]">{props.eyebrow}</p>
           <h1 className="mt-2 font-display text-3xl font-semibold">{props.title}</h1>
           <p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">{props.description}</p>
-          <div className="mt-5">
+          <div className="mt-5 flex flex-wrap items-center gap-2">
             <ResponseModeToggle mode={mode} onChange={setMode} />
+            <LanguageModeToggle language={language} onChange={setLanguage} />
           </div>
 
           {props.upload && <div className="mt-6"><input ref={fileRef} type="file" multiple={props.upload === "double"} accept=".pdf,.docx,.jpg,.jpeg,.png,.webp,.heic,.heif,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,image/jpeg,image/png,image/webp,image/heic,image/heif" className="hidden" onChange={(event) => setFiles(Array.from(event.target.files ?? []).slice(0, props.upload === "double" ? 2 : 1))} /><button type="button" onClick={() => fileRef.current?.click()} className="flex w-full items-center justify-center gap-3 rounded-xl border border-dashed border-[#394150] bg-[#0b0e14] p-6 text-sm text-white/55 hover:border-[#4d7ef5] hover:text-white"><FileUp className="h-5 w-5 text-[#8fb0ff]" />{files.length ? files.map((file) => file.name).join(" · ") : props.upload === "double" ? "Upload two PDF, DOCX, or image versions" : "Upload PDF, DOCX, or image"}</button></div>}

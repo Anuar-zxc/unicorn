@@ -23,7 +23,7 @@ export async function authorizeFeature(feature: UsageFeature) {
   monthStart.setHours(0, 0, 0, 0);
 
   const [{ data: profile }, { count }] = await Promise.all([
-    supabase.from("profiles").select("plan").eq("id", user.id).maybeSingle(),
+    supabase.from("profiles").select("plan,ai_language,account_type").eq("id", user.id).maybeSingle(),
     supabase
       .from("analyses")
       .select("id", { count: "exact", head: true })
@@ -40,7 +40,7 @@ export async function authorizeFeature(feature: UsageFeature) {
     };
   }
 
-  return { ok: true as const, supabase, user };
+  return { ok: true as const, supabase, user, profile };
 }
 
 export async function recordToolUsage({

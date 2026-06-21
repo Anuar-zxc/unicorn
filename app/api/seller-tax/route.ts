@@ -24,7 +24,8 @@ Products or services: ${body.productType}`;
       body: JSON.stringify({
         input,
         context: "Kazakhstan marketplace seller taxation",
-        mode: body.mode
+        mode: body.mode,
+        language: body.language
       })
     })
   );

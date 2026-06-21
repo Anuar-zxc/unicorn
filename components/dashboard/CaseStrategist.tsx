@@ -5,6 +5,9 @@ import { Archive, Briefcase, CheckCircle2, Download, FileText, Loader2, Scale, S
 import { Button } from "@/components/ui/button";
 import { ResponseModeToggle } from "@/components/shared/ResponseModeToggle";
 import type { ResponseMode } from "@/lib/ai-prompts";
+import { LanguageModeToggle } from "@/components/shared/LanguageModeToggle";
+import type { AILanguage } from "@/lib/ai-language";
+import { useLanguage } from "@/components/providers/AppProviders";
 
 const stages = ["Just started", "Got a legal notice", "Going to court", "Already in court"];
 const progressSteps = [
@@ -23,6 +26,7 @@ const lawyers = [
 ];
 
 export function CaseStrategist() {
+  const { locale } = useLanguage();
   const [situation, setSituation] = useState("");
   const [outcome, setOutcome] = useState("");
   const [stage, setStage] = useState(stages[0]);
@@ -32,6 +36,7 @@ export function CaseStrategist() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [mode, setMode] = useState<ResponseMode>("concise");
+  const [language, setLanguage] = useState<AILanguage>(locale);
 
   const activeStep = useMemo(() => {
     if (!loading && strategy) return progressSteps.length;
@@ -53,7 +58,7 @@ export function CaseStrategist() {
       const response = await fetch("/api/case-strategy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ situation, outcome, stage, jurisdiction, documentsSummary, mode })
+        body: JSON.stringify({ situation, outcome, stage, jurisdiction, documentsSummary, mode, language })
       });
 
       if (!response.ok || !response.body) throw new Error("Could not build strategy.");
@@ -90,8 +95,9 @@ export function CaseStrategist() {
         <p className="mt-4 text-sm leading-6 text-white/55">
           Tell Lexo what happened. It will identify legal issues, cite relevant law where possible, build arguments, prepare a demand letter, and package a brief for a lawyer.
         </p>
-        <div className="mt-5">
+        <div className="mt-5 flex flex-wrap gap-2">
           <ResponseModeToggle mode={mode} onChange={setMode} />
+          <LanguageModeToggle language={language} onChange={setLanguage} />
         </div>
 
         <label className="mt-6 block text-sm font-medium text-white/70">What happened?</label>

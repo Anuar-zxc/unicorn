@@ -5,6 +5,7 @@ import {
   ArrowRight,
   FileCheck2,
   MessageCircleQuestion,
+  PenLine,
   ReceiptText
 } from "lucide-react";
 import { useLanguage } from "@/components/providers/AppProviders";
@@ -17,6 +18,15 @@ type RecentItem = {
 };
 
 const tools = [
+  {
+    href: "/dashboard/build",
+    icon: PenLine,
+    titleEn: "Build an agreement",
+    titleRu: "Создать договор",
+    descEn: "Answer a few simple questions and get a rental, freelance, loan, sale, or other agreement.",
+    descRu: "Ответьте на несколько простых вопросов и получите договор аренды, услуг, займа, купли-продажи или другое соглашение.",
+    tone: "text-violet-400 bg-violet-400/10 border-violet-400/20"
+  },
   {
     href: "/dashboard/check",
     icon: FileCheck2,

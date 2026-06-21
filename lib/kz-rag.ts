@@ -1,6 +1,7 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { buildSystemPrompt, type ResponseMode } from "@/lib/ai-prompts";
+import type { AILanguage } from "@/lib/ai-language";
 
 type LegalChunk = { id:string; sourceId:string; title:string; article:string; text:string; url:string; authority:string; language:string; fetchedAt:string };
 let cache: LegalChunk[] | null = null;
@@ -14,7 +15,8 @@ export async function retrieveKzLaw(query: string, limit = 7) {
 export async function streamLocalLegalAnswer(
   query: string,
   context: string,
-  mode: ResponseMode = "concise"
+  mode: ResponseMode = "concise",
+  language: AILanguage = "ru"
 ) {
   const sources = await retrieveKzLaw(`${query} ${context}`);
   if (!sources.length) throw new Error("В локальном корпусе не найдены релевантные статьи.");
@@ -26,7 +28,7 @@ export async function streamLocalLegalAnswer(
       model:process.env.OLLAMA_MODEL ?? "llama3:latest",
       stream:true,
       messages:[
-        {role:"system",content:buildSystemPrompt("Ты — Lexo KZ, локальный юридический исследователь для юристов Казахстана. Отвечай только по официальным выдержкам ИПС «Әділет». Не выдумывай нормы. Каждое юридическое утверждение сопровождай ссылкой [номер]. Если данных недостаточно, скажи об этом. Формат: ## Правовой вопрос; ## Применимое право; ## Анализ; ## Вывод; ## Источники. Отвечай профессионально на русском языке.", mode)},
+        {role:"system",content:buildSystemPrompt("You are Lexo KZ, a legal researcher grounded only in the supplied official extracts from Kazakhstan's Adilet legal information system. Never invent legal rules. Add a bracket citation to every legal claim. If the evidence is insufficient, say so. Structure the answer as a legal question, applicable law, analysis, conclusion, and sources, with headings translated into the output language.", mode, language)},
         {role:"user",content:`Вопрос: ${query}\nКонтекст: ${context || "не указан"}\n\nОфициальные выдержки:\n${evidence}`}
       ]
     })

@@ -6,26 +6,36 @@ import {
   buildSystemPrompt,
   normalizeResponseMode
 } from "@/lib/ai-prompts";
+import { normalizeAILanguage } from "@/lib/ai-language";
 
-const fallback = `## Professional AI analysis
+const fallback = {
+  en: `## Professional AI analysis
 
-Lexo is running in investor demo mode.
-
-Add a free Google AI Studio \`GEMINI_API_KEY\` to enable live AI generation for documents, scans, and photos. For now, this preview shows the expected attorney-ready structure.
+Lexo could not reach the live AI model, so this is a structured fallback.
 
 ## Key observations
-- Identify the client's goal and represented party.
-- Extract important facts, deadlines, obligations, and risks.
-- Convert the material into a practical legal work product.
+- Confirm the user's goal, jurisdiction, and represented party.
+- Extract facts, deadlines, obligations, and risks.
+- Verify every legal citation before relying on it.
 
 ## Recommended next steps
-1. Upload or paste the source material.
-2. Confirm jurisdiction and client position.
-3. Review the AI output before client delivery.
+Review the source material and retry the live analysis.
 
-## Attorney review
+AI-assisted analysis — professional review recommended.`,
+  ru: `## Профессиональный AI-анализ
 
-AI-assisted analysis — attorney review recommended before client delivery.`;
+Lexo не смог подключиться к AI-модели, поэтому показан структурированный резервный ответ.
+
+## Ключевые наблюдения
+- Уточните цель, юрисдикцию и представляемую сторону.
+- Выделите факты, сроки, обязательства и риски.
+- Перепроверьте каждую правовую ссылку.
+
+## Следующие шаги
+Проверьте исходные материалы и повторите анализ.
+
+Анализ создан с помощью AI — рекомендуется проверка специалистом.`
+};
 
 export function createToolHandler(
   systemPrompt: string,
@@ -46,10 +56,12 @@ export function createToolHandler(
       let input = "";
       let context = "";
       let mode: unknown = "concise";
+      let language: unknown;
       if (contentType.includes("multipart/form-data")) {
         const data = await req.formData();
         context = String(data.get("context") ?? "");
         mode = data.get("mode");
+        language = data.get("language");
         const files = data
           .getAll("files")
           .filter((item): item is File => item instanceof File && item.size > 0);
@@ -68,22 +80,27 @@ export function createToolHandler(
         input = [body.input, body.secondaryInput].filter(Boolean).join("\n\n--- SECOND VERSION / ADDITIONAL MATERIAL ---\n");
         context = body.context ?? "";
         mode = body.mode;
+        language = body.language;
       }
       if (!input.trim()) return new Response("Input is required.", { status: 400 });
       const addon = options.systemAddon
         ? await options.systemAddon(input, context)
         : "";
+      const responseLanguage = normalizeAILanguage(
+        language ?? access.profile?.ai_language
+      );
       const output = await completeGemini({
         system: `${buildSystemPrompt(
           systemPrompt,
-          normalizeResponseMode(mode)
+          normalizeResponseMode(mode),
+          responseLanguage
         )}\n\nWorkspace context: ${
           context || "No additional context supplied."
         }${addon ? `\n\n${addon}` : ""}`,
         prompt: input.slice(0, 30000),
         maxTokens: 5000
       });
-      const result = output || fallback;
+      const result = output || fallback[responseLanguage];
       await recordToolUsage({
         supabase: access.supabase,
         userId: access.user.id,

@@ -2,6 +2,7 @@ import { STRATEGIST_SYSTEM } from "@/lib/ai-system";
 import { completeGemini } from "@/lib/gemini";
 import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
 import { buildSystemPrompt, normalizeResponseMode } from "@/lib/ai-prompts";
+import { normalizeAILanguage } from "@/lib/ai-language";
 
 const demoStrategy = `# Case Strategy Brief
 
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
     return new Response(access.message, { status: access.status });
   }
 
-  const { situation, outcome, stage, jurisdiction, documentsSummary, followups, mode } = await req.json();
+  const { situation, outcome, stage, jurisdiction, documentsSummary, followups, mode, language } = await req.json();
   const systemPrompt = buildSystemPrompt(`${STRATEGIST_SYSTEM}
 
 Your analysis must include:
@@ -110,7 +111,7 @@ Rules:
 - Be strategic, practical, and organized
 - Format as clean markdown with clear section headers
 
-Jurisdiction: ${jurisdiction || "Not provided"}`, normalizeResponseMode(mode));
+Jurisdiction: ${jurisdiction || "Not provided"}`, normalizeResponseMode(mode), normalizeAILanguage(language ?? access.profile?.ai_language));
 
   const output = await completeGemini({
     system: systemPrompt,
@@ -121,7 +122,24 @@ Documents summary: ${documentsSummary || "No documents uploaded"}
 Follow-up answers: ${followups || "None"}`,
     maxTokens: 7000
   });
-  const result = output || demoStrategy;
+  const responseLanguage = normalizeAILanguage(language ?? access.profile?.ai_language);
+  const result = output || (responseLanguage === "ru" ? `# Стратегия по делу
+
+## Краткое резюме
+Соберите договоры, переписку, платежи, уведомления и хронологию событий.
+
+## Правовые вопросы
+- Было ли создано обязательство?
+- Исполнили ли вы свою часть?
+- Какой ущерб можно подтвердить документами?
+
+## Следующие шаги
+1. Составьте хронологию.
+2. Сохраните доказательства.
+3. Подготовьте письменную претензию.
+4. Уточните применимое право и срок исковой давности с юристом.
+
+Анализ создан с помощью AI — рекомендуется профессиональная проверка.` : demoStrategy);
   await recordToolUsage({
     supabase: access.supabase,
     userId: access.user.id,
