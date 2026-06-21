@@ -12,6 +12,7 @@ import {
   GitCompareArrows,
   LayoutGrid,
   MessageCircleQuestion,
+  ReceiptText,
   PenLine,
   SearchCheck,
   Settings,
@@ -24,7 +25,15 @@ import { LogoutButton } from "@/components/auth/LogoutButton";
 import { useLanguage } from "@/components/providers/AppProviders";
 import { cn } from "@/lib/utils";
 
-const items = [
+type NavItem = {
+  href: string;
+  en: string;
+  ru: string;
+  icon: typeof LayoutGrid;
+  badge?: string;
+};
+
+const lawyerItems: NavItem[] = [
   { href: "/dashboard", en: "Workspace", ru: "Рабочее пространство", icon: LayoutGrid },
   { href: "/dashboard/review", en: "Contract Review", ru: "Проверка договоров", icon: FileCheck2 },
   { href: "/dashboard/research", en: "Case Research", ru: "Правовой поиск", icon: SearchCheck },
@@ -37,12 +46,35 @@ const items = [
   { href: "/dashboard/settings", en: "Settings", ru: "Настройки", icon: Settings }
 ];
 
+const individualItems: NavItem[] = [
+  { href: "/dashboard", en: "Home", ru: "Главная", icon: LayoutGrid },
+  { href: "/dashboard/check", en: "Check a Contract", ru: "Проверить договор", icon: FileCheck2 },
+  { href: "/dashboard/ask", en: "Ask a Question", ru: "Задать вопрос", icon: MessageCircleQuestion },
+  { href: "/dashboard/seller-tax", en: "Seller Taxes", ru: "Налоги продавца", icon: ReceiptText, badge: "New" },
+  { href: "/dashboard/docs", en: "My Documents", ru: "Мои документы", icon: FolderOpen },
+  { href: "/dashboard/billing", en: "Billing", ru: "Оплата", icon: CreditCard },
+  { href: "/dashboard/settings", en: "Settings", ru: "Настройки", icon: Settings }
+];
+
 function initials(email: string) { return email.split("@")[0].split(/[.\-_]/).map((p) => p[0]).join("").slice(0, 2).toUpperCase() || "LX"; }
 
-export function Sidebar({ collapsed, onToggle, userEmail, userPlan }: { collapsed: boolean; onToggle: () => void; userEmail: string; userPlan: string }) {
+export function Sidebar({
+  collapsed,
+  onToggle,
+  userEmail,
+  userPlan,
+  accountType
+}: {
+  collapsed: boolean;
+  onToggle: () => void;
+  userEmail: string;
+  userPlan: string;
+  accountType: "lawyer" | "individual";
+}) {
   const pathname = usePathname();
   const { locale } = useLanguage();
   const [pendingHref, setPendingHref] = useState<string | null>(null);
+  const items = accountType === "lawyer" ? lawyerItems : individualItems;
 
   useEffect(() => {
     setPendingHref(null);
@@ -60,7 +92,13 @@ export function Sidebar({ collapsed, onToggle, userEmail, userPlan }: { collapse
           MVP Suite
         </div>
         <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
-          {locale === "ru" ? "Загружайте, проверяйте и готовьте юридические документы в одном месте." : "Upload, review, draft, and prepare legal work in one place."}
+          {accountType === "lawyer"
+            ? locale === "ru"
+              ? "Загружайте, проверяйте и готовьте юридические документы в одном месте."
+              : "Upload, review, draft, and prepare legal work in one place."
+            : locale === "ru"
+              ? "Проверяйте договоры, задавайте вопросы и разбирайтесь с налогами простым языком."
+              : "Check contracts, ask questions, and understand seller taxes in plain language."}
         </p>
       </div>
       <nav className="mt-6 space-y-1.5">
@@ -88,7 +126,16 @@ export function Sidebar({ collapsed, onToggle, userEmail, userPlan }: { collapse
               >
                 <item.icon className="h-5 w-5" strokeWidth={2.65} />
               </span>
-              {!collapsed && label}
+              {!collapsed && (
+                <>
+                  <span>{label}</span>
+                  {item.badge && (
+                    <span className="ml-auto rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] text-amber-500">
+                      {item.badge}
+                    </span>
+                  )}
+                </>
+              )}
             </Link>
           );
         })}

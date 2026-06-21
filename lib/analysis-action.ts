@@ -6,6 +6,11 @@ import { extractDocumentForAnalysis, type ExtractedDocument } from "@/lib/file-t
 import { completeGemini } from "@/lib/gemini";
 import { canAnalyze } from "@/lib/plans";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import {
+  buildSystemPrompt,
+  normalizeResponseMode,
+  type ResponseMode
+} from "@/lib/ai-prompts";
 
 const resultSchema = z.object({
   summary: z.string(),
@@ -51,6 +56,7 @@ export async function analyzeContractAction(
   formData: FormData
 ): Promise<AnalyzeState> {
   const file = formData.get("contract");
+  const mode = normalizeResponseMode(formData.get("mode"));
   if (!(file instanceof File) || file.size === 0) {
     return { ok: false, error: "Upload a PDF, DOCX, or legal image first." };
   }
@@ -132,7 +138,7 @@ export async function analyzeContractAction(
     return { ok: false, error: uploadError.message };
   }
 
-  const analysis = await runAnalysis(document);
+  const analysis = await runAnalysis(document, mode);
   const extractedText =
     document.kind === "text"
       ? document.text
@@ -159,7 +165,10 @@ export async function analyzeContractAction(
   return { ok: true, analysisId: data.id };
 }
 
-async function runAnalysis(document: ExtractedDocument): Promise<AnalysisResult> {
+async function runAnalysis(
+  document: ExtractedDocument,
+  mode: ResponseMode
+): Promise<AnalysisResult> {
   if (!process.env.GEMINI_API_KEY) {
     return {
       summary:
@@ -203,7 +212,7 @@ async function runAnalysis(document: ExtractedDocument): Promise<AnalysisResult>
   }
 
   const content = await completeGemini({
-    system: `You are Lexo's professional contract analysis AI.
+    system: buildSystemPrompt(`You are Lexo's professional contract analysis AI.
 
 Analyze this document and return JSON with these keys:
 summary: string, 2-3 sentences.
@@ -215,7 +224,7 @@ lawyerQuestions: string[].
 disclaimer: string.
 
 Use simple language. Never pretend to be a licensed lawyer. Always include a disclaimer that this is informational only.
-Return only valid JSON. Do not wrap the JSON in markdown fences.`,
+Return only valid JSON. Do not wrap the JSON in markdown fences.`, mode),
     prompt:
       document.kind === "image"
         ? "Read this legal image/scan/photo. First perform OCR, then analyze the legal document."

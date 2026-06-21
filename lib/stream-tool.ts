@@ -2,6 +2,10 @@ import { extractDocumentForAnalysis } from "@/lib/file-text";
 import { completeGemini } from "@/lib/gemini";
 import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
 import type { UsageFeature } from "@/lib/usage";
+import {
+  buildSystemPrompt,
+  normalizeResponseMode
+} from "@/lib/ai-prompts";
 
 const fallback = `## Professional AI analysis
 
@@ -25,7 +29,11 @@ AI-assisted analysis — attorney review recommended before client delivery.`;
 
 export function createToolHandler(
   systemPrompt: string,
-  options: { feature?: UsageFeature; toolType?: string } = {}
+  options: {
+    feature?: UsageFeature;
+    toolType?: string;
+    systemAddon?: (input: string, context: string) => Promise<string>;
+  } = {}
 ) {
   return async function POST(req: Request) {
     try {
@@ -37,9 +45,11 @@ export function createToolHandler(
       const contentType = req.headers.get("content-type") ?? "";
       let input = "";
       let context = "";
+      let mode: unknown = "concise";
       if (contentType.includes("multipart/form-data")) {
         const data = await req.formData();
         context = String(data.get("context") ?? "");
+        mode = data.get("mode");
         const files = data
           .getAll("files")
           .filter((item): item is File => item instanceof File && item.size > 0);
@@ -57,10 +67,19 @@ export function createToolHandler(
         const body = await req.json();
         input = [body.input, body.secondaryInput].filter(Boolean).join("\n\n--- SECOND VERSION / ADDITIONAL MATERIAL ---\n");
         context = body.context ?? "";
+        mode = body.mode;
       }
       if (!input.trim()) return new Response("Input is required.", { status: 400 });
+      const addon = options.systemAddon
+        ? await options.systemAddon(input, context)
+        : "";
       const output = await completeGemini({
-        system: `${systemPrompt}\n\nWorkspace context: ${context || "No additional context supplied."}`,
+        system: `${buildSystemPrompt(
+          systemPrompt,
+          normalizeResponseMode(mode)
+        )}\n\nWorkspace context: ${
+          context || "No additional context supplied."
+        }${addon ? `\n\n${addon}` : ""}`,
         prompt: input.slice(0, 30000),
         maxTokens: 5000
       });

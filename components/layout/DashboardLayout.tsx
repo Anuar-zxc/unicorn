@@ -24,11 +24,13 @@ function getInitials(email: string): string {
 export function DashboardLayout({
   children,
   userEmail,
-  userPlan
+  userPlan,
+  accountType
 }: {
   children: React.ReactNode;
   userEmail: string;
   userPlan: string;
+  accountType: "lawyer" | "individual";
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [plan, setPlan] = useState(userPlan);
@@ -53,6 +55,7 @@ export function DashboardLayout({
         onToggle={() => setCollapsed((v) => !v)}
         userEmail={userEmail}
         userPlan={plan}
+        accountType={accountType}
       />
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--bg-page)]/92 backdrop-blur-xl">
@@ -66,7 +69,13 @@ export function DashboardLayout({
             </button>
             <div className="min-w-0">
               <p className="text-xs uppercase tracking-[0.16em] text-[var(--text-muted)]">
-                {locale === "ru" ? "Профессиональное юридическое пространство" : "Professional legal workspace"}
+                {accountType === "lawyer"
+                  ? locale === "ru"
+                    ? "Профессиональное юридическое пространство"
+                    : "Professional legal workspace"
+                  : locale === "ru"
+                    ? "Личный юридический помощник"
+                    : "Personal legal assistant"}
               </p>
               <Logo className="mt-2 text-[30px]" />
             </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, FileSearch, Loader2 } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
@@ -12,13 +12,24 @@ const timeSinks = ["Contract review", "Legal research", "Document drafting", "Cl
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const supabase = createSupabaseBrowserClient();
+  const [supabase] = useState(() => createSupabaseBrowserClient());
   const [step, setStep] = useState(1);
   const [areas, setAreas] = useState<string[]>([]);
   const [jurisdiction, setJurisdiction] = useState("");
   const [firmSize, setFirmSize] = useState("Solo");
   const [timeSink, setTimeSink] = useState("");
   const [saving, setSaving] = useState(false);
+  const [accountType, setAccountType] = useState<"lawyer" | "individual" | null>(null);
+
+  useEffect(() => {
+    void supabase
+      .from("profiles")
+      .select("account_type")
+      .maybeSingle()
+      .then(({ data }) => {
+        setAccountType(data?.account_type === "lawyer" ? "lawyer" : "individual");
+      });
+  }, [supabase]);
 
   function toggleArea(area: string) { setAreas((current) => current.includes(area) ? current.filter((item) => item !== area) : [...current, area]); }
   async function finish() {
@@ -27,6 +38,51 @@ export default function OnboardingPage() {
     if (user) await supabase.from("profiles").update({ practice_areas: areas, jurisdiction, firm_size: firmSize, biggest_time_sink: timeSink, onboarding_completed: true }).eq("id", user.id);
     router.push("/dashboard/review");
     router.refresh();
+  }
+
+  async function finishIndividual() {
+    setSaving(true);
+    const {
+      data: { user }
+    } = await supabase.auth.getUser();
+    if (user) {
+      await supabase
+        .from("profiles")
+        .update({ onboarding_completed: true })
+        .eq("id", user.id);
+    }
+    router.push("/dashboard");
+    router.refresh();
+  }
+
+  if (!accountType) {
+    return (
+      <main className="grid min-h-[calc(100vh-64px)] place-items-center">
+        <Loader2 className="h-6 w-6 animate-spin text-[var(--accent)]" />
+      </main>
+    );
+  }
+
+  if (accountType === "individual") {
+    return (
+      <main className="grid min-h-[calc(100vh-64px)] place-items-center p-4 md:p-8">
+        <section className="w-full max-w-xl rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-7 text-center md:p-10">
+          <div className="mx-auto grid h-14 w-14 place-items-center rounded-2xl bg-[var(--accent-light)] text-[var(--accent)]">
+            <FileSearch className="h-7 w-7" />
+          </div>
+          <h1 className="mt-6 font-display text-3xl font-semibold">
+            Your personal legal assistant is ready.
+          </h1>
+          <p className="mt-4 text-sm leading-6 text-[var(--text-secondary)]">
+            Check a contract, ask a legal question, or understand marketplace seller taxes in Kazakhstan.
+          </p>
+          <Button className="mt-7 w-full" onClick={finishIndividual} disabled={saving}>
+            {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+            Open my workspace
+          </Button>
+        </section>
+      </main>
+    );
   }
 
   return (

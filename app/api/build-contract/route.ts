@@ -1,6 +1,7 @@
 import { BUILDER_SYSTEM } from "@/lib/ai-system";
 import { completeGemini } from "@/lib/gemini";
 import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
+import { buildSystemPrompt, normalizeResponseMode } from "@/lib/ai-prompts";
 
 const demoContract = `# Mutual Non-Disclosure Agreement
 
@@ -53,8 +54,8 @@ export async function POST(req: Request) {
     return new Response(access.message, { status: access.status });
   }
 
-  const { description, jurisdiction, clarifications } = await req.json();
-  const systemPrompt = `${BUILDER_SYSTEM}
+  const { description, jurisdiction, clarifications, mode } = await req.json();
+  const systemPrompt = buildSystemPrompt(`${BUILDER_SYSTEM}
 
 Draft professional, jurisdiction-aware legal contracts based on user descriptions.
 
@@ -67,7 +68,7 @@ Rules:
 6. After the contract, add "## AI Notes" with assumptions, lawyer review points, and jurisdiction warnings
 
 Jurisdiction: ${jurisdiction || "United States (general)"}
-Output format: clean markdown. Start directly with the contract — no preamble.`;
+Output format: clean markdown. Start directly with the contract — no preamble.`, normalizeResponseMode(mode));
 
   const output = await completeGemini({
     system: systemPrompt,

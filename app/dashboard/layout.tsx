@@ -4,15 +4,23 @@ import { createSupabaseServerClient } from "@/lib/supabase/server";
 
 export default async function Layout({ children }: { children: React.ReactNode }) {
   const supabase = await createSupabaseServerClient();
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
 
-  if (!claims?.sub) redirect("/auth/signin");
+  if (!user) redirect("/auth/signin");
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan,account_type")
+    .eq("id", user.id)
+    .maybeSingle();
 
   return (
     <DashboardLayout
-      userEmail={typeof claims.email === "string" ? claims.email : ""}
-      userPlan="free"
+      userEmail={user.email ?? ""}
+      userPlan={profile?.plan ?? "free"}
+      accountType={profile?.account_type === "lawyer" ? "lawyer" : "individual"}
     >
       {children}
     </DashboardLayout>

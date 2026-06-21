@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Scale, UserRound } from "lucide-react";
 import {
   createSupabaseBrowserClient,
   isSupabaseConfigured
@@ -25,7 +26,13 @@ const authText = {
     divider: "or",
     configError: "Authentication is not configured yet. Add the Supabase environment variables.",
     invalidCredentials: "Incorrect email or password.",
-    emailNotConfirmed: "Confirm your email before signing in."
+    emailNotConfirmed: "Confirm your email before signing in.",
+    chooseType: "How will you use Lexo?",
+    chooseTypeHint: "Choose the workspace that fits you. You can change it later.",
+    lawyer: "I'm a lawyer",
+    lawyerHint: "Contract review, case research, drafting, and client work.",
+    individual: "I'm an individual",
+    individualHint: "Check a lease, employment offer, freelance deal, or seller taxes."
   },
   ru: {
     fullName: "Полное имя",
@@ -42,7 +49,13 @@ const authText = {
     divider: "или",
     configError: "Авторизация ещё не настроена. Добавьте переменные окружения Supabase.",
     invalidCredentials: "Неверный email или пароль.",
-    emailNotConfirmed: "Подтвердите email перед входом."
+    emailNotConfirmed: "Подтвердите email перед входом.",
+    chooseType: "Как вы будете использовать Lexo?",
+    chooseTypeHint: "Выберите подходящее пространство. Позже его можно изменить.",
+    lawyer: "Я юрист",
+    lawyerHint: "Проверка договоров, правовой поиск, документы и работа с клиентами.",
+    individual: "Я частное лицо",
+    individualHint: "Проверка аренды, оффера, договора с заказчиком или налогов продавца."
   }
 };
 
@@ -81,6 +94,9 @@ export function AuthForm({
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [accountType, setAccountType] = useState<"lawyer" | "individual" | null>(
+    mode === "signup" ? null : "individual"
+  );
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -126,7 +142,11 @@ export function AuthForm({
       password,
       options: {
         emailRedirectTo: `${origin}/auth/callback?next=/dashboard/onboarding`,
-        data: { full_name: fullName, company }
+        data: {
+          full_name: fullName,
+          company,
+          account_type: accountType ?? "individual"
+        }
       }
     });
     setLoading(false);
@@ -137,6 +157,12 @@ export function AuthForm({
     }
 
     if (data.session) {
+      if (data.user) {
+        await supabase
+          .from("profiles")
+          .update({ account_type: accountType ?? "individual" })
+          .eq("id", data.user.id);
+      }
       router.replace("/dashboard/onboarding");
       router.refresh();
       return;
@@ -167,7 +193,9 @@ export function AuthForm({
     const { error: googleError } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
-        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(next)}`,
+        redirectTo: `${origin}/auth/callback?next=${encodeURIComponent(
+          mode === "signup" ? "/dashboard/onboarding" : next
+        )}&account_type=${accountType ?? "individual"}`,
         queryParams: {
           access_type: "offline",
           prompt: "select_account"
@@ -180,8 +208,67 @@ export function AuthForm({
     }
   };
 
+  if (mode === "signup" && !accountType) {
+    return (
+      <div>
+        <h2 className="text-center font-display text-xl font-semibold">
+          {text.chooseType}
+        </h2>
+        <p className="mt-2 text-center text-sm text-[var(--text-secondary)]">
+          {text.chooseTypeHint}
+        </p>
+        <div className="mt-6 grid gap-3">
+          <button
+            type="button"
+            onClick={() => setAccountType("lawyer")}
+            className="group rounded-xl border-2 border-[var(--border)] p-5 text-left transition hover:border-[var(--accent)] hover:bg-[var(--accent-light)]"
+          >
+            <span className="flex items-start gap-3">
+              <Scale className="mt-0.5 h-6 w-6 text-[var(--accent)]" />
+              <span>
+                <span className="block font-semibold">{text.lawyer}</span>
+                <span className="mt-1 block text-sm leading-5 text-[var(--text-secondary)]">
+                  {text.lawyerHint}
+                </span>
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setAccountType("individual")}
+            className="group rounded-xl border-2 border-[var(--border)] p-5 text-left transition hover:border-emerald-500 hover:bg-emerald-500/10"
+          >
+            <span className="flex items-start gap-3">
+              <UserRound className="mt-0.5 h-6 w-6 text-emerald-500" />
+              <span>
+                <span className="block font-semibold">{text.individual}</span>
+                <span className="mt-1 block text-sm leading-5 text-[var(--text-secondary)]">
+                  {text.individualHint}
+                </span>
+              </span>
+            </span>
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <form className="space-y-4" onSubmit={submit}>
+      {mode === "signup" && (
+        <div className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm">
+          <span className="font-medium">
+            {accountType === "lawyer" ? text.lawyer : text.individual}
+          </span>
+          <button
+            type="button"
+            onClick={() => setAccountType(null)}
+            className="font-semibold text-[var(--accent)]"
+          >
+            {locale === "ru" ? "Изменить" : "Change"}
+          </button>
+        </div>
+      )}
       {mode !== "reset" && (
         <>
           <button

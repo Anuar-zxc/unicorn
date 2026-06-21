@@ -9,6 +9,7 @@ create table if not exists public.profiles (
   email text,
   full_name text,
   company text,
+  account_type text not null default 'individual' check (account_type in ('lawyer', 'individual')),
   role text default 'lawyer',
   bar_number text,
   practice_areas text[],
@@ -89,6 +90,7 @@ create table if not exists public.team_members (
 
 -- Existing-project migration (safe to run repeatedly)
 alter table public.profiles add column if not exists role text default 'lawyer';
+alter table public.profiles add column if not exists account_type text not null default 'individual';
 alter table public.profiles add column if not exists bar_number text;
 alter table public.profiles add column if not exists practice_areas text[];
 alter table public.profiles add column if not exists firm_name text;
@@ -101,6 +103,11 @@ alter table public.profiles add column if not exists polar_subscription_id text;
 alter table public.profiles add column if not exists subscription_status text not null default 'none';
 alter table public.profiles add column if not exists current_period_end timestamptz;
 alter table public.profiles add column if not exists cancel_at_period_end boolean not null default false;
+update public.profiles
+set account_type = 'lawyer'
+where role = 'lawyer' and onboarding_completed = true;
+alter table public.profiles drop constraint if exists profiles_account_type_check;
+alter table public.profiles add constraint profiles_account_type_check check (account_type in ('lawyer', 'individual'));
 alter table public.analyses add column if not exists matter_name text;
 alter table public.analyses add column if not exists tool_type text;
 alter table public.analyses add column if not exists client_name text;
@@ -204,12 +211,13 @@ language plpgsql
 security definer set search_path = public
 as $$
 begin
-  insert into public.profiles (id, email, full_name, company)
+  insert into public.profiles (id, email, full_name, company, account_type)
   values (
     new.id,
     new.email,
     new.raw_user_meta_data->>'full_name',
-    new.raw_user_meta_data->>'company'
+    new.raw_user_meta_data->>'company',
+    coalesce(new.raw_user_meta_data->>'account_type', 'individual')
   )
   on conflict (id) do nothing;
   return new;

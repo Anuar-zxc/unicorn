@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import path from "node:path";
+import { buildSystemPrompt, type ResponseMode } from "@/lib/ai-prompts";
 
 type LegalChunk = { id:string; sourceId:string; title:string; article:string; text:string; url:string; authority:string; language:string; fetchedAt:string };
 let cache: LegalChunk[] | null = null;
@@ -10,7 +11,11 @@ export async function retrieveKzLaw(query: string, limit = 7) {
   return cache!.map((chunk) => ({ chunk, score: score(chunk, terms) })).filter((item) => item.score > 0).sort((a,b) => b.score-a.score).slice(0,limit).map((item) => item.chunk);
 }
 
-export async function streamLocalLegalAnswer(query: string, context: string) {
+export async function streamLocalLegalAnswer(
+  query: string,
+  context: string,
+  mode: ResponseMode = "concise"
+) {
   const sources = await retrieveKzLaw(`${query} ${context}`);
   if (!sources.length) throw new Error("В локальном корпусе не найдены релевантные статьи.");
   const evidence = sources.map((source,index) => `[${index+1}] ${source.title}, ${source.article}\n${source.text}\nИсточник: ${source.url}`).join("\n\n");
@@ -21,7 +26,7 @@ export async function streamLocalLegalAnswer(query: string, context: string) {
       model:process.env.OLLAMA_MODEL ?? "llama3:latest",
       stream:true,
       messages:[
-        {role:"system",content:"Ты — Lexo KZ, локальный юридический исследователь для юристов Казахстана. Отвечай только по официальным выдержкам ИПС «Әділет». Не выдумывай нормы. Каждое юридическое утверждение сопровождай ссылкой [номер]. Если данных недостаточно, скажи об этом. Формат: ## Правовой вопрос; ## Применимое право; ## Анализ; ## Вывод; ## Источники. Отвечай профессионально на русском языке."},
+        {role:"system",content:buildSystemPrompt("Ты — Lexo KZ, локальный юридический исследователь для юристов Казахстана. Отвечай только по официальным выдержкам ИПС «Әділет». Не выдумывай нормы. Каждое юридическое утверждение сопровождай ссылкой [номер]. Если данных недостаточно, скажи об этом. Формат: ## Правовой вопрос; ## Применимое право; ## Анализ; ## Вывод; ## Источники. Отвечай профессионально на русском языке.", mode)},
         {role:"user",content:`Вопрос: ${query}\nКонтекст: ${context || "не указан"}\n\nОфициальные выдержки:\n${evidence}`}
       ]
     })

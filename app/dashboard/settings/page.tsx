@@ -3,12 +3,13 @@ import Link from "next/link";
 import { CreditCard, Mail, KeyRound, ShieldAlert } from "lucide-react";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 import { LogoutButton } from "@/components/auth/LogoutButton";
+import { AccountTypeSwitcher } from "@/components/settings/AccountTypeSwitcher";
 
 export default async function SettingsPage() {
   const supabase = await createSupabaseServerClient();
   const [{ data: { user } }, { data: profile }] = await Promise.all([
     supabase.auth.getUser(),
-    supabase.from("profiles").select("polar_customer_id").maybeSingle()
+    supabase.from("profiles").select("polar_customer_id,account_type").maybeSingle()
   ]);
   if (!user) redirect("/auth/signin");
   const email = user.email ?? "";
@@ -21,6 +22,16 @@ export default async function SettingsPage() {
       </div>
 
       <div className="grid gap-5 max-w-2xl">
+        <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6">
+          <h2 className="font-display text-xl font-semibold">Workspace type</h2>
+          <p className="mb-5 mt-2 text-sm text-[var(--text-secondary)]">
+            Choose the tools and dashboard that match how you use Lexo.
+          </p>
+          <AccountTypeSwitcher
+            initialType={profile?.account_type === "lawyer" ? "lawyer" : "individual"}
+          />
+        </section>
+
         <section className="rounded-xl border border-[#252528] bg-[#141418] p-6">
           <div className="mb-5 flex items-center gap-3">
             <CreditCard className="h-5 w-5 text-[#1A56E8]" />

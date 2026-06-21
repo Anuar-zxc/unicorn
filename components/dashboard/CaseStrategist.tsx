@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { Archive, Briefcase, CheckCircle2, Download, FileText, Loader2, Scale, Send, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ResponseModeToggle } from "@/components/shared/ResponseModeToggle";
+import type { ResponseMode } from "@/lib/ai-prompts";
 
 const stages = ["Just started", "Got a legal notice", "Going to court", "Already in court"];
 const progressSteps = [
@@ -29,6 +31,7 @@ export function CaseStrategist() {
   const [strategy, setStrategy] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [mode, setMode] = useState<ResponseMode>("concise");
 
   const activeStep = useMemo(() => {
     if (!loading && strategy) return progressSteps.length;
@@ -50,7 +53,7 @@ export function CaseStrategist() {
       const response = await fetch("/api/case-strategy", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ situation, outcome, stage, jurisdiction, documentsSummary })
+        body: JSON.stringify({ situation, outcome, stage, jurisdiction, documentsSummary, mode })
       });
 
       if (!response.ok || !response.body) throw new Error("Could not build strategy.");
@@ -87,6 +90,9 @@ export function CaseStrategist() {
         <p className="mt-4 text-sm leading-6 text-white/55">
           Tell Lexo what happened. It will identify legal issues, cite relevant law where possible, build arguments, prepare a demand letter, and package a brief for a lawyer.
         </p>
+        <div className="mt-5">
+          <ResponseModeToggle mode={mode} onChange={setMode} />
+        </div>
 
         <label className="mt-6 block text-sm font-medium text-white/70">What happened?</label>
         <textarea

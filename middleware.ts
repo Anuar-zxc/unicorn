@@ -1,5 +1,5 @@
-import { type NextRequest, NextResponse } from "next/server";
 import { createServerClient, type CookieOptions } from "@supabase/ssr";
+import { type NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
   if (
@@ -34,10 +34,11 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data } = await supabase.auth.getClaims();
-  const claims = data?.claims;
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
 
-  if (!claims?.sub && request.nextUrl.pathname.startsWith("/dashboard")) {
+  if (!user && request.nextUrl.pathname.startsWith("/dashboard")) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/auth/signin";
     redirectUrl.searchParams.set("next", request.nextUrl.pathname);
@@ -48,5 +49,7 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"]
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)"
+  ]
 };

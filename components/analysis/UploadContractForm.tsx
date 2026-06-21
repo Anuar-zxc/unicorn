@@ -8,6 +8,8 @@ import {
   type AnalyzeState
 } from "@/lib/analysis-action";
 import { Button } from "@/components/ui/button";
+import { ResponseModeToggle } from "@/components/shared/ResponseModeToggle";
+import type { ResponseMode } from "@/lib/ai-prompts";
 
 const initialState: AnalyzeState = { ok: false };
 
@@ -15,6 +17,7 @@ export function UploadContractForm({ disabled }: { disabled?: boolean }) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
+  const [mode, setMode] = useState<ResponseMode>("concise");
   const [state, formAction, pending] = useActionState(
     analyzeContractAction,
     initialState
@@ -28,6 +31,11 @@ export function UploadContractForm({ disabled }: { disabled?: boolean }) {
 
   return (
     <form action={formAction} className="rounded-xl border border-[#252528] bg-[#141418] p-5 md:p-8">
+      <input type="hidden" name="mode" value={mode} />
+      <div className="mb-5 flex items-center justify-between gap-3">
+        <p className="text-sm font-medium text-white/70">Response style</p>
+        <ResponseModeToggle mode={mode} onChange={setMode} />
+      </div>
       <div
         className="grid cursor-pointer place-items-center rounded-xl border border-dashed border-[#3a3a40] bg-[#0C0C0E] p-10 text-center transition hover:border-[#1A56E8]"
         onClick={() => inputRef.current?.click()}

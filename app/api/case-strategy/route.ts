@@ -1,6 +1,7 @@
 import { STRATEGIST_SYSTEM } from "@/lib/ai-system";
 import { completeGemini } from "@/lib/gemini";
 import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
+import { buildSystemPrompt, normalizeResponseMode } from "@/lib/ai-prompts";
 
 const demoStrategy = `# Case Strategy Brief
 
@@ -91,8 +92,8 @@ export async function POST(req: Request) {
     return new Response(access.message, { status: access.status });
   }
 
-  const { situation, outcome, stage, jurisdiction, documentsSummary, followups } = await req.json();
-  const systemPrompt = `${STRATEGIST_SYSTEM}
+  const { situation, outcome, stage, jurisdiction, documentsSummary, followups, mode } = await req.json();
+  const systemPrompt = buildSystemPrompt(`${STRATEGIST_SYSTEM}
 
 Your analysis must include:
 1. CASE SUMMARY
@@ -109,7 +110,7 @@ Rules:
 - Be strategic, practical, and organized
 - Format as clean markdown with clear section headers
 
-Jurisdiction: ${jurisdiction || "Not provided"}`;
+Jurisdiction: ${jurisdiction || "Not provided"}`, normalizeResponseMode(mode));
 
   const output = await completeGemini({
     system: systemPrompt,
