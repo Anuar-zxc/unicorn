@@ -10,7 +10,7 @@ const plans = [
   {
     key: "solo",
     name: "Solo",
-    price: 39,
+    price: 19,
     featured: false,
     features: [
       "All 6 AI tools",
@@ -22,10 +22,10 @@ const plans = [
   {
     key: "firm",
     name: "Firm",
-    price: 119,
+    price: 59,
     features: [
       "Up to 5 team members",
-      "Unlimited documents",
+      "250 documents/month",
       "Shared matters",
       "Priority processing"
     ],
@@ -34,7 +34,7 @@ const plans = [
   {
     key: "enterprise",
     name: "Enterprise",
-    price: 299,
+    price: 149,
     featured: false,
     features: [
       "Unlimited team members",

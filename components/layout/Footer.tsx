@@ -6,24 +6,24 @@ import { useLanguage } from "@/components/providers/AppProviders";
 
 const copy = {
   en: {
-    tagline: "AI-powered legal workspace for modern law practices.",
+    tagline: "Clear legal guidance for people, businesses, and modern law practices.",
     columns: [
       { title: "Workspace", links: [["Contract Review", "/dashboard/review"], ["Case Research", "/dashboard/research"], ["Draft Generator", "/dashboard/draft"], ["Case Prep", "/dashboard/caseprep"]] },
       { title: "Product", links: [["Redline Compare", "/dashboard/compare"], ["Client Summary", "/dashboard/client"], ["Pricing", "/#pricing"], ["Security", "/#trust"]] },
       { title: "Legal", links: [["Privacy", "/privacy"], ["Terms", "/terms"], ["AI use policy", "/terms"], ["Contact", "mailto:hello@lexo.ai"]] }
     ],
-    copyright: "© 2026 Lexo. Professional legal AI workspace.",
-    disclaimer: "AI-assisted analysis — attorney review recommended before client delivery."
+    copyright: "© 2026 Lexo. Legal AI for people and professionals.",
+    disclaimer: "AI-assisted information is not a substitute for advice from a qualified lawyer."
   },
   ru: {
-    tagline: "AI-пространство для современной юридической практики.",
+    tagline: "Понятная юридическая помощь для людей, бизнеса и современной юридической практики.",
     columns: [
       { title: "Инструменты", links: [["Проверка договоров", "/dashboard/review"], ["Исследование дел", "/dashboard/research"], ["Создание документов", "/dashboard/draft"], ["Подготовка дела", "/dashboard/caseprep"]] },
       { title: "Продукт", links: [["Сравнение версий", "/dashboard/compare"], ["Резюме для клиента", "/dashboard/client"], ["Тарифы", "/#pricing"], ["Безопасность", "/#trust"]] },
       { title: "Правовая информация", links: [["Конфиденциальность", "/privacy"], ["Условия", "/terms"], ["Политика AI", "/terms"], ["Контакты", "mailto:hello@lexo.ai"]] }
     ],
-    copyright: "© 2026 Lexo. Профессиональное юридическое AI-пространство.",
-    disclaimer: "AI-анализ требует проверки юристом перед передачей клиенту."
+    copyright: "© 2026 Lexo. Юридический AI для людей и профессионалов.",
+    disclaimer: "AI-информация не заменяет консультацию квалифицированного юриста."
   }
 };
 

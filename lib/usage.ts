@@ -12,9 +12,9 @@ export const PLAN_LIMITS = {
     teamMembers: 1
   },
   firm: {
-    analyses: Infinity,
-    builds: Infinity,
-    caseStrategies: Infinity,
+    analyses: 250,
+    builds: 250,
+    caseStrategies: 25,
     teamMembers: 5
   },
   enterprise: {

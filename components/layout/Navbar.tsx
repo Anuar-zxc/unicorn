@@ -14,7 +14,7 @@ const copy = {
   en: {
     demo: "How it works",
     features: "Features",
-    audience: "For lawyers",
+    audience: "Who it helps",
     trust: "Security",
     pricing: "Pricing",
     login: "Log in",
@@ -23,7 +23,7 @@ const copy = {
   ru: {
     demo: "Как работает",
     features: "Возможности",
-    audience: "Для юристов",
+    audience: "Для кого",
     trust: "Безопасность",
     pricing: "Тарифы",
     login: "Войти",
