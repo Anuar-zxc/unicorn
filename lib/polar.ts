@@ -45,9 +45,15 @@ export function getPlanFromProductId(productId: string) {
 }
 
 export function getSiteUrl() {
+  // VERCEL_PROJECT_PRODUCTION_URL is set automatically on Vercel, so OG images,
+  // sitemap and checkout return URLs stay correct even without NEXT_PUBLIC_SITE_URL.
+  const vercelUrl = process.env.VERCEL_PROJECT_PRODUCTION_URL
+    ? `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`
+    : undefined;
   return (
-    process.env.NEXT_PUBLIC_SITE_URL ??
-    process.env.NEXT_PUBLIC_APP_URL ??
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.NEXT_PUBLIC_APP_URL ||
+    vercelUrl ||
     "http://localhost:3000"
   ).replace(/\/$/, "");
 }
