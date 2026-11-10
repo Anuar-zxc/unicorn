@@ -205,7 +205,7 @@ export function LandingPage() {
                 <Sparkles className="h-3.5 w-3.5 text-[var(--accent)]" aria-hidden />
                 {t.badge}
               </div>
-              <h1 className={`mt-7 font-display font-bold leading-[1.02] tracking-[-0.045em] ${ru ? "text-[clamp(38px,4.6vw,58px)]" : "text-[clamp(44px,6.2vw,76px)]"}`}>
+              <h1 className="mt-7 font-display text-[clamp(38px,4.6vw,58px)] font-bold leading-[1.04] tracking-[-0.045em]">
                 {t.hero[0]}<br />
                 {t.hero[1]}<br />
                 <span className="text-[var(--accent)]">{t.hero[2]}</span>
