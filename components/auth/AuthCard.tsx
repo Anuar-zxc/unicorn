@@ -9,13 +9,13 @@ import { useLanguage } from "@/components/providers/AppProviders";
 
 const copy = {
   en: {
-    signin: ["Welcome back", "Log in to your professional legal workspace.", "Forgot password?", "No account?", "Create one"],
-    signup: ["Start your trial", "Set up your Lexo workspace in minutes.", "Already have an account?", "Sign in"],
+    signin: ["Welcome back", "Log in to your Lexo workspace.", "Forgot password?", "No account?", "Create one"],
+    signup: ["Create your free account", "No credit card needed. Takes less than a minute.", "Already have an account?", "Sign in"],
     reset: ["Reset password", "We will send a secure reset link to your email.", "Remembered it?", "Log in"]
   },
   ru: {
-    signin: ["С возвращением", "Войдите в профессиональное юридическое пространство.", "Забыли пароль?", "Нет аккаунта?", "Создать"],
-    signup: ["Начните пробный период", "Настройте рабочее пространство Lexo за несколько минут.", "Уже есть аккаунт?", "Войти"],
+    signin: ["С возвращением", "Войдите в рабочее пространство Lexo.", "Забыли пароль?", "Нет аккаунта?", "Создать"],
+    signup: ["Создайте бесплатный аккаунт", "Без банковской карты. Займёт меньше минуты.", "Уже есть аккаунт?", "Войти"],
     reset: ["Сброс пароля", "Мы отправим безопасную ссылку для сброса на email.", "Вспомнили пароль?", "Войти"]
   }
 };
@@ -23,17 +23,19 @@ const copy = {
 export function AuthCard({
   mode,
   next,
-  error
+  error,
+  initialAccountType
 }: {
   mode: "signin" | "signup" | "reset";
   next?: string;
   error?: string;
+  initialAccountType?: "lawyer" | "individual";
 }) {
   const { locale } = useLanguage();
   const text = copy[locale][mode];
 
   return (
-    <main className="grid min-h-screen place-items-center bg-[var(--bg-surface)] p-4 grid-bg">
+    <main id="main" className="grid min-h-screen place-items-center bg-[var(--bg-surface)] p-4 grid-bg">
       <section className="w-full max-w-md rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-7 shadow-[var(--shadow-lg)]">
         <div className="mb-7 text-center">
           <div className="mb-4 flex justify-end gap-2">
@@ -51,7 +53,7 @@ export function AuthCard({
               : "We could not complete sign-in. Please try again."}
           </p>
         )}
-        <AuthForm mode={mode} next={next} />
+        <AuthForm mode={mode} next={next} initialAccountType={initialAccountType} />
         {mode === "signin" && (
           <>
             <p className="mt-5 text-center text-sm text-[var(--text-secondary)]">

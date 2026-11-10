@@ -3,26 +3,27 @@
 import Link from "next/link";
 import { Logo } from "@/components/shared/Logo";
 import { useLanguage } from "@/components/providers/AppProviders";
+import { CONTACT_EMAIL } from "@/lib/site";
 
 const copy = {
   en: {
     tagline: "Clear legal guidance for people, businesses, and modern law practices.",
     columns: [
-      { title: "Workspace", links: [["Contract Review", "/dashboard/review"], ["Case Research", "/dashboard/research"], ["Draft Generator", "/dashboard/draft"], ["Case Prep", "/dashboard/caseprep"]] },
-      { title: "Product", links: [["Redline Compare", "/dashboard/compare"], ["Client Summary", "/dashboard/client"], ["Pricing", "/#pricing"], ["Security", "/#trust"]] },
-      { title: "Legal", links: [["Privacy", "/privacy"], ["Terms", "/terms"], ["AI use policy", "/terms"], ["Contact", "mailto:hello@lexo.ai"]] }
+      { title: "Tools", links: [["Check a contract", "/dashboard/check"], ["Ask a legal question", "/dashboard/ask"], ["Build a contract", "/dashboard/build"], ["Seller taxes", "/seller-tax"]] },
+      { title: "Product", links: [["For lawyers", "/auth/signup?account=lawyer"], ["Pricing", "/#pricing"], ["Security", "/#trust"], ["FAQ", "/#faq"]] },
+      { title: "Legal", links: [["Privacy", "/privacy"], ["Terms", "/terms"], ["AI use policy", "/ai-policy"], ["Contact", `mailto:${CONTACT_EMAIL}`]] }
     ],
-    copyright: "© 2026 Lexo. Legal AI for people and professionals.",
+    copyright: `© ${new Date().getFullYear()} Lexo. Legal AI for people and professionals.`,
     disclaimer: "AI-assisted information is not a substitute for advice from a qualified lawyer."
   },
   ru: {
     tagline: "Понятная юридическая помощь для людей, бизнеса и современной юридической практики.",
     columns: [
-      { title: "Инструменты", links: [["Проверка договоров", "/dashboard/review"], ["Исследование дел", "/dashboard/research"], ["Создание документов", "/dashboard/draft"], ["Подготовка дела", "/dashboard/caseprep"]] },
-      { title: "Продукт", links: [["Сравнение версий", "/dashboard/compare"], ["Резюме для клиента", "/dashboard/client"], ["Тарифы", "/#pricing"], ["Безопасность", "/#trust"]] },
-      { title: "Правовая информация", links: [["Конфиденциальность", "/privacy"], ["Условия", "/terms"], ["Политика AI", "/terms"], ["Контакты", "mailto:hello@lexo.ai"]] }
+      { title: "Инструменты", links: [["Проверить договор", "/dashboard/check"], ["Задать вопрос", "/dashboard/ask"], ["Создать договор", "/dashboard/build"], ["Налоги продавца", "/seller-tax"]] },
+      { title: "Продукт", links: [["Для юристов", "/auth/signup?account=lawyer"], ["Тарифы", "/#pricing"], ["Безопасность", "/#trust"], ["FAQ", "/#faq"]] },
+      { title: "Правовая информация", links: [["Конфиденциальность", "/privacy"], ["Условия", "/terms"], ["Политика AI", "/ai-policy"], ["Контакты", `mailto:${CONTACT_EMAIL}`]] }
     ],
-    copyright: "© 2026 Lexo. Юридический AI для людей и профессионалов.",
+    copyright: `© ${new Date().getFullYear()} Lexo. Юридический AI для людей и профессионалов.`,
     disclaimer: "AI-информация не заменяет консультацию квалифицированного юриста."
   }
 };

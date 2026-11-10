@@ -3,8 +3,7 @@
 @tailwind utilities;
 
 :root {
-  --font-display: 'Plus Jakarta Sans', sans-serif;
-  --font-body: 'Inter', sans-serif;
+  /* --font-display / --font-body come from next/font in app/layout.tsx. */
   --bg-page: #ffffff;
   --bg-surface: #f7f7f5;
   --bg-elevated: #efefeb;

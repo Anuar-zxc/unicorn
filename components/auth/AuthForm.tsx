@@ -79,10 +79,12 @@ function friendlyError(message: string, text: (typeof authText)["en"]) {
 
 export function AuthForm({
   mode,
-  next = "/dashboard"
+  next = "/dashboard",
+  initialAccountType
 }: {
   mode: "signin" | "signup" | "reset";
   next?: string;
+  initialAccountType?: "lawyer" | "individual";
 }) {
   const { locale } = useLanguage();
   const text = authText[locale];
@@ -96,7 +98,7 @@ export function AuthForm({
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<"lawyer" | "individual" | null>(
-    mode === "signup" ? null : "individual"
+    mode === "signup" ? initialAccountType ?? null : "individual"
   );
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {

@@ -118,7 +118,7 @@ export function DashboardLayout({
             </span>
           </div>
         </header>
-        {children}
+        <div id="main">{children}</div>
       </div>
     </div>
   );

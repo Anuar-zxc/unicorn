@@ -8,6 +8,8 @@ export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: ButtonVariant;
   size?: ButtonSize;
+  /** Render the single child (e.g. a <Link>) with button styles instead of a <button>. */
+  asChild?: boolean;
 }
 
 const variants: Record<ButtonVariant, string> = {
@@ -30,18 +32,23 @@ const sizes: Record<ButtonSize, string> = {
   icon: "h-10 w-10 rounded-full"
 };
 
+const base =
+  "focus-ring relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50";
+
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant = "primary", size = "md", ...props }, ref) => (
-    <button
-      ref={ref}
-      className={cn(
-        "focus-ring relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50",
-        variants[variant],
-        sizes[size],
-        className
-      )}
-      {...props}
-    />
-  )
+  ({ className, variant = "primary", size = "md", asChild, children, ...props }, ref) => {
+    const classes = cn(base, variants[variant], sizes[size], className);
+    if (asChild && React.isValidElement<{ className?: string }>(children)) {
+      // Avoids invalid <a><button/></a> nesting for link-styled buttons.
+      return React.cloneElement(children, {
+        className: cn(classes, children.props.className)
+      });
+    }
+    return (
+      <button ref={ref} className={classes} {...props}>
+        {children}
+      </button>
+    );
+  }
 );
 Button.displayName = "Button";

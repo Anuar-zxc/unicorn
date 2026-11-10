@@ -19,19 +19,33 @@ type LanguageContextValue = {
 const LanguageContext = createContext<LanguageContextValue | null>(null);
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>("en");
+  // Russian by default: Lexo's primary market is Kazakhstan.
+  const [locale, setLocaleState] = useState<Locale>("ru");
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("lexo-locale");
+    let saved: string | null = null;
+    try {
+      saved = window.localStorage.getItem("lexo-locale");
+    } catch {
+      // Storage can be unavailable (private mode, embedded browsers).
+    }
     if (saved === "ru" || saved === "en") setLocaleState(saved);
   }, []);
+
+  useEffect(() => {
+    document.documentElement.lang = locale;
+  }, [locale]);
 
   const value = useMemo(
     () => ({
       locale,
       setLocale(nextLocale: Locale) {
         setLocaleState(nextLocale);
-        window.localStorage.setItem("lexo-locale", nextLocale);
+        try {
+          window.localStorage.setItem("lexo-locale", nextLocale);
+        } catch {
+          // Ignore: the choice still applies for this visit.
+        }
       }
     }),
     [locale]
