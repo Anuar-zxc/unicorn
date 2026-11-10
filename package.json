@@ -13,7 +13,8 @@
     "kz:ingest": "node scripts/ingest-kz-law.mjs",
     "kz:pilot": "node scripts/ingest-kz-law.mjs --only=constitution,civil-code-general,personal-data-law",
     "kz:dataset": "node scripts/build-training-dataset.mjs",
-    "kz:evaluate": "node scripts/evaluate-retrieval.mjs"
+    "kz:evaluate": "node scripts/evaluate-retrieval.mjs",
+    "test": "node --experimental-strip-types --no-warnings --test \"tests/*.test.ts\""
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.0",

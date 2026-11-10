@@ -12,12 +12,12 @@ type GeminiInlineDocument = {
 };
 
 export class GeminiError extends Error {
-  constructor(
-    message: string,
-    readonly status: number
-  ) {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
     super(message);
     this.name = "GeminiError";
+    this.status = status;
   }
 }
 
