@@ -1,6 +1,6 @@
 import { STRATEGIST_SYSTEM } from "@/lib/ai-system";
-import { completeGemini } from "@/lib/gemini";
 import { authorizeFeature, recordToolUsage } from "@/lib/usage-server";
+import { clampText, streamCompletion } from "@/lib/stream-tool";
 import { buildSystemPrompt, normalizeResponseMode } from "@/lib/ai-prompts";
 import { normalizeAILanguage } from "@/lib/ai-language";
 
@@ -74,18 +74,7 @@ Sincerely,
 
 Professional AI analysis — attorney review recommended before client delivery.`;
 
-function streamText(text: string) {
-  const encoder = new TextEncoder();
-  return new ReadableStream({
-    async start(controller) {
-      for (const chunk of text.match(/.{1,90}(\s|$)/g) ?? [text]) {
-        controller.enqueue(encoder.encode(chunk));
-        await new Promise((resolve) => setTimeout(resolve, 18));
-      }
-      controller.close();
-    }
-  });
-}
+export const maxDuration = 60;
 
 export async function POST(req: Request) {
   const access = await authorizeFeature("caseStrategies");
@@ -93,7 +82,16 @@ export async function POST(req: Request) {
     return new Response(access.message, { status: access.status });
   }
 
-  const { situation, outcome, stage, jurisdiction, documentsSummary, followups, mode, language } = await req.json();
+  const body = (await req.json().catch(() => ({}))) as Record<string, unknown>;
+  const situation = clampText(body.situation, 20_000);
+  const outcome = clampText(body.outcome, 4_000);
+  const stage = clampText(body.stage, 500);
+  const jurisdiction = clampText(body.jurisdiction, 200);
+  const documentsSummary = clampText(body.documentsSummary, 20_000);
+  const followups = clampText(body.followups, 8_000);
+  if (!situation) return new Response("Describe the situation first.", { status: 400 });
+
+  const language = normalizeAILanguage(body.language ?? access.profile?.ai_language);
   const systemPrompt = buildSystemPrompt(`${STRATEGIST_SYSTEM}
 
 Your analysis must include:
@@ -111,19 +109,9 @@ Rules:
 - Be strategic, practical, and organized
 - Format as clean markdown with clear section headers
 
-Jurisdiction: ${jurisdiction || "Not provided"}`, normalizeResponseMode(mode), normalizeAILanguage(language ?? access.profile?.ai_language));
+Jurisdiction: ${jurisdiction || "Republic of Kazakhstan"}`, normalizeResponseMode(body.mode), language);
 
-  const output = await completeGemini({
-    system: systemPrompt,
-    prompt: `Situation: ${situation}
-Desired outcome: ${outcome}
-Stage: ${stage}
-Documents summary: ${documentsSummary || "No documents uploaded"}
-Follow-up answers: ${followups || "None"}`,
-    maxTokens: 7000
-  });
-  const responseLanguage = normalizeAILanguage(language ?? access.profile?.ai_language);
-  const result = output || (responseLanguage === "ru" ? `# Стратегия по делу
+  const fallbackText = language === "ru" ? `# Стратегия по делу
 
 ## Краткое резюме
 Соберите договоры, переписку, платежи, уведомления и хронологию событий.
@@ -139,16 +127,26 @@ Follow-up answers: ${followups || "None"}`,
 3. Подготовьте письменную претензию.
 4. Уточните применимое право и срок исковой давности с юристом.
 
-Анализ создан с помощью AI — рекомендуется профессиональная проверка.` : demoStrategy);
-  await recordToolUsage({
-    supabase: access.supabase,
-    userId: access.user.id,
-    toolType: "case",
-    input: `${situation}\n${outcome}\n${stage}\n${jurisdiction}\n${documentsSummary ?? ""}`,
-    output: result
-  });
+Анализ создан с помощью AI — рекомендуется профессиональная проверка.` : demoStrategy;
 
-  return new Response(streamText(result), {
-    headers: { "Content-Type": "text/plain; charset=utf-8" }
+  return streamCompletion({
+    system: systemPrompt,
+    prompt: `Situation: ${situation}
+Desired outcome: ${outcome || "Not specified"}
+Stage: ${stage || "Not specified"}
+Documents summary: ${documentsSummary || "No documents uploaded"}
+Follow-up answers: ${followups || "None"}`,
+    maxTokens: 8000,
+    fallbackText,
+    language,
+    logLabel: "case-strategy",
+    onComplete: (output) =>
+      recordToolUsage({
+        supabase: access.supabase,
+        userId: access.user.id,
+        toolType: "case",
+        input: `${situation}\n${outcome}\n${stage}\n${jurisdiction}\n${documentsSummary}`,
+        output
+      })
   });
 }

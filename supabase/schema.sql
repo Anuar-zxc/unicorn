@@ -152,7 +152,8 @@ create policy "Users can read own profile"
 
 create policy "Users can update own profile"
   on public.profiles for update
-  using (auth.uid() = id);
+  using (auth.uid() = id)
+  with check (auth.uid() = id);
 
 create policy "Users can read own analyses"
   on public.analyses for select
@@ -176,7 +177,7 @@ create policy "Users can read own bookings"
 
 create policy "Users can create own bookings"
   on public.bookings for insert
-  with check (auth.uid() = user_id);
+  with check (auth.uid() = user_id and status = 'pending');
 
 create policy "Firm owners can manage team members"
   on public.team_members for all
@@ -203,6 +204,9 @@ create policy "Users can read own contracts"
 create policy "Users can delete own contracts"
   on storage.objects for delete
   using (bucket_id = 'contracts' and auth.uid()::text = (storage.foldername(name))[1]);
+
+-- Billing columns, usage ledger and other hardening live in
+-- supabase/migrations/20261111_security_hardening.sql — run it after this file.
 
 -- ============================================================
 -- Auto-create profile row on new user signup

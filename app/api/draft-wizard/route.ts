@@ -1,5 +1,6 @@
 import { completeGemini } from "@/lib/gemini";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { authorizeFeature, recordUsageEvent } from "@/lib/usage-server";
 import { getContractType } from "@/lib/contract-types";
 import {
   buildSystemPrompt,
@@ -11,6 +12,11 @@ import {
 } from "@/lib/ai-language";
 
 type Message = { role: "assistant" | "user"; content: string };
+
+export const maxDuration = 60;
+
+const MAX_ANSWER_CHARS = 4_000;
+const MAX_USER_TURNS = 12;
 
 export async function POST(req: Request) {
   const supabase = await createSupabaseServerClient();
@@ -44,28 +50,20 @@ export async function POST(req: Request) {
       return Response.json({ error: "Contract type is not available." }, { status: 404 });
     }
 
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("plan,ai_language")
-      .eq("id", user.id)
-      .maybeSingle();
-    const monthStart = new Date();
-    monthStart.setUTCDate(1);
-    monthStart.setUTCHours(0, 0, 0, 0);
-    const { count } = await supabase
-      .from("draft_sessions")
-      .select("id", { count: "exact", head: true })
-      .eq("user_id", user.id)
-      .gte("created_at", monthStart.toISOString());
-    if ((profile?.plan ?? "free") === "free" && (count ?? 0) >= 1) {
-      return Response.json(
-        { error: "PLAN_LIMIT: The free plan includes one contract build per month." },
-        { status: 403 }
-      );
+    // Same monthly "builds" quota as every other drafting tool, counted from the
+    // append-only usage ledger (deleting draft sessions no longer resets it).
+    const access = await authorizeFeature("builds");
+    if (!access.ok) {
+      return Response.json({ error: access.message }, { status: access.status });
     }
+    const profile = access.profile;
 
     const language = normalizeAILanguage(body.language ?? profile?.ai_language);
-    const firstQuestion = firstQuestionFor(contractType.name, accountType, language);
+    const firstQuestion = firstQuestionFor(
+      language === "ru" ? contractType.name_ru : contractType.name,
+      accountType,
+      language
+    );
     const conversation: Message[] = [{ role: "assistant", content: firstQuestion }];
     const { data: session, error } = await supabase
       .from("draft_sessions")
@@ -78,7 +76,8 @@ export async function POST(req: Request) {
       })
       .select("id")
       .single();
-    if (error) return Response.json({ error: error.message }, { status: 500 });
+    if (error) return Response.json({ error: "Could not start the drafting session." }, { status: 500 });
+    await recordUsageEvent(supabase, user.id, "build");
     return Response.json({ sessionId: session.id, firstQuestion, conversation });
   }
 
@@ -95,19 +94,25 @@ export async function POST(req: Request) {
     const contractType = getContractType(session.contract_type);
     if (!contractType) return Response.json({ error: "Contract type not found." }, { status: 404 });
 
+    if (session.status === "complete") {
+      return Response.json({ isComplete: true, draft: session.current_draft });
+    }
+    const answer = String(body.answer ?? "").trim().slice(0, MAX_ANSWER_CHARS);
+    if (!answer) return Response.json({ error: "Answer is required." }, { status: 400 });
+
     const language = normalizeAILanguage(body.language ?? session.ai_language);
     const conversation: Message[] = [
       ...(Array.isArray(session.conversation) ? session.conversation : []),
-      { role: "user", content: String(body.answer ?? "") }
+      { role: "user", content: answer }
     ];
     const userAnswers = conversation.filter((message) => message.role === "user").length;
     const targetAnswers = session.account_type === "lawyer" ? 4 : 6;
     const generated = await generateWizardTurn({
-      contractName: contractType.name,
+      contractName: language === "ru" ? contractType.name_ru : contractType.name,
       accountType: session.account_type,
       language,
       conversation,
-      shouldFinish: userAnswers >= targetAnswers
+      shouldFinish: userAnswers >= targetAnswers || userAnswers >= MAX_USER_TURNS
     });
     const assistantMessage = generated.isComplete
       ? language === "ru" ? "Договор готов. Проверьте текст справа." : "Your contract is ready. Review it on the right."
@@ -127,7 +132,7 @@ export async function POST(req: Request) {
       })
       .eq("id", session.id)
       .eq("user_id", user.id);
-    if (updateError) return Response.json({ error: updateError.message }, { status: 500 });
+    if (updateError) return Response.json({ error: "Could not save the drafting session." }, { status: 500 });
     return Response.json({
       isComplete: generated.isComplete,
       draft: generated.draft || session.current_draft,
@@ -166,12 +171,17 @@ For Kazakhstan jurisdiction, use Kazakhstan legal drafting conventions. If Engli
     language
   );
   const fallback = deterministicTurn(contractName, accountType, language, conversation, shouldFinish);
-  const output = await completeGemini({
-    system,
-    prompt: `Conversation:\n${conversation.map((message) => `${message.role}: ${message.content}`).join("\n")}\n\nThe target information threshold has ${shouldFinish ? "" : "not "}been reached.`,
-    maxTokens: shouldFinish ? 6000 : 1800,
-    json: true
-  });
+  let output: string | null | undefined = null;
+  try {
+    output = await completeGemini({
+      system,
+      prompt: `Conversation:\n${conversation.map((message) => `${message.role}: ${message.content}`).join("\n")}\n\nThe target information threshold has ${shouldFinish ? "" : "not "}been reached.${shouldFinish ? " Set isComplete to true and return the full draft now." : ""}`,
+      maxTokens: shouldFinish ? 8000 : 1800,
+      json: true
+    });
+  } catch (error) {
+    console.error("[draft-wizard] Gemini failed", error);
+  }
   if (!output) return fallback;
   try {
     const parsed = JSON.parse(output.replace(/^```json\s*|\s*```$/g, ""));

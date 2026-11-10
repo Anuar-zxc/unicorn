@@ -13,7 +13,12 @@ export async function POST(req: Request) {
   }
 
   const rawBody = await req.text();
-  const event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+  let event: ReturnType<typeof stripe.webhooks.constructEvent>;
+  try {
+    event = stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+  } catch {
+    return NextResponse.json({ error: "Invalid signature" }, { status: 400 });
+  }
 
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;

@@ -2,63 +2,109 @@ import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { buildSystemPrompt, type ResponseMode } from "@/lib/ai-prompts";
 import type { AILanguage } from "@/lib/ai-language";
+import {
+  buildLegalIndex,
+  searchLegalIndex,
+  type LegalChunk,
+  type LegalIndex
+} from "@/lib/kz-retrieval";
 
-type LegalChunk = { id:string; sourceId:string; title:string; article:string; text:string; url:string; authority:string; language:string; fetchedAt:string };
-let cache: LegalChunk[] | null = null;
+let indexPromise: Promise<LegalIndex> | null = null;
 
-export async function retrieveKzLaw(query: string, limit = 7) {
-  if (!cache) cache = JSON.parse(await readFile(path.join(process.cwd(), "data", "kz-law", "chunks.json"), "utf8"));
-  const terms = tokenize(query);
-  return cache!.map((chunk) => ({ chunk, score: score(chunk, terms) })).filter((item) => item.score > 0).sort((a,b) => b.score-a.score).slice(0,limit).map((item) => item.chunk);
+/** Loads the Adilet corpus once per server instance and builds the BM25 index. */
+function getIndex() {
+  if (!indexPromise) {
+    indexPromise = readFile(
+      path.join(process.cwd(), "data", "kz-law", "chunks.json"),
+      "utf8"
+    )
+      .then((raw) => buildLegalIndex(JSON.parse(raw) as LegalChunk[]))
+      .catch((error) => {
+        indexPromise = null;
+        throw error;
+      });
+  }
+  return indexPromise;
 }
 
+export async function retrieveKzLaw(query: string, limit = 7) {
+  return searchLegalIndex(await getIndex(), query, limit);
+}
+
+/**
+ * Self-hosted answer engine (Ollama). Only used when OLLAMA_BASE_URL is set,
+ * so production on Vercel goes straight to Gemini instead of timing out on
+ * a localhost connection first.
+ */
 export async function streamLocalLegalAnswer(
   query: string,
   context: string,
   mode: ResponseMode = "concise",
   language: AILanguage = "ru"
 ) {
+  const baseUrl = process.env.OLLAMA_BASE_URL;
+  if (!baseUrl) throw new Error("OLLAMA_BASE_URL is not configured.");
   const sources = await retrieveKzLaw(`${query} ${context}`);
   if (!sources.length) throw new Error("В локальном корпусе не найдены релевантные статьи.");
-  const evidence = sources.map((source,index) => `[${index+1}] ${source.title}, ${source.article}\n${source.text}\nИсточник: ${source.url}`).join("\n\n");
-  const response = await fetch(`${process.env.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434"}/api/chat`, {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      model:process.env.OLLAMA_MODEL ?? "llama3:latest",
-      stream:true,
-      messages:[
-        {role:"system",content:buildSystemPrompt("You are Lexo KZ, a legal researcher grounded only in the supplied official extracts from Kazakhstan's Adilet legal information system. Never invent legal rules. Add a bracket citation to every legal claim. If the evidence is insufficient, say so. Structure the answer as a legal question, applicable law, analysis, conclusion, and sources, with headings translated into the output language.", mode, language)},
-        {role:"user",content:`Вопрос: ${query}\nКонтекст: ${context || "не указан"}\n\nОфициальные выдержки:\n${evidence}`}
+  const evidence = sources
+    .map(
+      (source, index) =>
+        `[${index + 1}] ${source.title}, ${source.article}\n${source.text}\nИсточник: ${source.url}`
+    )
+    .join("\n\n");
+  const response = await fetch(`${baseUrl.replace(/\/$/, "")}/api/chat`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal: AbortSignal.timeout(60_000),
+    body: JSON.stringify({
+      model: process.env.OLLAMA_MODEL ?? "llama3:latest",
+      stream: true,
+      messages: [
+        {
+          role: "system",
+          content: buildSystemPrompt(
+            "You are Lexo KZ, a legal researcher grounded only in the supplied official extracts from Kazakhstan's Adilet legal information system. Never invent legal rules. Add a bracket citation to every legal claim. If the evidence is insufficient, say so. Structure the answer as a legal question, applicable law, analysis, conclusion, and sources, with headings translated into the output language.",
+            mode,
+            language
+          )
+        },
+        {
+          role: "user",
+          content: `Вопрос: ${query}\nКонтекст: ${context || "не указан"}\n\nОфициальные выдержки:\n${evidence}`
+        }
       ]
     })
   });
-  if (!response.ok || !response.body) throw new Error(`Ollama error ${response.status}: ${await response.text()}`);
+  if (!response.ok || !response.body) {
+    throw new Error(`Ollama error ${response.status}: ${await response.text()}`);
+  }
   const encoder = new TextEncoder();
   const decoder = new TextDecoder();
-  return new ReadableStream({
+  const body = response.body;
+  return new ReadableStream<Uint8Array>({
     async start(controller) {
-      const reader = response.body!.getReader();
+      const reader = body.getReader();
       let buffer = "";
       try {
         while (true) {
-          const {value,done} = await reader.read();
+          const { value, done } = await reader.read();
           if (done) break;
-          buffer += decoder.decode(value,{stream:true});
+          buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split("\n");
           buffer = lines.pop() ?? "";
           for (const line of lines) {
             if (!line.trim()) continue;
-            const text = JSON.parse(line).message?.content ?? "";
-            if (text) controller.enqueue(encoder.encode(text));
+            try {
+              const text = JSON.parse(line).message?.content ?? "";
+              if (text) controller.enqueue(encoder.encode(text));
+            } catch {
+              // Skip malformed frames instead of killing the whole answer.
+            }
           }
         }
-      } finally { controller.close(); }
+      } finally {
+        controller.close();
+      }
     }
   });
 }
-
-const TOKEN_SPLIT_PATTERN = new RegExp("[^\\p{L}\\p{N}-]+", "gu");
-function tokenize(value:string) { return Array.from(new Set(value.toLowerCase().replace(TOKEN_SPLIT_PATTERN," ").split(/\s+/).filter((term) => term.length > 2 && !STOP.has(term)))); }
-function score(chunk:LegalChunk, terms:string[]) { const heading=`${chunk.title} ${chunk.article}`.toLowerCase(); const body=chunk.text.toLowerCase(); return terms.reduce((total,term) => total+(heading.includes(term)?6:0)+Math.min(4,body.split(term).length-1),0); }
-const STOP = new Set(["какие","какой","может","нужно","если","либо","этого","этот","быть","право","закону","казахстана","республики"]);

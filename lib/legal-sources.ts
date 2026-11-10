@@ -1,3 +1,5 @@
+import { retrieveKzLaw } from "@/lib/kz-rag";
+
 export const TRUSTED_LEGAL_SOURCES = {
   kazakhstan: [
     "adilet.zan.kz",
@@ -18,8 +20,16 @@ export type TrustedSearchResult = {
 };
 
 export function getSourcesForJurisdiction(jurisdiction: string): readonly string[] {
-  const key = jurisdiction.toLowerCase();
+  const key = jurisdiction.toLowerCase().trim();
+  // Lexo is Kazakhstan-first: no jurisdiction means Kazakhstan law.
+  if (!key) return TRUSTED_LEGAL_SOURCES.kazakhstan;
   if (
+    key.includes("алматы") ||
+    key.includes("астана") ||
+    key.includes("шымкент") ||
+    key.includes("almaty") ||
+    key.includes("astana") ||
+    /(^|[^\p{L}])рк([^\p{L}]|$)/u.test(key) ||
     key.includes("kazakh") ||
     key.includes("қазақстан") ||
     key.includes("казахстан") ||
@@ -92,23 +102,22 @@ export async function getTrustedLegalContext(
   query: string,
   jurisdiction: string
 ) {
-  const webResults = await searchTrustedLegalSources(query, jurisdiction);
-  if (webResults.length) return formatTrustedSources(webResults);
-
   const domains = getSourcesForJurisdiction(jurisdiction);
-  if (!domains.includes("adilet.zan.kz")) return "";
+  const isKazakhstan = domains.includes("adilet.zan.kz");
+  const [webResults, localResults] = await Promise.all([
+    searchTrustedLegalSources(query, jurisdiction),
+    isKazakhstan
+      ? retrieveKzLaw(`${query} ${jurisdiction}`, 5).catch(() => [])
+      : Promise.resolve([])
+  ]);
 
-  try {
-    const localResults = await retrieveKzLaw(`${query} ${jurisdiction}`, 5);
-    return formatTrustedSources(
-      localResults.map((result) => ({
-        title: `${result.title} — ${result.article}`,
-        url: result.url,
-        content: result.text
-      }))
-    );
-  } catch {
-    return "";
-  }
+  // Official Adilet extracts first, then any live web results.
+  return formatTrustedSources([
+    ...localResults.map((result) => ({
+      title: `${result.title} — ${result.article}`,
+      url: result.url,
+      content: result.text.slice(0, 2_500)
+    })),
+    ...webResults
+  ]);
 }
-import { retrieveKzLaw } from "@/lib/kz-rag";

@@ -1,6 +1,26 @@
 /** @type {import('next').NextConfig} */
+const securityHeaders = [
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "X-Frame-Options", value: "SAMEORIGIN" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=(), browsing-topics=()" },
+  { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains; preload" }
+];
+
 const nextConfig = {
-  typedRoutes: false
+  typedRoutes: false,
+  poweredByHeader: false,
+  // The Adilet corpus is read at runtime by the legal RAG; make sure Vercel ships it.
+  outputFileTracingIncludes: {
+    "/api/**": ["./data/kz-law/chunks.json"]
+  },
+  // Training datasets and raw HTML are not needed at runtime.
+  outputFileTracingExcludes: {
+    "*": ["./data/training/**", "./data/kz-law/raw/**", "./data/egov/**"]
+  },
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  }
 };
 
 export default nextConfig;

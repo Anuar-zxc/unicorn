@@ -1,8 +1,5 @@
 import { AuthCard } from "@/components/auth/AuthCard";
-
-function safeNext(value: string | undefined) {
-  return value?.startsWith("/") && !value.startsWith("//") ? value : "/dashboard";
-}
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export default async function SignInPage({
   searchParams
@@ -13,7 +10,7 @@ export default async function SignInPage({
   return (
     <AuthCard
       mode="signin"
-      next={safeNext(params.next)}
+      next={safeRedirectPath(params.next)}
       error={params.error}
     />
   );

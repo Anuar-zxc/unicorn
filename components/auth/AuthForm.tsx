@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 import { Scale, UserRound } from "lucide-react";
 import {
   createSupabaseBrowserClient,
@@ -132,7 +133,13 @@ export function AuthForm({
         setError(friendlyError(signinError.message, text));
         return;
       }
-      router.replace(next);
+      const target = safeRedirectPath(next);
+      if (target.startsWith("/api/")) {
+        // Route handlers (e.g. checkout) need a full navigation, not an RSC fetch.
+        window.location.assign(target);
+        return;
+      }
+      router.replace(target);
       router.refresh();
       return;
     }

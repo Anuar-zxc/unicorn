@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { safeRedirectPath } from "@/lib/safe-redirect";
 
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
@@ -8,10 +9,7 @@ export async function GET(request: Request) {
   const requestedAccountType = searchParams.get("account_type");
   const accountType =
     requestedAccountType === "lawyer" ? "lawyer" : "individual";
-  const next =
-    requestedNext?.startsWith("/") && !requestedNext.startsWith("//")
-      ? requestedNext
-      : "/dashboard";
+  const next = safeRedirectPath(requestedNext);
 
   if (code) {
     const supabase = await createSupabaseServerClient();

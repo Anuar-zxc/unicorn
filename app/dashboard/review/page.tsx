@@ -1,57 +1,21 @@
+import { ContractCheckIntro } from "@/components/analysis/ContractCheckIntro";
 import { UploadContractForm } from "@/components/analysis/UploadContractForm";
-import { canAnalyze, monthlyAnalysisLimit } from "@/lib/plans";
-import { createSupabaseServerClient } from "@/lib/supabase/server";
+import { getFeatureUsage } from "@/lib/usage-server";
+
+export const maxDuration = 60;
 
 export default async function ContractReviewPage() {
-  const supabase = await createSupabaseServerClient();
-
-  const monthStart = new Date();
-  monthStart.setDate(1);
-  monthStart.setHours(0, 0, 0, 0);
-
-  const [{ data: profile }, { count }] = await Promise.all([
-    supabase.from("profiles").select("plan").maybeSingle(),
-    supabase
-      .from("analyses")
-      .select("id", { count: "exact", head: true })
-      .or("tool_type.in.(review,analysis),tool_type.is.null")
-      .gte("created_at", monthStart.toISOString())
-  ]);
-
-  const plan = profile?.plan ?? "free";
-  const usage = count ?? 0;
-  const allowed = canAnalyze(plan, usage);
-  const limit = monthlyAnalysisLimit(plan);
+  const usage = await getFeatureUsage("analyses");
 
   return (
     <main className="p-4 md:p-6">
-      <div className="mb-6 rounded-2xl border border-[#252b36] bg-[#131720] p-5 md:p-6">
-        <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[#8fb0ff]">
-          Contract intelligence
-        </p>
-        <h1 className="mt-2 font-display text-3xl font-semibold">
-          Review PDF, DOCX, scans, and legal photos
-        </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-6 text-white/50">
-          Upload a client contract or scan. Lexo extracts text, reads images
-          with vision when Gemini is configured, highlights risk, and saves the
-          report to matter history.
-        </p>
-        <p className="mt-4 text-sm text-white/42">
-          {limit === Infinity
-            ? `${plan === "enterprise" ? "Enterprise" : "Firm"} plan: unlimited analyses`
-            : `${usage} of ${limit} analyses used this month`}
-        </p>
-      </div>
-
-      <UploadContractForm disabled={!allowed} />
-
-      {!allowed && (
-        <p className="mt-4 rounded-lg border border-amber-400/20 bg-amber-400/10 p-4 text-sm text-amber-100">
-          You have reached your monthly analysis limit. Upgrade your plan to
-          continue.
-        </p>
-      )}
+      <ContractCheckIntro
+        variant="professional"
+        used={usage.used}
+        limit={usage.limit}
+        allowed={usage.allowed}
+      />
+      <UploadContractForm disabled={!usage.allowed} />
     </main>
   );
 }
