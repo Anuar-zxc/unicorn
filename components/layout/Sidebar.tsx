@@ -16,7 +16,8 @@ import {
   PenLine,
   SearchCheck,
   Settings,
-  Sparkles
+  Sparkles,
+  X
 } from "lucide-react";
 import { Avatar } from "@/components/shared/Avatar";
 import { Logo } from "@/components/shared/Logo";
@@ -60,17 +61,21 @@ const individualItems: NavItem[] = [
 function initials(email: string) { return email.split("@")[0].split(/[.\-_]/).map((p) => p[0]).join("").slice(0, 2).toUpperCase() || "LX"; }
 
 export function Sidebar({
-  collapsed,
+  collapsed: desktopCollapsed,
   onToggle,
   userEmail,
   userPlan,
-  accountType
+  accountType,
+  mobileOpen = false,
+  onCloseMobile
 }: {
   collapsed: boolean;
   onToggle: () => void;
   userEmail: string;
   userPlan: string;
   accountType: "lawyer" | "individual";
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }) {
   const pathname = usePathname();
   const { locale } = useLanguage();
@@ -79,18 +84,32 @@ export function Sidebar({
 
   useEffect(() => {
     setPendingHref(null);
+    onCloseMobile?.();
+    // Close the mobile drawer after navigation.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  return (
-    <aside className={cn("hidden h-screen shrink-0 border-r border-[var(--border)] bg-[var(--bg-surface)] p-4 transition-all lg:flex lg:flex-col", collapsed ? "w-20" : "w-64")}>
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const onKey = (event: KeyboardEvent) => event.key === "Escape" && onCloseMobile?.();
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [mobileOpen, onCloseMobile]);
+
+  const renderContent = (collapsed: boolean, mobile: boolean) => (
+    <>
       <div className="flex items-center justify-between">
         <Link href="/dashboard"><Logo markOnly={collapsed} className={collapsed ? "text-[26px]" : "text-[28px]"} /></Link>
-        <button aria-label="Toggle sidebar" onClick={onToggle} className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"><ChevronLeft className={cn("h-4 w-4", collapsed && "rotate-180")} /></button>
+        {mobile ? (
+          <button aria-label={locale === "ru" ? "Закрыть меню" : "Close menu"} onClick={onCloseMobile} className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"><X className="h-5 w-5" /></button>
+        ) : (
+          <button aria-label={locale === "ru" ? "Свернуть меню" : "Toggle sidebar"} onClick={onToggle} className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"><ChevronLeft className={cn("h-4 w-4", collapsed && "rotate-180")} /></button>
+        )}
       </div>
       <div className={cn("mt-7 rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-3", collapsed && "hidden")}>
         <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">
           <Sparkles className="h-4 w-4 text-[#5d86ff]" strokeWidth={2.6} />
-          MVP Suite
+          Lexo AI
         </div>
         <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
           {accountType === "lawyer"
@@ -132,7 +151,7 @@ export function Sidebar({
                   <span>{label}</span>
                   {item.badge && (
                     <span className="ml-auto rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] text-amber-500">
-                      {item.badge}
+                      {item.badge === "New" && locale === "ru" ? "Новое" : item.badge}
                     </span>
                   )}
                 </>
@@ -145,6 +164,28 @@ export function Sidebar({
         <div className="flex items-center gap-3"><Avatar initials={initials(userEmail)} className="h-9 w-9 text-xs" />{!collapsed && <div className="min-w-0"><p className="truncate text-xs font-semibold">{userEmail}</p><PlanBadge plan={userPlan === "enterprise" ? "Enterprise" : userPlan === "firm" ? "Firm" : userPlan === "solo" ? "Solo" : "Free"} /></div>}</div>
         {!collapsed && <div className="mt-3"><LogoutButton /></div>}
       </div>
-    </aside>
+    </>
+  );
+
+  return (
+    <>
+      <aside className={cn("sticky top-0 hidden h-screen shrink-0 overflow-y-auto border-r border-[var(--border)] bg-[var(--bg-surface)] p-4 transition-all lg:flex lg:flex-col", desktopCollapsed ? "w-20" : "w-64")}>
+        {renderContent(desktopCollapsed, false)}
+      </aside>
+      <div
+        className={cn("fixed inset-0 z-50 bg-black/45 backdrop-blur-sm transition-opacity lg:hidden", mobileOpen ? "opacity-100" : "pointer-events-none opacity-0")}
+        onClick={onCloseMobile}
+        aria-hidden
+      />
+      <aside
+        role="dialog"
+        aria-modal="true"
+        aria-label={locale === "ru" ? "Навигация" : "Navigation"}
+        inert={!mobileOpen}
+        className={cn("fixed inset-y-0 left-0 z-50 flex h-dvh w-[min(86vw,300px)] flex-col overflow-y-auto border-r border-[var(--border)] bg-[var(--bg-surface)] p-4 transition-transform lg:hidden", mobileOpen ? "translate-x-0" : "-translate-x-full")}
+      >
+        {renderContent(false, true)}
+      </aside>
+    </>
   );
 }

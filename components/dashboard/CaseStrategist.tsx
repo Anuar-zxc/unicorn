@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { Markdown } from "@/components/shared/Markdown";
 import { Archive, Briefcase, CheckCircle2, Download, FileText, Loader2, Scale, Send, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ResponseModeToggle } from "@/components/shared/ResponseModeToggle";
@@ -175,9 +176,13 @@ export function CaseStrategist() {
           <div>
             <p className="text-sm text-white/45">Lawyer-ready deliverable</p>
             <h2 className="font-display text-2xl font-semibold">Strategy brief</h2>
-            <pre className="mt-5 min-h-[620px] whitespace-pre-wrap rounded-xl border border-[#252528] bg-[#0C0C0E] p-5 text-sm leading-7 text-white/80">
-              {strategy || "Your case strategy will stream here: legal framework, strongest arguments, risks, action plan, demand letter, and lawyer questions."}
-            </pre>
+            <div className="mt-5 min-h-[620px] rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-5 text-[var(--text-primary)]">
+              {strategy ? (
+                <Markdown>{strategy}</Markdown>
+              ) : (
+                <p className="text-sm text-[var(--text-muted)]">Your case strategy will stream here: legal framework, strongest arguments, risks, action plan, demand letter, and lawyer questions.</p>
+              )}
+            </div>
           </div>
 
           <aside className="space-y-4">

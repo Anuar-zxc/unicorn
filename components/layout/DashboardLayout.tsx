@@ -33,6 +33,7 @@ export function DashboardLayout({
   accountType: "lawyer" | "individual";
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [plan, setPlan] = useState(userPlan);
   const { locale } = useLanguage();
   const initials = getInitials(userEmail || "CL");
@@ -49,10 +50,15 @@ export function DashboardLayout({
   }, []);
 
   return (
-    <div className="dashboard-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] lg:flex">
+    <div
+      className="dashboard-shell min-h-screen bg-[var(--bg-page)] text-[var(--text-primary)] lg:flex"
+      style={{ "--sidebar-width": collapsed ? "5rem" : "16rem" } as React.CSSProperties}
+    >
       <Sidebar
         collapsed={collapsed}
         onToggle={() => setCollapsed((v) => !v)}
+        mobileOpen={mobileNavOpen}
+        onCloseMobile={() => setMobileNavOpen(false)}
         userEmail={userEmail}
         userPlan={plan}
         accountType={accountType}
@@ -62,8 +68,9 @@ export function DashboardLayout({
           <div className="flex min-h-20 items-center gap-4 px-4 py-3 md:px-6">
             <button
               className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] lg:hidden"
-              aria-label="Open navigation"
-              onClick={() => setCollapsed((v) => !v)}
+              aria-label={locale === "ru" ? "Открыть навигацию" : "Open navigation"}
+              aria-expanded={mobileNavOpen}
+              onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </button>
@@ -77,7 +84,7 @@ export function DashboardLayout({
                     ? "Личный юридический помощник"
                     : "Personal legal assistant"}
               </p>
-              <Logo className="mt-2 text-[30px]" />
+              <Logo className="mt-2 text-[30px] lg:hidden" />
             </div>
             <div className="ml-auto flex items-center gap-2">
               <div className="hidden items-center gap-2 sm:flex">

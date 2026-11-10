@@ -8,9 +8,36 @@ import { useLanguage } from "@/components/providers/AppProviders";
 type HistoryItem = {
   id: string;
   file_name: string | null;
+  title: string | null;
+  tool_type: string | null;
   created_at: string;
-  result: { summary?: string } | null;
+  result: { summary?: string; overallRisk?: string } | null;
 };
+
+export const TOOL_LABELS: Record<string, { ru: string; en: string }> = {
+  review: { ru: "Проверка договора", en: "Contract review" },
+  analysis: { ru: "Проверка договора", en: "Contract review" },
+  check: { ru: "Проверка договора", en: "Contract review" },
+  ask: { ru: "Юридический вопрос", en: "Legal question" },
+  "seller-tax": { ru: "Налоги продавца", en: "Seller taxes" },
+  research: { ru: "Правовой поиск", en: "Legal research" },
+  draft: { ru: "Документ", en: "Draft" },
+  build: { ru: "Договор", en: "Contract" },
+  compare: { ru: "Сравнение версий", en: "Version comparison" },
+  client: { ru: "Резюме для клиента", en: "Client summary" },
+  case: { ru: "Стратегия по делу", en: "Case strategy" },
+  caseprep: { ru: "Подготовка дела", en: "Case prep" }
+};
+
+export function itemTitle(item: Pick<HistoryItem, "file_name" | "title" | "tool_type">, ru: boolean) {
+  const generic = !item.title || /^[a-z-]+ result$/.test(item.title);
+  return (
+    item.file_name ||
+    (!generic ? item.title : null) ||
+    TOOL_LABELS[item.tool_type ?? "review"]?.[ru ? "ru" : "en"] ||
+    (ru ? "Отчёт без названия" : "Untitled report")
+  );
+}
 
 export function HistoryHeading() {
   const { locale } = useLanguage();
@@ -36,8 +63,8 @@ export function HistoryList({ initialItems }: { initialItems: HistoryItem[] }) {
   async function deleteItem(item: HistoryItem) {
     const confirmed = window.confirm(
       ru
-        ? `Удалить отчёт «${item.file_name || "Без названия"}»? Это действие нельзя отменить.`
-        : `Delete “${item.file_name || "Untitled report"}”? This cannot be undone.`
+        ? `Удалить «${itemTitle(item, true)}»? Это действие нельзя отменить.`
+        : `Delete “${itemTitle(item, false)}”? This cannot be undone.`
     );
     if (!confirmed) return;
 
@@ -68,9 +95,9 @@ export function HistoryList({ initialItems }: { initialItems: HistoryItem[] }) {
           {ru ? "Сохранённых отчётов пока нет" : "No reports yet"}
         </h2>
         <p className="mt-3 text-[var(--text-secondary)]">
-          {ru ? "Загрузите первый договор, чтобы создать отчёт." : "Upload your first contract to create a report."}
+          {ru ? "Проверьте договор или задайте вопрос — результат сохранится здесь." : "Check a contract or ask a question — results are saved here."}
         </p>
-        <Link href="/dashboard/analyze" className="mt-5 inline-flex text-sm font-semibold text-[var(--accent)]">
+        <Link href="/dashboard" className="mt-5 inline-flex text-sm font-semibold text-[var(--accent)]">
           {ru ? "Проверить договор" : "Analyze a contract"}
         </Link>
       </section>
@@ -96,13 +123,16 @@ export function HistoryList({ initialItems }: { initialItems: HistoryItem[] }) {
             >
               <Link href={`/dashboard/history/${item.id}`} className="min-w-0 flex-1">
                 <h2 className="truncate font-display text-xl font-semibold">
-                  {item.file_name || (ru ? "Отчёт без названия" : "Untitled report")}
+                  {itemTitle(item, ru)}
                 </h2>
-                <p className="mt-2 line-clamp-1 text-sm text-[var(--text-secondary)]">
-                  {item.result?.summary ?? (ru ? "Отчёт о рисках договора" : "Contract risk report")}
-                </p>
-                <p className="mt-2 text-xs text-[var(--text-muted)]">
-                  {new Date(item.created_at).toLocaleDateString(ru ? "ru-RU" : "en-US")}
+                {item.result?.summary && (
+                  <p className="mt-2 line-clamp-1 text-sm text-[var(--text-secondary)]">{item.result.summary}</p>
+                )}
+                <p className="mt-2 flex flex-wrap items-center gap-2 text-xs text-[var(--text-muted)]">
+                  <span className="rounded-full border border-[var(--border)] px-2 py-0.5">
+                    {TOOL_LABELS[item.tool_type ?? "review"]?.[ru ? "ru" : "en"] ?? item.tool_type}
+                  </span>
+                  {new Date(item.created_at).toLocaleDateString(ru ? "ru-RU" : "en-US", { day: "numeric", month: "long", year: "numeric" })}
                 </p>
               </Link>
               <button

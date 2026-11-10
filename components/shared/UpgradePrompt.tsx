@@ -1,17 +1,20 @@
+"use client";
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/AppProviders";
 
-export function UpgradePrompt({ feature }: { feature: string }) {
+export function UpgradePrompt() {
+  const { locale } = useLanguage();
+  const ru = locale === "ru";
   return (
-    <div className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-4 text-center">
-      <p className="text-sm font-medium text-amber-100">
-        You&apos;ve reached your {feature} limit for this month.
+    <div className="mt-4 rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-center">
+      <p className="text-sm font-medium">
+        {ru ? "Лимит на этот месяц исчерпан. Лимиты обновляются 1-го числа." : "You've used this month's limit. Limits reset on the 1st."}
       </p>
-      <Link href="/dashboard/billing">
-        <Button className="mt-3" size="sm">
-          Upgrade plan →
-        </Button>
-      </Link>
+      <Button asChild className="mt-3" size="sm">
+        <Link href="/dashboard/billing">{ru ? "Посмотреть тарифы →" : "See plans →"}</Link>
+      </Button>
     </div>
   );
 }

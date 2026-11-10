@@ -6,7 +6,8 @@ export default async function HistoryPage() {
 
   const { data: analyses } = await supabase
     .from("analyses")
-    .select("id,file_name,created_at,result")
+    .select("id,file_name,title,tool_type,created_at,result")
+    .limit(200)
     .order("created_at", { ascending: false });
 
   return (

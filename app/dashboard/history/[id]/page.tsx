@@ -1,5 +1,7 @@
 import { notFound } from "next/navigation";
 import { AnalysisCards } from "@/components/analysis/AnalysisCards";
+import { SavedOutput } from "@/components/dashboard/SavedOutput";
+import { HistoryItemHeader } from "@/components/dashboard/HistoryItemHeader";
 import type { AnalysisResult } from "@/lib/analysis-action";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
 
@@ -13,21 +15,32 @@ export default async function AnalysisDetailPage({
 
   const { data: analysis } = await supabase
     .from("analyses")
-    .select("file_name,created_at,result")
+    .select("file_name,title,tool_type,created_at,result,output_text")
     .eq("id", id)
     .maybeSingle();
 
   if (!analysis) notFound();
 
+  const result = analysis.result as AnalysisResult | null;
+  const hasStructuredReport = Boolean(result && typeof result === "object" && "summary" in result);
+
   return (
-    <main className="p-4 md:p-6">
-      <div className="mb-6">
-        <p className="text-sm text-white/42">
-          {new Date(analysis.created_at).toLocaleString()}
+    <main className="mx-auto max-w-6xl p-4 md:p-6">
+      <HistoryItemHeader
+        fileName={analysis.file_name}
+        title={analysis.title}
+        toolType={analysis.tool_type}
+        createdAt={analysis.created_at}
+      />
+      {hasStructuredReport && result ? (
+        <AnalysisCards result={result} title={analysis.file_name ?? analysis.title ?? undefined} />
+      ) : analysis.output_text ? (
+        <SavedOutput title={analysis.title ?? analysis.file_name ?? "Lexo"} output={analysis.output_text} />
+      ) : (
+        <p className="rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 text-sm text-[var(--text-secondary)]">
+          Этот отчёт пуст. / This report is empty.
         </p>
-        <h1 className="font-display text-3xl font-semibold">{analysis.file_name}</h1>
-      </div>
-      <AnalysisCards result={analysis.result as AnalysisResult} />
+      )}
     </main>
   );
 }

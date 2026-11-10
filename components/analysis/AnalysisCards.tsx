@@ -1,128 +1,244 @@
 "use client";
 
 import Link from "next/link";
-import { Copy, Download, FilePlus, Scale, Send } from "lucide-react";
+import { useRef, useState } from "react";
+import { Check, Copy, FileDown, FilePlus, MessageCircleQuestion, Printer } from "lucide-react";
 import type { AnalysisResult } from "@/lib/analysis-action";
 import { Button } from "@/components/ui/button";
+import { useLanguage } from "@/components/providers/AppProviders";
+import { copyToClipboard, downloadWord } from "@/lib/export";
+import { cn } from "@/lib/utils";
 
-const riskTone = {
-  High: "border-red-400/25 bg-red-400/10 text-red-100",
-  Medium: "border-amber-400/25 bg-amber-400/10 text-amber-100",
-  Low: "border-emerald-400/25 bg-emerald-400/10 text-emerald-100"
+type Level = "High" | "Medium" | "Low";
+
+const riskTone: Record<Level, string> = {
+  High: "border-red-500/30 bg-red-500/10 text-red-700 dark:text-red-200",
+  Medium: "border-amber-500/30 bg-amber-500/10 text-amber-800 dark:text-amber-100",
+  Low: "border-emerald-500/30 bg-emerald-500/10 text-emerald-800 dark:text-emerald-100"
 };
 
-export function AnalysisCards({ result }: { result: AnalysisResult }) {
-  const overallRisk =
-    result.overallRisk ??
-    (result.risks.some((risk) => risk.level === "High") ? "High" : result.risks.some((risk) => risk.level === "Medium") ? "Medium" : "Low");
+const copy = {
+  ru: {
+    level: { High: "Высокий", Medium: "Средний", Low: "Низкий" } as Record<Level, string>,
+    risk: "риск",
+    summary: "Краткий вывод",
+    summaryTitle: "Что это за документ и стоит ли подписывать",
+    jurisdiction: "Применимое право",
+    notDetected: "Не определено — уточните оговорку о применимом праве.",
+    clauses: "Ключевые условия",
+    clausesTitle: "Что нужно понимать в этом договоре",
+    breakdown: "Разбор рисков",
+    breakdownTitle: "Условия, на которые стоит обратить внимание",
+    columns: ["Условие", "Что это значит", "Риск", "Что предложить"],
+    fullText: "Текст условия",
+    noClause: "Текст условия не извлечён — для сканов загрузите более чёткое фото.",
+    playbook: "Переговоры",
+    playbookTitle: "Формулировки, которые можно предложить",
+    current: "Сейчас",
+    replacement: "Предлагаемая редакция",
+    copy: "Копировать",
+    copied: "Скопировано",
+    questions: "Вопросы юристу",
+    questionsTitle: "Что спросить, чтобы консультация была короче",
+    word: "Скачать Word",
+    print: "Печать / PDF",
+    build: "Подготовить свою редакцию",
+    ask: "Задать вопрос по договору",
+    reportTitle: "Отчёт о проверке договора"
+  },
+  en: {
+    level: { High: "High", Medium: "Medium", Low: "Low" } as Record<Level, string>,
+    risk: "risk",
+    summary: "Summary",
+    summaryTitle: "What this document is and whether to sign",
+    jurisdiction: "Governing law",
+    notDetected: "Not detected — confirm the governing law clause.",
+    clauses: "Key terms",
+    clausesTitle: "What you need to understand in this contract",
+    breakdown: "Risk breakdown",
+    breakdownTitle: "Clauses that deserve attention",
+    columns: ["Clause", "What it means", "Risk", "What to ask for"],
+    fullText: "Clause text",
+    noClause: "Clause text was not extracted — for scans, upload a sharper photo.",
+    playbook: "Negotiation",
+    playbookTitle: "Wording you can propose",
+    current: "Current",
+    replacement: "Suggested replacement",
+    copy: "Copy",
+    copied: "Copied",
+    questions: "Questions for a lawyer",
+    questionsTitle: "Ask these to keep the consultation short",
+    word: "Download Word",
+    print: "Print / PDF",
+    build: "Draft my own version",
+    ask: "Ask about this contract",
+    reportTitle: "Contract review report"
+  }
+};
 
-  const negotiationRisks = result.risks.filter((risk) => risk.level !== "Low");
+function CopyButton({ text, label, done }: { text: string; label: string; done: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        if (await copyToClipboard(text)) {
+          setCopied(true);
+          setTimeout(() => setCopied(false), 1800);
+        }
+      }}
+      className="no-print mt-3 inline-flex items-center gap-1 text-xs font-bold text-emerald-700 hover:underline dark:text-emerald-200"
+    >
+      {copied ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
+      {copied ? done : label}
+    </button>
+  );
+}
+
+export function AnalysisCards({ result, title }: { result: AnalysisResult; title?: string }) {
+  const { locale } = useLanguage();
+  const t = copy[locale];
+  const reportRef = useRef<HTMLDivElement>(null);
+  const risks = result.risks ?? [];
+  const overallRisk: Level =
+    result.overallRisk ??
+    (risks.some((risk) => risk.level === "High") ? "High" : risks.some((risk) => risk.level === "Medium") ? "Medium" : "Low");
+  const negotiationRisks = risks.filter((risk) => risk.level !== "Low");
+  const card = "rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 md:p-6";
+  const eyebrow = "text-xs font-semibold uppercase tracking-[.14em] text-[var(--text-muted)]";
+  const heading = "mt-2 font-display text-2xl font-bold";
 
   return (
-    <div className="space-y-5 pb-24">
-      <section className="rounded-2xl border border-[#252528] bg-[#141418] p-5 md:p-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-          <div>
-            <p className="text-sm text-white/42">Executive Summary</p>
-            <h2 className="mt-2 font-display text-2xl font-semibold">Attorney-grade contract overview</h2>
+    <div className="pb-28">
+      <div ref={reportRef} className="space-y-5">
+        <section className={card}>
+          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+            <div>
+              <p className={eyebrow}>{t.summary}</p>
+              <h2 className={heading}>{t.summaryTitle}</h2>
+            </div>
+            <span className={cn("w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide", riskTone[overallRisk])}>
+              {t.level[overallRisk]} {t.risk}
+            </span>
           </div>
-          <span className={`w-fit rounded-full border px-3 py-1 text-xs font-bold uppercase tracking-wide ${riskTone[overallRisk]}`}>
-            {overallRisk} Risk
-          </span>
-        </div>
-        <p className="mt-5 text-lg leading-8 text-white/82">{result.summary}</p>
-        <div className="mt-5 rounded-xl border border-[#252528] bg-[#0C0C0E] p-4 text-sm text-white/62">
-          <span className="font-semibold text-white/85">Jurisdiction detected:</span>{" "}
-          {result.jurisdiction ?? "Not detected. Confirm the governing law clause with a lawyer."}
-        </div>
-      </section>
+          <p className="mt-5 text-lg leading-8">{result.summary}</p>
+          <p className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-4 text-sm text-[var(--text-secondary)]">
+            <span className="font-semibold text-[var(--text-primary)]">{t.jurisdiction}:</span>{" "}
+            {result.jurisdiction || t.notDetected}
+          </p>
+        </section>
 
-      <section className="rounded-2xl border border-[#252528] bg-[#141418] p-5 md:p-6">
-        <p className="text-sm text-white/42">Risk Breakdown</p>
-        <h2 className="mt-2 font-display text-2xl font-semibold">Clauses that deserve attention</h2>
-        <div className="mt-5 overflow-hidden rounded-xl border border-[#252528]">
-          <div className="hidden grid-cols-[1fr_1.4fr_130px_1.4fr] gap-4 border-b border-[#252528] bg-[#0C0C0E] px-4 py-3 text-xs font-bold uppercase tracking-wide text-white/40 md:grid">
-            <span>Clause</span>
-            <span>What it means</span>
-            <span>Risk</span>
-            <span>Our suggestion</span>
-          </div>
-          {result.risks.map((risk) => (
-            <details key={risk.title} className="group border-b border-[#252528] last:border-0">
-              <summary className="grid cursor-pointer gap-3 px-4 py-4 text-sm hover:bg-white/[0.03] md:grid-cols-[1fr_1.4fr_130px_1.4fr]">
-                <span className="font-semibold">{risk.title}</span>
-                <span className="text-white/62">{risk.explanation}</span>
-                <span>
-                  <span className={`rounded-full border px-2 py-1 text-xs font-bold ${riskTone[risk.level]}`}>{risk.level}</span>
-                </span>
-                <span className="text-white/62">{risk.recommendation}</span>
-              </summary>
-              <div className="border-t border-[#252528] bg-[#0C0C0E] px-4 py-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-white/35">Full clause text</p>
-                <p className="mt-2 rounded-lg border border-red-400/20 bg-red-400/10 p-3 text-sm leading-6 text-red-100">
-                  {risk.clauseText ?? "Clause text was not extracted. Re-run analysis with a clearer document scan."}
-                </p>
-              </div>
-            </details>
-          ))}
-        </div>
-      </section>
+        {result.importantClauses?.length > 0 && (
+          <section className={card}>
+            <p className={eyebrow}>{t.clauses}</p>
+            <h2 className={heading}>{t.clausesTitle}</h2>
+            <ul className="mt-4 grid gap-2 text-sm leading-6 md:grid-cols-2">
+              {result.importantClauses.map((clause) => (
+                <li key={clause} className="flex gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-page)] p-3">
+                  <Check className="mt-1 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden />
+                  {clause}
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
-      <section className="rounded-2xl border border-[#252528] bg-[#141418] p-5 md:p-6">
-        <p className="text-sm text-white/42">Negotiation Playbook</p>
-        <h2 className="mt-2 font-display text-2xl font-semibold">Counter-language you can propose</h2>
-        <div className="mt-5 grid gap-4">
-          {negotiationRisks.map((risk) => (
-            <article key={risk.title} className="rounded-xl border border-[#252528] bg-[#0C0C0E] p-4">
-              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-                <h3 className="font-display text-xl font-semibold">{risk.title}</h3>
-                <span className={`w-fit rounded-full border px-2 py-1 text-xs font-bold ${riskTone[risk.level]}`}>{risk.level}</span>
+        {risks.length > 0 && (
+          <section className={card}>
+            <p className={eyebrow}>{t.breakdown}</p>
+            <h2 className={heading}>{t.breakdownTitle}</h2>
+            <div className="mt-5 overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--bg-page)]">
+              <div className="hidden grid-cols-[1fr_1.4fr_120px_1.4fr] gap-4 border-b border-[var(--border)] bg-[var(--bg-elevated)] px-4 py-3 text-xs font-bold uppercase tracking-wide text-[var(--text-muted)] md:grid">
+                {t.columns.map((column) => <span key={column}>{column}</span>)}
               </div>
-              <div className="mt-4 grid gap-4 lg:grid-cols-2">
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-red-200/70">Current language</p>
-                  <p className="mt-2 rounded-lg border border-red-400/20 bg-red-400/10 p-3 text-sm leading-6 text-red-100">
-                    {risk.clauseText ?? risk.explanation}
-                  </p>
-                </div>
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-wide text-emerald-200/70">Suggested replacement</p>
-                  <div className="mt-2 rounded-lg border border-emerald-400/20 bg-emerald-400/10 p-3 text-sm leading-6 text-emerald-100">
-                    <p>{risk.replacementLanguage ?? risk.recommendation}</p>
-                    <button className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-emerald-200 hover:text-white">
-                      <Copy className="h-3 w-3" />
-                      Copy language
-                    </button>
+              {risks.map((risk) => (
+                <details key={risk.title} className="group border-b border-[var(--border)] last:border-0">
+                  <summary className="grid cursor-pointer gap-3 px-4 py-4 text-sm hover:bg-[var(--bg-surface)] md:grid-cols-[1fr_1.4fr_120px_1.4fr]">
+                    <span className="font-semibold">{risk.title}</span>
+                    <span className="text-[var(--text-secondary)]">{risk.explanation}</span>
+                    <span>
+                      <span className={cn("rounded-full border px-2 py-1 text-xs font-bold", riskTone[risk.level])}>{t.level[risk.level]}</span>
+                    </span>
+                    <span className="text-[var(--text-secondary)]">{risk.recommendation}</span>
+                  </summary>
+                  <div className="border-t border-[var(--border)] bg-[var(--bg-surface)] px-4 py-4">
+                    <p className="text-xs font-bold uppercase tracking-wide text-[var(--text-muted)]">{t.fullText}</p>
+                    <blockquote className="mt-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm leading-6">
+                      {risk.clauseText || t.noClause}
+                    </blockquote>
                   </div>
-                </div>
-              </div>
-            </article>
-          ))}
-        </div>
-      </section>
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
 
-      <section className="rounded-2xl border border-[#252528] bg-[#141418] p-5 md:p-6">
-        <p className="text-sm text-white/42">Questions to Ask Your Lawyer</p>
-        <h2 className="mt-2 font-display text-2xl font-semibold">Smart questions that save billable time</h2>
-        <ul className="mt-4 grid gap-3 text-sm leading-6 text-white/72 md:grid-cols-2">
-          {result.lawyerQuestions.map((question) => (
-            <li key={question} className="rounded-xl border border-[#252528] bg-[#0C0C0E] p-4">
-              {question}
-            </li>
-          ))}
-        </ul>
-      </section>
+        {negotiationRisks.length > 0 && (
+          <section className={card}>
+            <p className={eyebrow}>{t.playbook}</p>
+            <h2 className={heading}>{t.playbookTitle}</h2>
+            <div className="mt-5 grid gap-4">
+              {negotiationRisks.map((risk) => {
+                const replacement = risk.replacementLanguage || risk.recommendation;
+                return (
+                  <article key={risk.title} className="rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-4">
+                    <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                      <h3 className="font-display text-lg font-bold">{risk.title}</h3>
+                      <span className={cn("w-fit rounded-full border px-2 py-1 text-xs font-bold", riskTone[risk.level])}>{t.level[risk.level]}</span>
+                    </div>
+                    <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-red-600 dark:text-red-300">{t.current}</p>
+                        <p className="mt-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm leading-6">
+                          {risk.clauseText || risk.explanation}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">{t.replacement}</p>
+                        <div className="mt-2 rounded-lg border border-emerald-500/25 bg-emerald-500/5 p-3 text-sm leading-6">
+                          <p>{replacement}</p>
+                          <CopyButton text={replacement} label={t.copy} done={t.copied} />
+                        </div>
+                      </div>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+          </section>
+        )}
 
-      <p className="rounded-xl border border-amber-400/20 bg-amber-400/10 p-4 text-sm leading-6 text-amber-100">
-        {result.disclaimer}
-      </p>
+        {result.lawyerQuestions?.length > 0 && (
+          <section className={card}>
+            <p className={eyebrow}>{t.questions}</p>
+            <h2 className={heading}>{t.questionsTitle}</h2>
+            <ol className="mt-4 grid list-decimal gap-3 pl-5 text-sm leading-6 text-[var(--text-secondary)] md:grid-cols-2">
+              {result.lawyerQuestions.map((question) => (
+                <li key={question} className="rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-4">
+                  {question}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#252528] bg-[#0C0C0E]/90 px-4 py-3 backdrop-blur-xl lg:left-60">
-        <div className="mx-auto flex max-w-5xl flex-wrap gap-2">
-          <Button variant="outline"><Download className="h-4 w-4" />Download PDF report</Button>
-          <Link href="/dashboard/build"><Button variant="outline"><FilePlus className="h-4 w-4" />Build counter-proposal</Button></Link>
-          <Link href="/dashboard/lawyers"><Button variant="outline"><Scale className="h-4 w-4" />Find a Lawyer</Button></Link>
-          <Button><Send className="h-4 w-4" />Export for my lawyer</Button>
+        <p className="rounded-xl border border-amber-400/30 bg-amber-400/10 p-4 text-sm leading-6">{result.disclaimer}</p>
+      </div>
+
+      <div className="no-print fixed inset-x-0 bottom-0 z-40 border-t border-[var(--border)] bg-[var(--bg-page)]/92 px-4 py-3 backdrop-blur-xl lg:left-[var(--sidebar-width,15rem)]">
+        <div className="mx-auto flex max-w-5xl gap-2 overflow-x-auto [scrollbar-width:none] md:flex-wrap [&>*]:shrink-0">
+          <Button size="sm" variant="outline" onClick={() => downloadWord(title || t.reportTitle, reportRef.current?.innerHTML ?? "")}>
+            <FileDown className="h-4 w-4" aria-hidden />{t.word}
+          </Button>
+          <Button size="sm" variant="outline" onClick={() => window.print()}>
+            <Printer className="h-4 w-4" aria-hidden />{t.print}
+          </Button>
+          <Button asChild size="sm" variant="outline">
+            <Link href="/dashboard/build"><FilePlus className="h-4 w-4" aria-hidden />{t.build}</Link>
+          </Button>
+          <Button asChild size="sm">
+            <Link href="/dashboard/ask"><MessageCircleQuestion className="h-4 w-4" aria-hidden />{t.ask}</Link>
+          </Button>
         </div>
       </div>
     </div>

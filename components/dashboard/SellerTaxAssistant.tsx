@@ -9,6 +9,8 @@ import { cn } from "@/lib/utils";
 import { LanguageModeToggle } from "@/components/shared/LanguageModeToggle";
 import type { AILanguage } from "@/lib/ai-language";
 import { useLanguage } from "@/components/providers/AppProviders";
+import { Markdown } from "@/components/shared/Markdown";
+import { UpgradePrompt } from "@/components/shared/UpgradePrompt";
 
 export function SellerTaxAssistant() {
   const { locale } = useLanguage();
@@ -22,17 +24,19 @@ export function SellerTaxAssistant() {
   const [output, setOutput] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [limitReached, setLimitReached] = useState(false);
   const platforms = ["Kaspi", "Wildberries", "OZON", ru ? "Instagram / другое" : "Instagram / Other"];
   const revenues = [ru ? "До 1 млн ₸" : "Under 1M ₸", "1–5 млн ₸", "5–15 млн ₸", "15 млн+ ₸"];
   const registrations = ru ? ["Да", "Нет", "Не уверен(а)"] : ["Yes", "No", "Not sure"];
 
   async function run() {
     if (!platform || !revenueRange || !isRegisteredIP || !productType.trim()) {
-      setError("Complete all fields to get a useful report.");
+      setError(ru ? "Заполните все поля, чтобы получить точный отчёт." : "Complete all fields to get a useful report.");
       return;
     }
     setLoading(true);
     setError("");
+    setLimitReached(false);
     setOutput("");
     try {
       const response = await fetch("/api/seller-tax", {
@@ -48,7 +52,12 @@ export function SellerTaxAssistant() {
         })
       });
       if (!response.ok || !response.body) {
-        throw new Error((await response.text()) || "Could not create the tax report.");
+        const message = await response.text();
+        if (response.status === 403 && message.includes("PLAN_LIMIT")) {
+          setLimitReached(true);
+          throw new Error(ru ? "Лимит вопросов на этот месяц исчерпан." : "You have used this month's questions.");
+        }
+        throw new Error(ru ? "Не удалось подготовить отчёт. Попробуйте ещё раз." : "Could not create the tax report. Please try again.");
       }
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
@@ -60,7 +69,7 @@ export function SellerTaxAssistant() {
         setOutput(result);
       }
     } catch (caught) {
-      setError(caught instanceof Error ? caught.message : "Something went wrong.");
+      setError(caught instanceof Error ? caught.message : ru ? "Что-то пошло не так." : "Something went wrong.");
     } finally {
       setLoading(false);
     }
@@ -94,7 +103,8 @@ export function SellerTaxAssistant() {
           placeholder={ru ? "Например: одежда, косметика, электроника, услуги" : "Example: clothes, cosmetics, electronics, digital services"}
           className="mt-2 h-11 w-full rounded-xl border border-[var(--border)] bg-[var(--bg-page)] px-4 text-sm outline-none focus:border-[var(--accent)]"
         />
-        {error && <p className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="mt-4 rounded-lg bg-red-500/10 p-3 text-sm text-[var(--red)]">{error}</p>}
+        {limitReached && <UpgradePrompt />}
         <Button className="mt-5 w-full" onClick={run} disabled={loading}>
           {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ReceiptText className="h-4 w-4" />}
           {loading ? (ru ? "Проверяем актуальные правила…" : "Checking current rules…") : (ru ? "Создать налоговый чек-лист" : "Create my tax checklist")}
@@ -104,12 +114,14 @@ export function SellerTaxAssistant() {
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 md:p-6">
         <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--text-muted)]">{ru ? "Персональный отчёт" : "Personalized report"}</p>
         <h2 className="mt-2 font-display text-2xl font-semibold">{ru ? "Вероятные обязанности и следующие шаги" : "Your likely obligations and next steps"}</h2>
-        <div className="mt-5 min-h-[560px] rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-5">
+        <div className="mt-5 min-h-[560px] rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-5" aria-live="polite" aria-busy={loading}>
           {output ? (
-            <pre className="whitespace-pre-wrap font-sans text-sm leading-7 text-[var(--text-secondary)]">{output}</pre>
+            <Markdown>{output}</Markdown>
           ) : (
             <div className="grid min-h-[510px] place-items-center text-center text-sm text-[var(--text-muted)]">
-              {ru ? "Заполните форму, чтобы получить практический чек-лист со ссылками на доверенные источники." : "Complete the form to generate a practical checklist with trusted-source references."}
+              {loading
+                ? <Loader2 className="h-7 w-7 animate-spin text-[var(--accent)]" aria-label={ru ? "Готовим отчёт" : "Preparing report"} />
+                : ru ? "Заполните форму, чтобы получить практический чек-лист со ссылками на официальные источники." : "Complete the form to generate a practical checklist with official-source references."}
             </div>
           )}
         </div>
@@ -138,8 +150,9 @@ function ChoiceGroup({
             key={item}
             type="button"
             onClick={() => onChange(item)}
+            aria-pressed={value === item}
             className={cn(
-              "rounded-full border border-[var(--border)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] transition",
+              "rounded-full border border-[var(--border)] px-3 py-2 text-xs font-medium text-[var(--text-secondary)] transition hover:border-[var(--accent)]",
               value === item && "border-[var(--accent)] bg-[var(--accent-light)] text-[var(--accent)]"
             )}
           >
