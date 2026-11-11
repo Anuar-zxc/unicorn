@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import type { AILanguage } from "@/lib/ai-language";
-import { cn } from "@/lib/utils";
+import { Languages } from "lucide-react";
+import { Segmented } from "@/components/ui/segmented";
 import { useLanguage } from "@/components/providers/AppProviders";
 
 export function LanguageModeToggle({
@@ -17,7 +18,12 @@ export function LanguageModeToggle({
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    const saved = window.localStorage.getItem("lexo-ai-language");
+    let saved: string | null = null;
+    try {
+      saved = window.localStorage.getItem("lexo-ai-language");
+    } catch {
+      // Storage unavailable — fall back to profile/locale.
+    }
     if (saved === "ru" || saved === "en") {
       onChange(saved);
       return;
@@ -38,7 +44,11 @@ export function LanguageModeToggle({
 
   async function select(next: AILanguage) {
     onChange(next);
-    window.localStorage.setItem("lexo-ai-language", next);
+    try {
+      window.localStorage.setItem("lexo-ai-language", next);
+    } catch {
+      // Ignore: the choice still applies for this visit.
+    }
     setSaving(true);
     const supabase = createSupabaseBrowserClient();
     const {
@@ -54,22 +64,15 @@ export function LanguageModeToggle({
   }
 
   return (
-    <div className="inline-flex rounded-lg border border-[var(--border)] bg-[var(--bg-page)] p-1 text-xs">
-      {(["en", "ru"] as const).map((item) => (
-        <button
-          key={item}
-          type="button"
-          disabled={saving}
-          onClick={() => select(item)}
-          className={cn(
-            "rounded-md px-3 py-1.5 font-semibold uppercase text-[var(--text-muted)] transition",
-            language === item &&
-              "bg-[var(--bg-elevated)] text-[var(--text-primary)] shadow-sm"
-          )}
-        >
-          {item === "en" ? "🇬🇧 EN" : "🇷🇺 RU"}
-        </button>
-      ))}
-    </div>
+    <Segmented
+      label={locale === "ru" ? "Язык ответа" : "Answer language"}
+      value={language}
+      onChange={(next) => void select(next)}
+      disabled={saving}
+      options={[
+        { value: "ru", label: "RU", icon: Languages },
+        { value: "en", label: "EN" }
+      ]}
+    />
   );
 }

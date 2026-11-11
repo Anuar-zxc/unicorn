@@ -132,7 +132,7 @@ export function AnalysisCards({ result, title }: { result: AnalysisResult; title
           <section className={card}>
             <p className={eyebrow}>{t.clauses}</p>
             <h2 className={heading}>{t.clausesTitle}</h2>
-            <ul className="mt-4 grid gap-2 text-sm leading-6 md:grid-cols-2">
+            <ul className="mt-4 grid grid-cols-1 gap-2 text-sm leading-6 md:grid-cols-2">
               {result.importantClauses.map((clause) => (
                 <li key={clause} className="flex gap-2 rounded-lg border border-[var(--border)] bg-[var(--bg-page)] p-3">
                   <Check className="mt-1 h-4 w-4 shrink-0 text-[var(--accent)]" aria-hidden />
@@ -153,7 +153,7 @@ export function AnalysisCards({ result, title }: { result: AnalysisResult; title
               </div>
               {risks.map((risk) => (
                 <details key={risk.title} className="group border-b border-[var(--border)] last:border-0">
-                  <summary className="grid cursor-pointer gap-3 px-4 py-4 text-sm hover:bg-[var(--bg-surface)] md:grid-cols-[1fr_1.4fr_120px_1.4fr]">
+                  <summary className="grid grid-cols-1 cursor-pointer gap-3 px-4 py-4 text-sm hover:bg-[var(--bg-surface)] md:grid-cols-[1fr_1.4fr_120px_1.4fr]">
                     <span className="font-semibold">{risk.title}</span>
                     <span className="text-[var(--text-secondary)]">{risk.explanation}</span>
                     <span>
@@ -186,7 +186,7 @@ export function AnalysisCards({ result, title }: { result: AnalysisResult; title
                       <h3 className="font-display text-lg font-bold">{risk.title}</h3>
                       <span className={cn("w-fit rounded-full border px-2 py-1 text-xs font-bold", riskTone[risk.level])}>{t.level[risk.level]}</span>
                     </div>
-                    <div className="mt-4 grid gap-4 lg:grid-cols-2">
+                    <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
                       <div>
                         <p className="text-xs font-bold uppercase tracking-wide text-red-600 dark:text-red-300">{t.current}</p>
                         <p className="mt-2 rounded-lg border border-red-500/20 bg-red-500/5 p-3 text-sm leading-6">
@@ -212,7 +212,7 @@ export function AnalysisCards({ result, title }: { result: AnalysisResult; title
           <section className={card}>
             <p className={eyebrow}>{t.questions}</p>
             <h2 className={heading}>{t.questionsTitle}</h2>
-            <ol className="mt-4 grid list-decimal gap-3 pl-5 text-sm leading-6 text-[var(--text-secondary)] md:grid-cols-2">
+            <ol className="mt-4 grid grid-cols-1 list-decimal gap-3 pl-5 text-sm leading-6 text-[var(--text-secondary)] md:grid-cols-2">
               {result.lawyerQuestions.map((question) => (
                 <li key={question} className="rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-4">
                   {question}

@@ -205,7 +205,7 @@ export function ToolWorkspace({ tool }: { tool: ToolKey }) {
 
   return (
     <main className="p-4 md:p-6">
-      <div className="grid gap-5 xl:grid-cols-[.9fr_1.1fr]">
+      <div className="grid grid-cols-1 gap-5 xl:grid-cols-[.9fr_1.1fr]">
         <section className="no-print rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 md:p-6">
           <div className="flex h-11 w-11 items-center justify-center rounded-xl border border-[var(--accent)]/20 bg-[var(--accent-light)] text-[var(--accent)]"><Icon className="h-5 w-5" aria-hidden /></div>
           <p className="mt-6 text-xs font-semibold uppercase tracking-[.16em] text-[var(--accent)]">{copy.eyebrow}</p>

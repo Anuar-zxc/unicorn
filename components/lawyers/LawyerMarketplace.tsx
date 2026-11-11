@@ -71,7 +71,7 @@ export function LawyerMarketplace({ lawyers }: { lawyers: Lawyer[] }) {
   return (
     <>
       <div className="sticky top-16 z-20 mb-6 rounded-2xl border border-[#252528] bg-[#0C0C0E]/95 p-4 backdrop-blur-xl">
-        <div className="grid gap-3 xl:grid-cols-[1.2fr_repeat(4,180px)]">
+        <div className="grid grid-cols-1 gap-3 xl:grid-cols-[1.2fr_repeat(4,180px)]">
           <label className="relative">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/35" />
             <input
@@ -93,7 +93,7 @@ export function LawyerMarketplace({ lawyers }: { lawyers: Lawyer[] }) {
         {filtered.length} verified lawyers available
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {filtered.map((lawyer) => (
           <LawyerCard key={lawyer.id} lawyer={lawyer} onProfile={setProfile} onBook={setBooking} />
         ))}
@@ -228,7 +228,7 @@ function BookingModal({ lawyer, onClose }: { lawyer: Lawyer; onClose: () => void
           </button>
         </div>
 
-        <div className="mt-6 grid gap-5 md:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-5 md:grid-cols-2">
           <div>
             <p className="text-sm font-semibold">Session length</p>
             <div className="mt-3 grid gap-2">

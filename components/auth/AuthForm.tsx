@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { safeRedirectPath } from "@/lib/safe-redirect";
-import { Scale, UserRound } from "lucide-react";
+import { Eye, EyeOff, Scale, UserRound } from "lucide-react";
 import {
   createSupabaseBrowserClient,
   isSupabaseConfigured
@@ -95,6 +95,7 @@ export function AuthForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [accountType, setAccountType] = useState<"lawyer" | "individual" | null>(
@@ -220,39 +221,39 @@ export function AuthForm({
   if (mode === "signup" && !accountType) {
     return (
       <div>
-        <h2 className="text-center font-display text-xl font-semibold">
+        <h2 className="font-display text-lg font-semibold">
           {text.chooseType}
         </h2>
-        <p className="mt-2 text-center text-sm text-[var(--text-secondary)]">
+        <p className="mt-1 text-sm text-[var(--text-secondary)]">
           {text.chooseTypeHint}
         </p>
         <div className="mt-6 grid gap-3">
           <button
             type="button"
-            onClick={() => setAccountType("lawyer")}
-            className="group rounded-xl border-2 border-[var(--border)] p-5 text-left transition hover:border-[var(--accent)] hover:bg-[var(--accent-light)]"
+            onClick={() => setAccountType("individual")}
+            className="group cursor-pointer rounded-2xl border border-[var(--border-strong)] p-5 text-left transition-colors duration-150 hover:border-[var(--accent)] hover:bg-[var(--accent-light)]"
           >
             <span className="flex items-start gap-3">
-              <Scale className="mt-0.5 h-6 w-6 text-[var(--accent)]" />
+              <UserRound className="mt-0.5 h-6 w-6 text-[var(--accent)]" aria-hidden />
               <span>
-                <span className="block font-semibold">{text.lawyer}</span>
+                <span className="block font-semibold">{text.individual}</span>
                 <span className="mt-1 block text-sm leading-5 text-[var(--text-secondary)]">
-                  {text.lawyerHint}
+                  {text.individualHint}
                 </span>
               </span>
             </span>
           </button>
           <button
             type="button"
-            onClick={() => setAccountType("individual")}
-            className="group rounded-xl border-2 border-[var(--border)] p-5 text-left transition hover:border-emerald-500 hover:bg-emerald-500/10"
+            onClick={() => setAccountType("lawyer")}
+            className="group cursor-pointer rounded-2xl border border-[var(--border-strong)] p-5 text-left transition-colors duration-150 hover:border-[var(--accent)] hover:bg-[var(--accent-light)]"
           >
             <span className="flex items-start gap-3">
-              <UserRound className="mt-0.5 h-6 w-6 text-emerald-500" />
+              <Scale className="mt-0.5 h-6 w-6 text-[var(--accent)]" aria-hidden />
               <span>
-                <span className="block font-semibold">{text.individual}</span>
+                <span className="block font-semibold">{text.lawyer}</span>
                 <span className="mt-1 block text-sm leading-5 text-[var(--text-secondary)]">
-                  {text.individualHint}
+                  {text.lawyerHint}
                 </span>
               </span>
             </span>
@@ -265,14 +266,14 @@ export function AuthForm({
   return (
     <form className="space-y-4" onSubmit={submit}>
       {mode === "signup" && (
-        <div className="flex items-center justify-between rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] px-3 py-2 text-sm">
+        <div className="flex items-center justify-between rounded-xl border border-[var(--border)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm">
           <span className="font-medium">
             {accountType === "lawyer" ? text.lawyer : text.individual}
           </span>
           <button
             type="button"
             onClick={() => setAccountType(null)}
-            className="font-semibold text-[var(--accent)]"
+            className="min-h-9 cursor-pointer font-semibold text-[var(--accent)] hover:underline"
           >
             {locale === "ru" ? "Изменить" : "Change"}
           </button>
@@ -284,7 +285,7 @@ export function AuthForm({
             type="button"
             onClick={signInWithGoogle}
             disabled={loading}
-            className="focus-ring flex h-11 w-full items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] text-sm font-semibold text-[var(--text-primary)] hover:bg-[var(--bg-surface)]"
+            className="focus-ring flex h-12 w-full cursor-pointer items-center justify-center gap-2 rounded-full border border-[var(--border-strong)] bg-[var(--bg-page)] text-sm font-semibold text-[var(--text-primary)] transition-colors hover:bg-[var(--bg-surface)]"
           >
             <GoogleIcon />
             {text.google}
@@ -306,7 +307,7 @@ export function AuthForm({
               autoComplete="name"
               value={fullName}
               onChange={(event) => setFullName(event.target.value)}
-              className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className="input-base mt-2 h-12 px-4"
               required
             />
           </label>
@@ -318,7 +319,7 @@ export function AuthForm({
               autoComplete="organization"
               value={company}
               onChange={(event) => setCompany(event.target.value)}
-              className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+              className="input-base mt-2 h-12 px-4"
             />
           </label>
         </>
@@ -331,34 +332,52 @@ export function AuthForm({
           autoComplete="email"
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
+          className="input-base mt-2 h-12 px-4"
           required
         />
       </label>
       {mode !== "reset" && (
-        <label className="block">
-          <span className="text-sm font-medium">{text.password}</span>
-          <input
-            type="password"
-            name="password"
-            autoComplete={mode === "signup" ? "new-password" : "current-password"}
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="mt-2 h-11 w-full rounded-lg border border-[var(--border)] bg-[var(--bg-page)] px-3 text-[var(--text-primary)] outline-none focus:border-[var(--accent)]"
-            required
-            minLength={8}
-          />
-        </label>
+        <div>
+          <label htmlFor="auth-password" className="text-sm font-medium">{text.password}</label>
+          <div className="relative mt-2">
+            <input
+              id="auth-password"
+              type={showPassword ? "text" : "password"}
+              name="password"
+              autoComplete={mode === "signup" ? "new-password" : "current-password"}
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="input-base h-12 pl-4 pr-12"
+              aria-describedby={mode === "signup" ? "auth-password-hint" : undefined}
+              required
+              minLength={8}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((value) => !value)}
+              aria-label={showPassword ? (locale === "ru" ? "Скрыть пароль" : "Hide password") : (locale === "ru" ? "Показать пароль" : "Show password")}
+              aria-pressed={showPassword}
+              className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full text-[var(--text-muted)] hover:text-[var(--text-primary)]"
+            >
+              {showPassword ? <EyeOff className="h-4 w-4" aria-hidden /> : <Eye className="h-4 w-4" aria-hidden />}
+            </button>
+          </div>
+          {mode === "signup" && (
+            <p id="auth-password-hint" className="mt-1.5 text-xs text-[var(--text-muted)]">
+              {locale === "ru" ? "Минимум 8 символов." : "At least 8 characters."}
+            </p>
+          )}
+        </div>
       )}
       {error && (
-        <p className="rounded-lg bg-[var(--red-light)] p-3 text-sm text-[var(--red)]">{error}</p>
+        <p role="alert" className="rounded-xl border border-red-500/30 bg-[var(--red-light)] p-3 text-sm text-[var(--red)]">{friendlyAuthError(error, locale)}</p>
       )}
       {message && (
-        <p className="rounded-lg bg-[var(--green-light)] p-3 text-sm text-[var(--green)]">
+        <p role="status" className="rounded-xl bg-[var(--green-light)] p-3 text-sm text-[var(--green)]">
           {message}
         </p>
       )}
-      <Button className="w-full" disabled={loading}>
+      <Button size="lg" className="w-full" disabled={loading}>
         {loading
           ? text.wait
           : mode === "signin"
@@ -369,4 +388,29 @@ export function AuthForm({
       </Button>
     </form>
   );
+}
+
+/** Supabase returns English technical messages; show something a person can act on. */
+function friendlyAuthError(message: string, locale: "ru" | "en") {
+  const ru = locale === "ru";
+  const lower = message.toLowerCase();
+  if (lower.includes("invalid login credentials")) {
+    return ru ? "Неверный email или пароль." : "Incorrect email or password.";
+  }
+  if (lower.includes("email not confirmed")) {
+    return ru ? "Подтвердите email — мы отправили ссылку на вашу почту." : "Confirm your email — we sent you a link.";
+  }
+  if (lower.includes("already registered") || lower.includes("already exists")) {
+    return ru ? "Аккаунт с этим email уже есть. Войдите или восстановите пароль." : "An account with this email already exists. Sign in or reset your password.";
+  }
+  if (lower.includes("password should be") || lower.includes("at least")) {
+    return ru ? "Пароль слишком короткий: нужно минимум 8 символов." : "Password is too short: use at least 8 characters.";
+  }
+  if (lower.includes("rate limit") || lower.includes("too many")) {
+    return ru ? "Слишком много попыток. Подождите минуту и попробуйте снова." : "Too many attempts. Wait a minute and try again.";
+  }
+  if (lower.includes("fetch") || lower.includes("network")) {
+    return ru ? "Нет соединения с сервером. Проверьте интернет и попробуйте снова." : "Could not reach the server. Check your connection and retry.";
+  }
+  return message;
 }

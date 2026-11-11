@@ -10,10 +10,10 @@ export function Avatar({
   tone?: "blue" | "green" | "slate" | "violet";
 }) {
   const tones = {
-    blue: "bg-[#EEF3FF] text-[#1A56E8]",
-    green: "bg-[#E6F7F0] text-[#0D7A4E]",
-    slate: "bg-[#F0F0EC] text-[#4A4A48]",
-    violet: "bg-violet-100 text-violet-700"
+    blue: "bg-[var(--accent-light)] text-[var(--accent)]",
+    green: "bg-[var(--green-light)] text-[var(--green)]",
+    slate: "bg-[var(--bg-elevated)] text-[var(--text-secondary)]",
+    violet: "bg-violet-500/15 text-violet-700 dark:text-violet-300"
   };
 
   return (

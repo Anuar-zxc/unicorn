@@ -33,7 +33,7 @@ export function Footer() {
   const text = copy[locale];
   return (
     <footer className="border-t border-[var(--border)] bg-[var(--bg-surface)]">
-      <div className="container-shell grid gap-10 py-14 md:grid-cols-[1.2fr_1.8fr]">
+      <div className="container-shell grid grid-cols-1 gap-10 py-14 md:grid-cols-[1.2fr_1.8fr]">
         <div>
           <Logo className="text-[30px]" />
           <p className="mt-4 max-w-sm text-sm leading-6 text-[var(--text-secondary)]">{text.tagline}</p>

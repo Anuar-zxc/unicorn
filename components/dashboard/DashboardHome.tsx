@@ -78,47 +78,52 @@ const tools = [
   }
 ];
 
+// 700 in light / 300 in dark keeps icons above 3:1 on their tinted chips.
 const toneClasses: Record<string, string> = {
-  blue: "border-blue-400/20 bg-blue-400/10 text-blue-400",
-  indigo: "border-indigo-400/20 bg-indigo-400/10 text-indigo-400",
-  green: "border-emerald-400/20 bg-emerald-400/10 text-emerald-400",
-  purple: "border-violet-400/20 bg-violet-400/10 text-violet-400",
-  amber: "border-amber-400/20 bg-amber-400/10 text-amber-400",
-  rose: "border-rose-400/20 bg-rose-400/10 text-rose-400"
+  blue: "bg-blue-500/10 text-blue-700 dark:text-blue-300",
+  indigo: "bg-indigo-500/10 text-indigo-700 dark:text-indigo-300",
+  green: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+  purple: "bg-violet-500/10 text-violet-700 dark:text-violet-300",
+  amber: "bg-amber-500/10 text-amber-700 dark:text-amber-300",
+  rose: "bg-rose-500/10 text-rose-700 dark:text-rose-300"
 };
 
 export function DashboardHome({
   firstName,
   reviewed,
-  recent
+  recent,
+  usage = []
 }: {
   firstName: string;
   reviewed: number;
   recent: RecentItem[];
+  usage?: { label: "analyses" | "builds" | "questions"; used: number; limit: number }[];
 }) {
   const { locale } = useLanguage();
   const ru = locale === "ru";
-  const pending = recent.filter((item) => item.status === "pending").length;
+  const usageLabel = {
+    analyses: ru ? "Проверок в этом месяце" : "Reviews this month",
+    builds: ru ? "Документов в этом месяце" : "Drafts this month",
+    questions: ru ? "Вопросов в этом месяце" : "Questions this month"
+  };
+  const formatUsage = (used: number, limit: number) =>
+    Number.isFinite(limit) ? `${used} / ${limit}` : String(used);
 
   return (
-    <main className="p-4 md:p-6">
-      <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 md:p-8">
+    <main className="mx-auto max-w-7xl p-4 md:p-8">
+      <section className="rounded-3xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 md:p-8">
         <p className="text-sm text-[var(--text-secondary)]">
-          {ru ? `Добро пожаловать, ${firstName}.` : `Good morning, ${firstName}.`}
+          {ru ? (firstName ? `Добро пожаловать, ${firstName}` : "Добро пожаловать") : firstName ? `Welcome back, ${firstName}` : "Welcome back"}
         </p>
-        <h1 className="mt-2 max-w-3xl font-display text-3xl font-semibold tracking-tight md:text-4xl">
+        <h1 className="mt-1 max-w-3xl font-display text-3xl font-bold tracking-tight md:text-4xl">
           {ru ? "Юридическая работа — быстрее и точнее." : "Your legal work, accelerated."}
         </h1>
-        <p className="mt-3 text-sm text-[var(--text-secondary)]">
-          {ru
-            ? `Документов на проверке: ${pending}.`
-            : `You have ${pending} documents pending review.`}
-        </p>
-        <div className="mt-7 grid gap-3 sm:grid-cols-3">
-          <Stat label={ru ? "Документов за месяц" : "Documents this month"} value={String(reviewed)} />
-          <Stat label={ru ? "Сэкономлено времени" : "Hours saved"} value={`${Math.round(reviewed * 1.8)}${ru ? " ч" : "h"}`} />
-          <Stat label={ru ? "Активных дел" : "Active matters"} value={String(Math.max(1, Math.ceil(reviewed / 3)))} />
-        </div>
+        <dl className="mt-7 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <Stat label={ru ? "Всего документов" : "Documents total"} value={String(reviewed)} />
+          {usage.map((row) => (
+            <Stat key={row.label} label={usageLabel[row.label]} value={formatUsage(row.used, row.limit)} />
+          ))}
+        </dl>
       </section>
 
       <section className="mt-6">
@@ -128,30 +133,25 @@ export function DashboardHome({
         <h2 className="mt-2 font-display text-2xl font-semibold">
           {ru ? "Выберите инструмент" : "Start with a tool"}
         </h2>
-        <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
           {tools.map((tool) => {
             const title = ru ? tool.ru : tool.en;
             return (
               <Link
                 key={tool.href}
                 href={tool.href}
-                className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 transition hover:-translate-y-0.5 hover:border-[var(--accent)]"
+                className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-5 shadow-[var(--shadow-sm)] transition-[border-color,box-shadow] duration-200 hover:border-[var(--accent)] hover:shadow-[var(--shadow-md)]"
               >
-                <div className="flex items-start justify-between gap-3">
-                  <div className={`flex h-11 w-11 items-center justify-center rounded-xl border ${toneClasses[tool.tone]}`}>
-                    <tool.icon className="h-5 w-5" strokeWidth={2.65} />
-                  </div>
-                  <span className="rounded-full border border-emerald-400/20 bg-emerald-400/10 px-2.5 py-1 text-[11px] font-semibold text-emerald-500">
-                    {ru ? "Работает" : "Works now"}
-                  </span>
+                <div className={`flex h-11 w-11 items-center justify-center rounded-xl ${toneClasses[tool.tone]}`}>
+                  <tool.icon className="h-5 w-5" aria-hidden />
                 </div>
-                <h3 className="mt-5 font-display text-xl font-semibold">{title}</h3>
+                <h3 className="mt-5 font-display text-lg font-semibold">{title}</h3>
                 <p className="mt-2 text-sm text-[var(--text-secondary)]">
                   {ru ? tool.descRu : tool.descEn}
                 </p>
                 <span className="mt-5 flex items-center gap-2 text-sm font-semibold text-[var(--accent)]">
                   {ru ? "Открыть" : "Run tool"}
-                  <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+                  <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden />
                 </span>
               </Link>
             );
@@ -159,7 +159,7 @@ export function DashboardHome({
         </div>
       </section>
 
-      <section className="mt-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5">
+      <section className="mt-6 rounded-3xl border border-[var(--border)] bg-[var(--bg-page)] p-5 md:p-6">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[.16em] text-[var(--text-muted)]">
@@ -186,14 +186,14 @@ export function DashboardHome({
             </thead>
             <tbody className="divide-y divide-[var(--border)]">
               {recent.map((item) => (
-                <tr key={item.id}>
-                  <td className="py-4 font-medium">{item.file_name || item.title || (ru ? "Без названия" : "Untitled matter")}</td>
+                <tr key={item.id} className="transition-colors hover:bg-[var(--bg-surface)]">
+                  <td className="max-w-[320px] truncate py-4 font-medium">{item.file_name || item.title || (ru ? "Без названия" : "Untitled matter")}</td>
                   <td className="py-4 text-[var(--text-secondary)]">{toolLabel(item.type, ru)}</td>
                   <td className="py-4 text-[var(--text-secondary)]">
                     {new Date(item.created_at).toLocaleDateString(ru ? "ru-RU" : "en-US", { month: "short", day: "numeric", year: "numeric" })}
                   </td>
                   <td className="py-4">
-                    <span className="rounded-full bg-emerald-400/10 px-2.5 py-1 text-xs font-medium text-emerald-500">
+                    <span className="rounded-full bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300">
                       {item.status === "pending" ? (ru ? "В обработке" : "Pending") : (ru ? "Готово" : "Complete")}
                     </span>
                   </td>
@@ -219,9 +219,9 @@ export function DashboardHome({
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-4">
-      <p className="text-xs text-[var(--text-muted)]">{label}</p>
-      <p className="mt-2 font-display text-2xl font-semibold">{value}</p>
+    <div className="rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-4">
+      <dt className="text-xs text-[var(--text-muted)]">{label}</dt>
+      <dd className="mt-2 font-display text-2xl font-semibold tabular-nums">{value}</dd>
     </div>
   );
 }
@@ -236,7 +236,9 @@ function toolLabel(type: string | null, ru: boolean) {
     caseprep: ["Case Prep", "Подготовка дела"],
     research: ["Case Research", "Правовой поиск"],
     compare: ["Redline Compare", "Сравнение версий"],
-    client: ["Client Summary", "Резюме для клиента"]
+    client: ["Client Summary", "Резюме для клиента"],
+    ask: ["Legal question", "Юридический вопрос"],
+    "seller-tax": ["Seller taxes", "Налоги продавца"]
   };
   const label = labels[type ?? ""];
   return label ? label[ru ? 1 : 0] : (ru ? "Юридический AI" : "Legal AI");

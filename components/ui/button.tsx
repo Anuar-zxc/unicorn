@@ -14,7 +14,7 @@ export interface ButtonProps
 
 const variants: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--accent)] text-white shadow-[var(--shadow-sm)] hover:bg-[var(--accent-hover)] active:scale-[0.97]",
+    "bg-[var(--accent-solid)] text-[var(--on-accent)] shadow-[var(--shadow-sm)] hover:bg-[var(--accent-solid-hover)] active:scale-[0.98]",
   secondary:
     "bg-[var(--accent-light)] text-[var(--accent)] hover:bg-[var(--bg-elevated)] active:scale-[0.97]",
   ghost:
@@ -29,11 +29,11 @@ const sizes: Record<ButtonSize, string> = {
   sm: "h-9 rounded-full px-4 text-sm",
   md: "h-11 rounded-full px-5 text-sm",
   lg: "h-12 rounded-full px-6 text-base",
-  icon: "h-10 w-10 rounded-full"
+  icon: "h-11 w-11 rounded-full"
 };
 
 const base =
-  "focus-ring relative inline-flex items-center justify-center gap-2 overflow-hidden whitespace-nowrap font-medium transition-all duration-200 disabled:pointer-events-none disabled:opacity-50";
+  "focus-ring relative inline-flex cursor-pointer items-center justify-center gap-2 overflow-hidden whitespace-nowrap font-medium transition-[background-color,border-color,color,transform,opacity] duration-150 disabled:pointer-events-none disabled:opacity-50";
 
 export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "primary", size = "md", asChild, children, ...props }, ref) => {

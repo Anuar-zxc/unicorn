@@ -29,7 +29,7 @@ export default async function BookingConfirmedPage({
         <p className="mt-5 rounded-xl border border-[#252528] bg-[#0C0C0E] p-4 text-sm leading-6 text-white/55">
           If you attached a Lexo case brief, it will be shared with the lawyer before the call so they can come prepared.
         </p>
-        <div className="mt-6 grid gap-3 sm:grid-cols-2">
+        <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Button variant="outline">
             <CalendarPlus className="h-4 w-4" />
             Add to calendar

@@ -16,7 +16,6 @@ import {
   PenLine,
   SearchCheck,
   Settings,
-  Sparkles,
   X
 } from "lucide-react";
 import { Avatar } from "@/components/shared/Avatar";
@@ -35,14 +34,14 @@ type NavItem = {
 };
 
 const lawyerItems: NavItem[] = [
-  { href: "/dashboard", en: "Workspace", ru: "Рабочее пространство", icon: LayoutGrid },
+  { href: "/dashboard", en: "Overview", ru: "Обзор", icon: LayoutGrid },
   { href: "/dashboard/review", en: "Contract Review", ru: "Проверка договоров", icon: FileCheck2 },
   { href: "/dashboard/research", en: "Case Research", ru: "Правовой поиск", icon: SearchCheck },
-  { href: "/dashboard/draft", en: "Drafting", ru: "Подготовка документов", icon: PenLine },
+  { href: "/dashboard/draft", en: "Drafting", ru: "Документы", icon: PenLine },
   { href: "/dashboard/caseprep", en: "Case Prep", ru: "Подготовка дела", icon: BriefcaseBusiness },
   { href: "/dashboard/compare", en: "Redline", ru: "Сравнение версий", icon: GitCompareArrows },
   { href: "/dashboard/client", en: "Client Briefs", ru: "Резюме клиенту", icon: MessageCircleQuestion },
-  { href: "/dashboard/docs", en: "All Documents", ru: "Все документы", icon: FolderOpen },
+  { href: "/dashboard/docs", en: "Archive", ru: "Архив", icon: FolderOpen },
   { href: "/dashboard/billing", en: "Billing", ru: "Оплата", icon: CreditCard },
   { href: "/dashboard/settings", en: "Settings", ru: "Настройки", icon: Settings }
 ];
@@ -52,7 +51,7 @@ const individualItems: NavItem[] = [
   { href: "/dashboard/check", en: "Check a Contract", ru: "Проверить договор", icon: FileCheck2 },
   { href: "/dashboard/build", en: "Build an Agreement", ru: "Создать договор", icon: PenLine },
   { href: "/dashboard/ask", en: "Ask a Question", ru: "Задать вопрос", icon: MessageCircleQuestion },
-  { href: "/dashboard/seller-tax", en: "Seller Taxes", ru: "Налоги продавца", icon: ReceiptText, badge: "New" },
+  { href: "/dashboard/seller-tax", en: "Seller Taxes", ru: "Налоги продавца", icon: ReceiptText },
   { href: "/dashboard/docs", en: "My Documents", ru: "Мои документы", icon: FolderOpen },
   { href: "/dashboard/billing", en: "Billing", ru: "Оплата", icon: CreditCard },
   { href: "/dashboard/settings", en: "Settings", ru: "Настройки", icon: Settings }
@@ -106,22 +105,8 @@ export function Sidebar({
           <button aria-label={locale === "ru" ? "Свернуть меню" : "Toggle sidebar"} onClick={onToggle} className="rounded-lg p-2 text-[var(--text-muted)] hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]"><ChevronLeft className={cn("h-4 w-4", collapsed && "rotate-180")} /></button>
         )}
       </div>
-      <div className={cn("mt-7 rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-3", collapsed && "hidden")}>
-        <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-[var(--text-muted)]">
-          <Sparkles className="h-4 w-4 text-[#5d86ff]" strokeWidth={2.6} />
-          Lexo AI
-        </div>
-        <p className="mt-2 text-xs leading-5 text-[var(--text-secondary)]">
-          {accountType === "lawyer"
-            ? locale === "ru"
-              ? "Загружайте, проверяйте и готовьте юридические документы в одном месте."
-              : "Upload, review, draft, and prepare legal work in one place."
-            : locale === "ru"
-              ? "Проверяйте договоры, задавайте вопросы и разбирайтесь с налогами простым языком."
-              : "Check contracts, ask questions, and understand seller taxes in plain language."}
-        </p>
-      </div>
-      <nav className="mt-6 space-y-1.5">
+      
+      <nav className="mt-8 space-y-1" aria-label={locale === "ru" ? "Разделы" : "Sections"}>
         {items.map((item) => {
           const label = locale === "ru" ? item.ru : item.en;
           const activePath = pendingHref ?? pathname;
@@ -133,22 +118,18 @@ export function Sidebar({
               prefetch
               onClick={() => setPendingHref(item.href)}
               title={collapsed ? label : undefined}
+              aria-label={collapsed ? label : undefined}
+              aria-current={active ? "page" : undefined}
               className={cn(
-                "group flex h-12 items-center gap-3 rounded-xl px-3 text-[15px] font-semibold text-[var(--text-secondary)] transition hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]",
-                active && "bg-[#2f64f1] text-white shadow-[0_10px_28px_rgba(47,100,241,0.28)]"
+                "group flex h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium text-[var(--text-secondary)] transition-colors duration-150 hover:bg-[var(--bg-elevated)] hover:text-[var(--text-primary)]",
+                collapsed && "justify-center px-0",
+                active && "bg-[var(--accent-solid)] text-[var(--on-accent)] hover:bg-[var(--accent-solid)] hover:text-[var(--on-accent)]"
               )}
             >
-              <span
-                className={cn(
-                  "grid h-8 w-8 shrink-0 place-items-center rounded-lg border border-[var(--border)] bg-[var(--bg-page)] text-[var(--text-secondary)] group-hover:text-[var(--text-primary)]",
-                  active && "border-white/15 bg-white/15 text-white"
-                )}
-              >
-                <item.icon className="h-5 w-5" strokeWidth={2.65} />
-              </span>
+              <item.icon className="h-[18px] w-[18px] shrink-0" aria-hidden />
               {!collapsed && (
                 <>
-                  <span>{label}</span>
+                  <span className="truncate">{label}</span>
                   {item.badge && (
                     <span className="ml-auto rounded-full bg-amber-400/15 px-2 py-0.5 text-[10px] text-amber-500">
                       {item.badge === "New" && locale === "ru" ? "Новое" : item.badge}

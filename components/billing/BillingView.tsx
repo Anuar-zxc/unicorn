@@ -123,7 +123,7 @@ export function BillingView({
         </p>
       )}
 
-      <div className="mt-6 grid gap-5 lg:grid-cols-[.9fr_1.1fr]">
+      <div className="mt-6 grid grid-cols-1 gap-5 lg:grid-cols-[.9fr_1.1fr]">
         <section className={card}>
           <div className="flex items-center gap-3">
             <CreditCard className="h-5 w-5 text-[var(--accent)]" aria-hidden />
@@ -174,7 +174,7 @@ export function BillingView({
         </section>
       </div>
 
-      <div className="mt-6 grid gap-5 xl:grid-cols-3">
+      <div className="mt-6 grid grid-cols-1 gap-5 xl:grid-cols-3">
         {paidPlans.map((plan) => {
           const active = current === plan.key;
           const ready = plan.key === "enterprise" ? true : checkoutReady[plan.key];

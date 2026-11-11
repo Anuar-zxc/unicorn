@@ -4,12 +4,15 @@ import { useState } from "react";
 import { Scale, UserRound } from "lucide-react";
 import { createSupabaseBrowserClient } from "@/lib/supabase/browser";
 import { cn } from "@/lib/utils";
+import { useLanguage } from "@/components/providers/AppProviders";
 
 export function AccountTypeSwitcher({
   initialType
 }: {
   initialType: "lawyer" | "individual";
 }) {
+  const { locale } = useLanguage();
+  const ru = locale === "ru";
   const [accountType, setAccountType] = useState(initialType);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
@@ -22,7 +25,7 @@ export function AccountTypeSwitcher({
       data: { user }
     } = await supabase.auth.getUser();
     if (!user) {
-      setMessage("Please sign in again.");
+      setMessage(ru ? "Войдите снова." : "Please sign in again.");
       setSaving(false);
       return;
     }
@@ -31,10 +34,10 @@ export function AccountTypeSwitcher({
       .update({ account_type: next })
       .eq("id", user.id);
     if (error) {
-      setMessage(error.message);
+      setMessage(ru ? "Не удалось сохранить. Попробуйте ещё раз." : "Could not save. Please try again.");
     } else {
       setAccountType(next);
-      setMessage("Workspace updated. Reloading…");
+      setMessage(ru ? "Кабинет обновлён. Перезагружаем…" : "Workspace updated. Reloading…");
       window.location.assign("/dashboard");
     }
     setSaving(false);
@@ -42,43 +45,45 @@ export function AccountTypeSwitcher({
 
   return (
     <div>
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <button
           type="button"
-          disabled={saving}
+          disabled={saving || accountType === "lawyer"}
+          aria-pressed={accountType === "lawyer"}
           onClick={() => update("lawyer")}
           className={cn(
-            "rounded-xl border p-4 text-left transition",
+            "cursor-pointer rounded-2xl border p-4 text-left transition-colors duration-150 disabled:cursor-default",
             accountType === "lawyer"
               ? "border-[var(--accent)] bg-[var(--accent-light)]"
-              : "border-[var(--border)] bg-[var(--bg-page)]"
+              : "border-[var(--border-strong)] bg-[var(--bg-page)] hover:border-[var(--accent)]"
           )}
         >
-          <Scale className="h-5 w-5 text-[var(--accent)]" />
-          <p className="mt-3 text-sm font-semibold">Lawyer workspace</p>
+          <Scale className="h-5 w-5 text-[var(--accent)]" aria-hidden />
+          <p className="mt-3 text-sm font-semibold">{ru ? "Кабинет юриста" : "Lawyer workspace"}</p>
           <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
-            Research, drafting, case prep, redlines, and client briefs.
+            {ru ? "Поиск, документы, подготовка дел, сравнение версий и резюме для клиентов." : "Research, drafting, case prep, redlines, and client briefs."}
           </p>
         </button>
         <button
           type="button"
-          disabled={saving}
+          disabled={saving || accountType === "individual"}
+          aria-pressed={accountType === "individual"}
           onClick={() => update("individual")}
           className={cn(
-            "rounded-xl border p-4 text-left transition",
+            "cursor-pointer rounded-2xl border p-4 text-left transition-colors duration-150 disabled:cursor-default",
             accountType === "individual"
-              ? "border-emerald-500 bg-emerald-500/10"
-              : "border-[var(--border)] bg-[var(--bg-page)]"
+              ? "border-[var(--accent)] bg-[var(--accent-light)]"
+              : "border-[var(--border-strong)] bg-[var(--bg-page)] hover:border-[var(--accent)]"
           )}
         >
-          <UserRound className="h-5 w-5 text-emerald-500" />
-          <p className="mt-3 text-sm font-semibold">Personal workspace</p>
+          <UserRound className="h-5 w-5 text-[var(--accent)]" aria-hidden />
+          <p className="mt-3 text-sm font-semibold">{ru ? "Личный кабинет" : "Personal workspace"}</p>
           <p className="mt-1 text-xs leading-5 text-[var(--text-secondary)]">
-            Contract checks, questions, and marketplace seller taxes.
+            {ru ? "Проверка договоров, вопросы и налоги продавца." : "Contract checks, questions, and marketplace seller taxes."}
           </p>
         </button>
       </div>
-      {message && <p className="mt-3 text-xs text-[var(--text-secondary)]">{message}</p>}
+      {message && <p role="status" className="mt-3 text-xs text-[var(--text-secondary)]">{message}</p>}
     </div>
   );
 }

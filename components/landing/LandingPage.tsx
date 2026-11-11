@@ -220,7 +220,7 @@ export function LandingPage() {
                 </Button>
               </div>
               <p className="mt-5 text-xs text-[var(--text-muted)]">{t.note}</p>
-              <div className="mt-8 grid max-w-xl gap-3 sm:grid-cols-2">
+              <div className="mt-8 grid grid-cols-1 max-w-xl gap-3 sm:grid-cols-2">
                 <Link href="/auth/signup?account=individual" className="group rounded-2xl border border-[var(--border)] bg-[var(--bg-page)]/80 p-4 shadow-[var(--shadow-sm)] backdrop-blur transition hover:-translate-y-0.5 hover:border-[var(--accent)]">
                   <div className="flex items-center gap-3">
                     <span className="rounded-xl bg-[var(--accent-light)] p-2 text-[var(--accent)]"><Home className="h-5 w-5" aria-hidden /></span>
@@ -241,7 +241,7 @@ export function LandingPage() {
                 <span className="truncate">{t.demo.file} · {t.demo.pages}</span>
                 <span className="flex shrink-0 items-center gap-2 text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />{t.demo.done}</span>
               </div>
-              <div className="grid min-h-[430px] gap-3 pt-3 md:grid-cols-[1fr_1fr]">
+              <div className="grid grid-cols-1 min-h-[430px] gap-3 pt-3 md:grid-cols-[1fr_1fr]">
                 <div className="rounded-xl bg-[#151820] p-5 text-sm leading-7 text-white/65">
                   <p className="mb-4 text-xs font-semibold uppercase tracking-[.16em] text-white/35">{t.demo.original}</p>
                   {t.demo.clauses.map(([heading, body, tone], index) => (
@@ -289,7 +289,7 @@ export function LandingPage() {
         <section id="for-firms" className="py-20 md:py-28">
           <div className="container-shell">
             <p className="text-caption text-[var(--accent)]">{t.tasksEyebrow}</p>
-            <div className="mt-3 grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
+            <div className="mt-3 grid grid-cols-1 gap-10 lg:grid-cols-[.8fr_1.2fr]">
               <h2 className="font-display text-[clamp(28px,3.4vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">{t.tasksTitle}</h2>
               <ol className="divide-y divide-[var(--border)] border-y border-[var(--border)]">
                 {t.tasks.map((point, index) => (
@@ -309,7 +309,7 @@ export function LandingPage() {
               <p className="text-caption text-[var(--accent)]">{t.featuresEyebrow}</p>
               <h2 className="mt-3 font-display text-[clamp(28px,3.4vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">{t.featuresTitle}</h2>
             </div>
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
               {t.features.map(([title, description, detail], index) => {
                 const Icon = featureIcons[index];
                 return (
@@ -331,7 +331,7 @@ export function LandingPage() {
               <p className="text-caption text-[var(--accent)]">{t.audienceEyebrow}</p>
               <h2 className="mt-3 font-display text-[clamp(28px,3.4vw,42px)] font-bold leading-[1.1] tracking-[-0.03em]">{t.audienceTitle}</h2>
             </div>
-            <div className="mt-10 grid gap-4 md:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-4 md:grid-cols-3">
               {t.audience.map(([role, quote], index) => {
                 const Icon = audienceIcons[index];
                 return (
@@ -349,12 +349,12 @@ export function LandingPage() {
         <PricingTable />
 
         <section id="trust" className="scroll-mt-24 bg-[#0d1424] py-20 text-white md:py-24">
-          <div className="container-shell grid gap-10 lg:grid-cols-[.8fr_1.2fr]">
+          <div className="container-shell grid grid-cols-1 gap-10 lg:grid-cols-[.8fr_1.2fr]">
             <div>
               <p className="text-caption text-[#8fb0ff]">{t.trustEyebrow}</p>
               <h2 className="mt-3 font-display text-4xl font-bold tracking-tight">{t.trustTitle}</h2>
             </div>
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {t.trust.map(([title, text], index) => {
                 const Icon = trustIcons[index];
                 return (

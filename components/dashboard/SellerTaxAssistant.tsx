@@ -76,7 +76,7 @@ export function SellerTaxAssistant() {
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[.9fr_1.1fr]">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[.9fr_1.1fr]">
       <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-5 md:p-6">
         <div className="flex items-start justify-between gap-3">
           <div className="grid h-11 w-11 place-items-center rounded-xl border border-amber-400/20 bg-amber-400/10 text-amber-500">

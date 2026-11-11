@@ -12,10 +12,17 @@
   --bg-tertiary: var(--bg-elevated);
   --text-primary: #0a0a0a;
   --text-secondary: #52524e;
-  --text-muted: #94948f;
+  /* #6b6b66 keeps small captions at >= 4.5:1 on page and surface. */
+  --text-muted: #6b6b66;
   --accent: #1a56e8;
   --accent-hover: #1240c4;
   --accent-light: #eef3ff;
+  /* Solid fills that carry white text (buttons, active tabs). */
+  --accent-solid: #1a56e8;
+  --accent-solid-hover: #1240c4;
+  --on-accent: #ffffff;
+  /* Form control boundaries need 3:1 against the page (WCAG 1.4.11). */
+  --input-border: #8f8f89;
   --green: #0d7a4e;
   --green-light: #e6f7f0;
   --legal-green: var(--green);
@@ -47,10 +54,15 @@
   --bg-tertiary: var(--bg-elevated);
   --text-primary: #eeeef0;
   --text-secondary: #a1a1aa;
-  --text-muted: #62626a;
-  --accent: #4d7ef5;
-  --accent-hover: #6b96f8;
+  --text-muted: #8b8b95;
+  /* Lighter accent for text/icons on dark surfaces (>= 5.9:1). */
+  --accent: #6b96f8;
+  --accent-hover: #8fb0ff;
   --accent-light: #0f1a3a;
+  --accent-solid: #2c5fe0;
+  --accent-solid-hover: #3a6df2;
+  --on-accent: #ffffff;
+  --input-border: #6a6a76;
   --green: #22c07a;
   --green-light: #0a2e1e;
   --legal-green: var(--green);
@@ -69,7 +81,28 @@
 
 * {
   box-sizing: border-box;
-  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.15s ease;
+}
+
+/* Visible keyboard focus everywhere (mouse clicks stay clean). */
+:where(a, button, summary, input, textarea, select, [role="button"], [role="tab"], [tabindex]):focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.focus-ring:focus-visible {
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }
 
 html {
@@ -78,6 +111,7 @@ html {
 
 body {
   margin: 0;
+  transition: background-color 0.2s ease, color 0.15s ease;
   background: var(--bg-page);
   color: var(--text-primary);
   font-family: var(--font-body);
@@ -167,6 +201,33 @@ select {
   @apply outline-none ring-offset-2 focus-visible:ring-2;
   --tw-ring-color: var(--accent);
   --tw-ring-offset-color: var(--bg-page);
+}
+
+/* Shared form control style: visible boundary, clear focus, 44px+ height. */
+.input-base {
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid var(--input-border);
+  background: var(--bg-page);
+  color: var(--text-primary);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.input-base::placeholder {
+  color: var(--text-muted);
+}
+.input-base:hover {
+  border-color: var(--text-secondary);
+}
+.input-base:focus,
+.input-base:focus-visible {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.input-base[aria-invalid="true"] {
+  border-color: var(--red);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -273,4 +334,11 @@ html:not(.dark) .dashboard-shell [class*="text-white/"] {
   header, aside, nav, .no-print { display: none !important; }
   body { background: #fff !important; color: #000 !important; }
   .print-area { border: 0 !important; box-shadow: none !important; }
+}
+
+/* Grid/flex children default to min-width:auto, so one long unbreakable title
+   (a file name) can push a whole card past the viewport on phones. */
+:where(.grid, .flex) > * {
+  /* Zero specificity so any min-w-* utility still wins. */
+  min-width: 0;
 }

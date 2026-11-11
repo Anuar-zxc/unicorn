@@ -103,7 +103,7 @@ export function PricingTable() {
                 aria-selected={audience === value}
                 className={cn(
                   "rounded-full px-5 py-2 text-sm font-semibold text-[var(--text-secondary)] transition",
-                  audience === value && "bg-[var(--accent)] text-white"
+                  audience === value && "bg-[var(--accent-solid)] text-[var(--on-accent)]"
                 )}
                 onClick={() => {
                   setAudience(value);
@@ -132,7 +132,7 @@ export function PricingTable() {
         </div>
 
         {audience === "individual" ? (
-          <div className="mx-auto mt-10 grid max-w-4xl gap-5 md:grid-cols-2">
+          <div className="mx-auto mt-10 grid grid-cols-1 max-w-4xl gap-5 md:grid-cols-2">
             {individualPlans[locale].map((plan) => {
               const comingSoon = plan.price > 0;
               return (
@@ -168,7 +168,7 @@ export function PricingTable() {
           </div>
         ) : (
           <>
-            <div className="mt-10 grid gap-5 lg:grid-cols-3">
+            <div className="mt-10 grid grid-cols-1 gap-5 lg:grid-cols-3">
               {plans.map((plan) => {
                 const enterprise = plan.name === "Enterprise";
                 const href = enterprise

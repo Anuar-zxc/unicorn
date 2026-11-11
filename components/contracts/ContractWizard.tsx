@@ -135,7 +135,7 @@ export function ContractWizard({
 
   return (
     <main className="p-4 md:p-6">
-      <div className="grid min-h-[calc(100vh-150px)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] lg:grid-cols-[420px_1fr]">
+      <div className="grid grid-cols-1 min-h-[calc(100vh-150px)] overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] lg:grid-cols-[420px_1fr]">
         <section className="flex min-h-[680px] flex-col border-b border-[var(--border)] lg:border-b-0 lg:border-r">
           <header className="border-b border-[var(--border)] p-4">
             <div className="flex items-start justify-between gap-3">
@@ -158,7 +158,7 @@ export function ContractWizard({
               <div key={`${message.role}-${index}`} className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}>
                 <div className={`max-w-[88%] whitespace-pre-wrap rounded-2xl px-4 py-3 text-sm leading-6 ${
                   message.role === "user"
-                    ? "bg-[var(--accent)] text-white"
+                    ? "bg-[var(--accent-solid)] text-[var(--on-accent)]"
                     : "bg-[var(--bg-elevated)] text-[var(--text-primary)]"
                 }`}>
                   {message.content}

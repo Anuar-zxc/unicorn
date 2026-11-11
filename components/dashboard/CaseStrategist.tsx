@@ -82,7 +82,7 @@ export function CaseStrategist() {
   }
 
   return (
-    <div className="grid gap-5 xl:grid-cols-[0.92fr_1.08fr]">
+    <div className="grid grid-cols-1 gap-5 xl:grid-cols-[0.92fr_1.08fr]">
       <section className="rounded-2xl border border-[#252528] bg-[#141418] p-5 md:p-6">
         <div className="flex items-center gap-3">
           <div className="flex h-12 w-12 items-center justify-center rounded-xl border border-violet-400/20 bg-violet-400/10 text-violet-300">
@@ -172,7 +172,7 @@ export function CaseStrategist() {
       </section>
 
       <section className="rounded-2xl border border-[#252528] bg-[#141418] p-5 md:p-6">
-        <div className="grid gap-4 lg:grid-cols-[1fr_230px]">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[1fr_230px]">
           <div>
             <p className="text-sm text-white/45">Lawyer-ready deliverable</p>
             <h2 className="font-display text-2xl font-semibold">Strategy brief</h2>
@@ -206,7 +206,7 @@ export function CaseStrategist() {
 
             <div className="rounded-xl border border-[#252528] bg-[#0C0C0E] p-4">
               <p className="mb-3 text-sm font-semibold">Export for your lawyer</p>
-              <div className="grid gap-2">
+              <div className="grid grid-cols-1 gap-2">
                 <Button variant="outline" disabled={!strategy}><Download className="h-4 w-4" />PDF Brief</Button>
                 <Button variant="outline" disabled={!strategy}><FileText className="h-4 w-4" />DOCX</Button>
                 <Button variant="outline" disabled={!strategy}><Archive className="h-4 w-4" />Copy summary</Button>

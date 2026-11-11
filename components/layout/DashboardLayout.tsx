@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { CreditCard, Menu, Settings } from "lucide-react";
 import { LogoutButton } from "@/components/auth/LogoutButton";
 import { Sidebar } from "@/components/layout/Sidebar";
@@ -34,6 +35,7 @@ export function DashboardLayout({
 }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const pathname = usePathname();
   const [plan, setPlan] = useState(userPlan);
   const { locale } = useLanguage();
   const initials = getInitials(userEmail || "CL");
@@ -65,27 +67,21 @@ export function DashboardLayout({
       />
       <div className="min-w-0 flex-1">
         <header className="sticky top-0 z-30 border-b border-[var(--border)] bg-[var(--bg-page)]/92 backdrop-blur-xl">
-          <div className="flex min-h-20 items-center gap-4 px-4 py-3 md:px-6">
+          <div className="flex h-16 items-center gap-3 px-4 md:px-6">
             <button
-              className="rounded-full p-2 text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] lg:hidden"
+              className="-ml-1 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-[var(--text-secondary)] hover:bg-[var(--bg-surface)] lg:hidden"
               aria-label={locale === "ru" ? "Открыть навигацию" : "Open navigation"}
               aria-expanded={mobileNavOpen}
               onClick={() => setMobileNavOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </button>
-            <div className="min-w-0">
-              <p className="text-xs uppercase tracking-[0.16em] text-[var(--text-muted)]">
-                {accountType === "lawyer"
-                  ? locale === "ru"
-                    ? "Профессиональное юридическое пространство"
-                    : "Professional legal workspace"
-                  : locale === "ru"
-                    ? "Личный юридический помощник"
-                    : "Personal legal assistant"}
-              </p>
-              <Logo className="mt-2 text-[30px] lg:hidden" />
-            </div>
+            <Link href="/dashboard" className="lg:hidden" aria-label="Lexo">
+              <Logo className="text-[26px]" />
+            </Link>
+            <p className="hidden min-w-0 truncate text-sm font-medium text-[var(--text-secondary)] lg:block">
+              {sectionTitle(pathname, locale)}
+            </p>
             <div className="ml-auto flex items-center gap-2">
               <div className="hidden items-center gap-2 sm:flex">
                 <LanguageSwitcher />
@@ -96,7 +92,7 @@ export function DashboardLayout({
                   className="list-none cursor-pointer rounded-full ring-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)]"
                   aria-label={locale === "ru" ? "Открыть личный кабинет" : "Open account menu"}
                 >
-                  <Avatar initials={initials} className="h-10 w-10 text-sm" />
+                  <Avatar initials={initials} className="h-11 w-11 text-sm" />
                 </summary>
                 <div className="absolute right-0 top-12 z-50 w-72 rounded-2xl border border-[var(--border)] bg-[var(--bg-page)] p-3 shadow-[var(--shadow-lg)]">
                   <p className="truncate px-2 text-sm font-semibold">{userEmail}</p>
@@ -129,4 +125,29 @@ export function DashboardLayout({
       </div>
     </div>
   );
+}
+
+const SECTION_TITLES: Array<[string, string, string]> = [
+  ["/dashboard/history", "Документы и ответы", "Documents and answers"],
+  ["/dashboard/docs", "Документы и ответы", "Documents and answers"],
+  ["/dashboard/check", "Проверка договора", "Contract check"],
+  ["/dashboard/review", "Проверка договоров", "Contract review"],
+  ["/dashboard/analyze", "Проверка договоров", "Contract review"],
+  ["/dashboard/build", "Конструктор договоров", "Contract builder"],
+  ["/dashboard/draft", "Подготовка документов", "Drafting"],
+  ["/dashboard/ask", "Юридический вопрос", "Legal question"],
+  ["/dashboard/seller-tax", "Налоги продавца", "Seller taxes"],
+  ["/dashboard/research", "Правовой поиск", "Legal research"],
+  ["/dashboard/caseprep", "Подготовка дела", "Case prep"],
+  ["/dashboard/compare", "Сравнение версий", "Version comparison"],
+  ["/dashboard/client", "Резюме для клиента", "Client summary"],
+  ["/dashboard/billing", "Тариф и оплата", "Plan and billing"],
+  ["/dashboard/settings", "Настройки", "Settings"],
+  ["/dashboard/onboarding", "Начало работы", "Getting started"]
+];
+
+function sectionTitle(pathname: string | null, locale: "ru" | "en") {
+  const match = SECTION_TITLES.find(([prefix]) => pathname?.startsWith(prefix));
+  if (match) return locale === "ru" ? match[1] : match[2];
+  return locale === "ru" ? "Обзор" : "Overview";
 }
