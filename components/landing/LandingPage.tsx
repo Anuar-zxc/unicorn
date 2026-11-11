@@ -237,21 +237,21 @@ export function LandingPage() {
             </div>
 
             <div id="demo" className="scroll-mt-28 rounded-2xl border border-[#2b2f3a] bg-[#0b0d12] p-3 shadow-[0_30px_80px_rgba(15,23,42,.22)]" aria-label={ru ? "Пример отчёта Lexo" : "Sample Lexo report"}>
-              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 pb-3 text-xs text-white/45">
+              <div className="flex items-center justify-between gap-3 border-b border-white/10 px-3 pb-3 text-xs text-white/60">
                 <span className="truncate">{t.demo.file} · {t.demo.pages}</span>
                 <span className="flex shrink-0 items-center gap-2 text-emerald-300"><span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />{t.demo.done}</span>
               </div>
               <div className="grid grid-cols-1 min-h-[430px] gap-3 pt-3 md:grid-cols-[1fr_1fr]">
                 <div className="rounded-xl bg-[#151820] p-5 text-sm leading-7 text-white/65">
-                  <p className="mb-4 text-xs font-semibold uppercase tracking-[.16em] text-white/35">{t.demo.original}</p>
+                  <p className="mb-4 text-xs font-semibold uppercase tracking-[.16em] text-white/60">{t.demo.original}</p>
                   {t.demo.clauses.map(([heading, body, tone], index) => (
                     <div key={heading} className={index ? "mt-5" : ""}>
                       <p>{heading}</p>
                       <p className={`mt-3 rounded-md border-l-2 px-3 py-2 text-white/85 ${tone === "red" ? "border-red-400 bg-red-400/10" : "border-amber-400 bg-amber-400/10"}`}>{body}</p>
                     </div>
                   ))}
-                  <p className="mt-5 text-white/35">{t.demo.rest[0]}</p>
-                  <p className="mt-2 text-white/25">{t.demo.rest[1]}</p>
+                  <p className="mt-5 text-white/60">{t.demo.rest[0]}</p>
+                  <p className="mt-2 text-white/55">{t.demo.rest[1]}</p>
                 </div>
                 <div className="rounded-xl bg-white p-5 text-[#111827]">
                   <div className="flex flex-wrap items-center justify-between gap-2">

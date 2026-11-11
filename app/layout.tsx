@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Manrope } from "next/font/google";
+import { Inter, Manrope, PT_Serif } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/AppProviders";
@@ -17,6 +17,15 @@ const manrope = Manrope({
   subsets: ["latin", "cyrillic"],
   variable: "--font-display",
   display: "swap"
+});
+
+// Serif for contract drafts: reads like a real legal document, full Cyrillic.
+const ptSerif = PT_Serif({
+  subsets: ["latin", "cyrillic"],
+  weight: ["400", "700"],
+  variable: "--font-doc",
+  display: "swap",
+  preload: false
 });
 
 const siteUrl = getSiteUrl();
@@ -74,7 +83,7 @@ export default function RootLayout({
   return (
     <html
       lang="ru"
-      className={`${inter.variable} ${manrope.variable}`}
+      className={`${inter.variable} ${manrope.variable} ${ptSerif.variable}`}
       suppressHydrationWarning
     >
       <body>

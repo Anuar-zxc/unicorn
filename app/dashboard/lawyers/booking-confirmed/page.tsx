@@ -13,20 +13,20 @@ export default async function BookingConfirmedPage({
 
   return (
     <main className="grid min-h-[calc(100vh-64px)] place-items-center p-4 md:p-6">
-      <section className="w-full max-w-xl rounded-2xl border border-[#252528] bg-[#141418] p-8 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-300">
+      <section className="w-full max-w-xl rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-8 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-400/10 text-emerald-700 dark:text-emerald-300">
           <CheckCircle2 className="h-9 w-9" />
         </div>
         <h1 className="mt-6 font-display text-3xl font-semibold">Booking confirmed</h1>
-        <p className="mt-3 text-sm leading-6 text-white/55">
-          Your consultation with <span className="font-semibold text-white">{lawyer}</span> is reserved for <span className="font-semibold text-white">{slot}</span>.
+        <p className="mt-3 text-sm leading-6 text-[var(--text-secondary)]">
+          Your consultation with <span className="font-semibold text-[var(--text-primary)]">{lawyer}</span> is reserved for <span className="font-semibold text-[var(--text-primary)]">{slot}</span>.
         </p>
         {params.demo && (
-          <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-100">
+          <p className="mt-4 rounded-xl border border-amber-400/20 bg-amber-400/10 p-3 text-sm text-amber-800 dark:text-amber-100">
             Demo confirmation shown because Stripe keys are not configured yet.
           </p>
         )}
-        <p className="mt-5 rounded-xl border border-[#252528] bg-[#0C0C0E] p-4 text-sm leading-6 text-white/55">
+        <p className="mt-5 rounded-xl border border-[var(--border)] bg-[var(--bg-page)] p-4 text-sm leading-6 text-[var(--text-secondary)]">
           If you attached a Lexo case brief, it will be shared with the lawyer before the call so they can come prepared.
         </p>
         <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">

@@ -172,7 +172,7 @@ export function ContractWizard({
                 </div>
               </div>
             )}
-            {error && <p className="rounded-xl bg-red-500/10 p-3 text-sm text-red-400">{error}</p>}
+            {error && <p role="alert" className="rounded-xl border border-red-500/30 bg-red-500/10 p-3 text-sm text-[var(--red)]">{error}</p>}
             <div ref={scrollRef} />
           </div>
 
@@ -185,11 +185,13 @@ export function ContractWizard({
                   if (event.key === "Enter") void sendAnswer();
                 }}
                 placeholder={ru ? "Введите ответ…" : "Type your answer…"}
-                className="min-w-0 flex-1 rounded-xl border border-[var(--border)] bg-[var(--bg-page)] px-4 py-2.5 text-sm outline-none focus:border-[var(--accent)]"
+                aria-label={ru ? "Ваш ответ" : "Your answer"}
+                className="input-base h-12 min-w-0 flex-1 px-4"
                 disabled={loading}
               />
               <Button onClick={sendAnswer} disabled={loading || !input.trim()}>
-                <Send className="h-4 w-4" />
+                <Send className="h-4 w-4" aria-hidden />
+                <span className="sr-only">{ru ? "Отправить" : "Send"}</span>
               </Button>
             </div>
           )}
@@ -197,8 +199,8 @@ export function ContractWizard({
 
         <section className="overflow-y-auto bg-[var(--bg-page)] p-5 md:p-8">
           {draft ? (
-            <article className="mx-auto max-w-3xl rounded-2xl border border-[var(--border)] bg-[var(--bg-surface)] p-6 shadow-[var(--shadow-sm)] md:p-10">
-              <Markdown ref={draftRef} className="font-serif">{draft}</Markdown>
+            <article className="mx-auto max-w-3xl rounded-lg border border-[var(--border)] bg-[var(--bg-page)] p-6 shadow-[var(--shadow-md)] md:px-14 md:py-12">
+              <Markdown ref={draftRef} className="lexo-doc">{draft}</Markdown>
               {isComplete && (
                 <div className="mt-8 flex flex-wrap gap-3 border-t border-[var(--border)] pt-6">
                   <Button onClick={downloadWord}><FileDown className="h-4 w-4" />{ru ? "Скачать Word" : "Download Word"}</Button>

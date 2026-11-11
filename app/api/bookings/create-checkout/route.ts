@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getStripeClient } from "@/lib/stripe";
 import { createSupabaseServerClient } from "@/lib/supabase/server";
-import { ALLOWED_SESSION_MINUTES, fallbackLawyers } from "@/lib/lawyers";
+import { ALLOWED_SESSION_MINUTES } from "@/lib/lawyers";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
@@ -30,16 +30,16 @@ export async function POST(req: Request) {
 
   // The price always comes from our data, never from the browser:
   // previously a client could send price_per_session: 1 and pay $0.01.
+  // Only verified lawyers from the database can be booked.
   let lawyer: { id: string; name: string; price_per_session: number } | undefined;
   if (UUID.test(lawyerId)) {
     const { data } = await supabase
       .from("lawyers")
       .select("id,name,price_per_session")
       .eq("id", lawyerId)
+      .eq("verified", true)
       .maybeSingle();
     if (data) lawyer = data;
-  } else {
-    lawyer = fallbackLawyers.find((item) => item.id === lawyerId);
   }
   if (!lawyer) {
     return NextResponse.json({ error: "Lawyer not found." }, { status: 404 });
@@ -52,7 +52,7 @@ export async function POST(req: Request) {
     .from("bookings")
     .insert({
       user_id: user.id,
-      lawyer_id: UUID.test(lawyer.id) ? lawyer.id : null,
+      lawyer_id: lawyer.id,
       duration_minutes: duration,
       status: "pending",
       notes: `Slot: ${slot}\n${notes}`

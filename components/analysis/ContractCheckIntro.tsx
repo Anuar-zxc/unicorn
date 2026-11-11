@@ -58,7 +58,7 @@ export function ContractCheckIntro({
           <span>{unlimited ? (ru ? "без ограничений" : "unlimited") : `${used} / ${limit}`}</span>
         </div>
         {!unlimited && (
-          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--bg-elevated)]" role="progressbar" aria-valuenow={used} aria-valuemin={0} aria-valuemax={limit}>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[var(--bg-elevated)]" role="progressbar" aria-label={ru ? "Использовано проверок" : "Checks used"} aria-valuenow={used} aria-valuemin={0} aria-valuemax={limit}>
             <div className={`h-full rounded-full ${allowed ? "bg-[var(--accent)]" : "bg-amber-500"}`} style={{ width: `${percent}%` }} />
           </div>
         )}

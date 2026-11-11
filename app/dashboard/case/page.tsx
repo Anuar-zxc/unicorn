@@ -1,9 +1,8 @@
-import { CaseStrategist } from "@/components/dashboard/CaseStrategist";
+import { redirect } from "next/navigation";
 
-export default function CaseStrategyPage() {
-  return (
-    <main className="p-4 md:p-6">
-      <CaseStrategist />
-    </main>
-  );
+// The old standalone case strategist duplicated Case Prep (English-only,
+// placeholder lawyer matches, non-working exports). Case Prep is the
+// maintained version of this tool.
+export default function CasePage() {
+  redirect("/dashboard/caseprep");
 }
